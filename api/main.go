@@ -28,7 +28,7 @@ func main() {
 
 	router.POST("/match", handlers.FindMatch)
 
-	router.Use(SPAMiddleware("/", "./skingenius"))
+	router.Use(SPAMiddleware("/", "../skingenius/dist/skingenius"))
 
 	router.Run(":8080")
 	fmt.Println(fmt.Sprintf("Start server on port %d", 8080))
