@@ -13,8 +13,8 @@ import (
 const (
 	host     = "localhost"
 	port     = 5432
-	user     = "skingenius"
-	password = "pwd"
+	user     = "postgres"
+	password = "postgres"
 )
 
 func main() {
