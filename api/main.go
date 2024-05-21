@@ -26,7 +26,7 @@ func main() {
 	router := gin.Default()
 	router.Use(gin.Recovery(), gin.Logger(), CORSMiddleware())
 
-	router.POST("/match", handlers.FindMatch)
+	router.POST("api/v1/genius", handlers.FindMatch)
 
 	router.Use(SPAMiddleware("/", "../skingenius/dist/skingenius"))
 
