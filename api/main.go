@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"skingenius/database"
 	"skingenius/handlers"
 	"strings"
 )
@@ -18,10 +17,10 @@ const (
 )
 
 func main() {
-	_, err := database.NewClient(host, port, user, password)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to establich db connection, error: %v", err))
-	}
+	//_, err := database.NewClient(host, port, user, password)
+	//if err != nil {
+	//	fmt.Println(fmt.Sprintf("failed to establich db connection, error: %v", err))
+	//}
 
 	router := gin.Default()
 	router.Use(gin.Recovery(), gin.Logger(), CORSMiddleware())
@@ -30,7 +29,7 @@ func main() {
 
 	router.Use(SPAMiddleware("/", "../skingenius/dist/skingenius"))
 
-	router.Run(":8080")
+	router.Run(":80")
 	fmt.Println(fmt.Sprintf("Start server on port %d", 8080))
 }
 
