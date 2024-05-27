@@ -15,6 +15,6 @@ func FindMatch(ctx *gin.Context) {
 }
 
 func SubmitQuiz(ctx *gin.Context) {
-	body, _ := io.ReadAll(c.Request.Body)
+	body, _ := io.ReadAll(ctx.Request.Body)
 	println(string(body))
 }
