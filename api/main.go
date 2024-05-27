@@ -25,11 +25,12 @@ func main() {
 	router := gin.Default()
 	router.Use(gin.Recovery(), gin.Logger(), CORSMiddleware())
 
-	router.POST("api/v1/genius", handlers.FindMatch)
+	router.GET("api/v1/genius", handlers.FindMatch)
+	router.POST("api/v1/submitQuiz", handlers.SubmitQuiz)
 
-	router.Use(SPAMiddleware("/", "../skingenius/dist/skingenius"))
+	//router.Use(SPAMiddleware("/", "../skingenius/dist/skingenius"))
 
-	router.Run(":80")
+	router.Run(":8080")
 	fmt.Println(fmt.Sprintf("Start server on port %d", 8080))
 }
 
