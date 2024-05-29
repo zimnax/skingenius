@@ -36,7 +36,7 @@ func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
 	iBySkinTypeList, err1 := gc.geniusData.IngredientBySkinType(qa.SkinType)
 	fmt.Println(fmt.Sprintf("IngredientBySkinType: [%d], error: %v", len(iBySkinTypeList), err1))
 
-	iBySkinSensitivityList, err2 := gc.geniusData.IngredientBySkinSensitivity(qa.SkinType)
+	iBySkinSensitivityList, err2 := gc.geniusData.IngredientBySkinSensitivity(qa.SkinReact_Sensitivity)
 	fmt.Println(fmt.Sprintf("IngredientBySkinType: [%d], error: %v", len(iBySkinSensitivityList), err2))
 
 	return nil
