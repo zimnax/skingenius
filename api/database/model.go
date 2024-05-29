@@ -28,3 +28,12 @@ var skinConcernToDbValue = map[string][]string{
 	"dc":   {"dark_circles"},
 	"ss":   {"sensitive_skin"},
 }
+
+var ageToDbValue = map[string]string{
+	"10s": "teen",
+	"20s": "age20s",
+	"30s": "age30s",
+	"40s": "age40s",
+	"50s": "age50s",
+	"60s": "age60s",
+}
