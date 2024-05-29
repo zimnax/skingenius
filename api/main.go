@@ -2,73 +2,33 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
-	"net/http"
-	"skingenius/handlers"
-	"strings"
-)
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
+	"github.com/gofiber/fiber/v2"
+	"os"
+	"skingenius/config"
+	"skingenius/controller"
+	"skingenius/database"
+	"skingenius/middleware"
+	"skingenius/routes"
+	"skingenius/utils"
 )
 
 func main() {
-	//_, err := database.NewClient(host, port, user, password)
-	//if err != nil {
-	//	fmt.Println(fmt.Sprintf("failed to establich db connection, error: %v", err))
-	//}
-
-	router := gin.Default()
-	router.Use(gin.Recovery(), gin.Logger(), CORSMiddleware())
-
-	router.GET("api/v1/genius", handlers.FindMatch)
-	router.POST("api/v1/submitQuiz", handlers.SubmitQuiz)
-
-	//router.Use(SPAMiddleware("/", "../skingenius/dist/skingenius"))
-
-	router.Run(":8080")
-	fmt.Println(fmt.Sprintf("Start server on port %d", 8080))
-}
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusNoContent)
-			return
-		}
-		c.Next()
+	db, err := database.NewClient(config.Host, config.Port, config.User, config.Password)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establich db connection, error: %v", err))
 	}
-}
 
-func SPAMiddleware(urlPrefix, spaDirectory string) gin.HandlerFunc {
-
-	directory := static.LocalFile(spaDirectory, true)
-	fileserver := http.FileServer(directory)
-	if urlPrefix != "" {
-		fileserver = http.StripPrefix(urlPrefix, fileserver)
+	quppaController, err := controller.NewGeniusController(db)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to create genius controller instance: %v", err))
+		os.Exit(1)
 	}
-	return func(c *gin.Context) {
 
-		if strings.Contains(c.Request.URL.Path, "api") {
-			c.Next()
-		}
+	app := fiber.New()
+	middleware.FiberMiddleware(app)
 
-		if directory.Exists(urlPrefix, c.Request.URL.Path) {
-			fileserver.ServeHTTP(c.Writer, c.Request)
-			c.Abort()
-		} else {
-			c.Request.URL.Path = "/"
-			fileserver.ServeHTTP(c.Writer, c.Request)
-			c.Abort()
-		}
-	}
+	routes.GeniusRoutes(app, quppaController)
+	routes.NotFoundRoute(app)
+
+	utils.StartServerWithGracefulShutdown(app)
 }
