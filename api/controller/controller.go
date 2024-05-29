@@ -26,6 +26,8 @@ func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
 
 	qa := model.QuizAnswers{}
 	if err := ctx.BodyParser(&qa); err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+
+			fmt.Sprintf("failed to unmarshall quizAnswers req, err: %+v", qa))
 		return ctx.SendString(fmt.Sprintf("failed to unmarshall quizAnswers req, err: %v", err))
 	}
 
