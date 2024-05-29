@@ -51,7 +51,7 @@ func (pg *PgConnector) IngredientByAllergens(ctx context.Context, allergens []st
 		return []string{}, nil
 	}
 
-	query := fmt.Sprintf("SELECT ingredient FROM ingredient_preference WHERE ")
+	query := fmt.Sprintf("SELECT ingredient FROM ingredient_allergen WHERE ")
 	var conditions []string
 	for _, p := range allergens {
 		conditions = append(conditions, fmt.Sprintf("%s=true", p))
