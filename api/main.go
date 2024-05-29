@@ -16,6 +16,7 @@ func main() {
 	db, err := database.NewClient(config.Host, config.Port, config.User, config.Password)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establich db connection, error: %v", err))
+		os.Exit(1)
 	}
 
 	quppaController, err := controller.NewGeniusController(db)
