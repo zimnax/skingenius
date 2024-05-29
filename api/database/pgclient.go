@@ -45,7 +45,7 @@ func NewClient(host string, port int, user, password string) (Connector, error) 
 }
 
 func (pg *PgConnector) IngredientBySkinType(skinType string) ([]string, error) {
-	rows, err := pg.db.Query("SELECT ingredient FROM ingredient_skin_type WHERE $1 = Yes", skinType)
+	rows, err := pg.db.Query("SELECT ingredient FROM ingredient_skin_type WHERE $1 = 'Yes'", skinType)
 
 	var res string
 	var ingredientsList []string
