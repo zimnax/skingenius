@@ -33,7 +33,7 @@ func NewClient(host string, port int, user, password string) (Connector, error) 
 	if err != nil {
 		logger.New().Error(context.Background(), "Error connecting to the database: ", err)
 	}
-	defer db.Close()
+	//defer db.Close()
 
 	err = db.Ping()
 	if err != nil {
