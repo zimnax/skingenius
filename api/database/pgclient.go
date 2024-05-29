@@ -53,8 +53,8 @@ func (pg *PgConnector) IngredientBySkinSensitivity(sensitivity string) ([]string
 		return nil, errors.New(fmt.Sprintf("failed to find db value for Skin sensitivity value:'%s'", sensitivity))
 	}
 
-	query := fmt.Sprintf("SELECT ingredient FROM ingredient_skin_type WHERE sensitive = %s", val)
-	logger.New().Error(context.Background(), fmt.Sprintf("IngredientBySkinSensitivity query: %s", query))
+	query := fmt.Sprintf("SELECT ingredient FROM ingredient_skin_type WHERE sensitive = '%s'", val)
+	logger.New().Info(context.Background(), fmt.Sprintf("IngredientBySkinSensitivity query: %s", query))
 
 	var res string
 	var ingredientsList []string
@@ -75,7 +75,7 @@ func (pg *PgConnector) IngredientBySkinSensitivity(sensitivity string) ([]string
 
 func (pg *PgConnector) IngredientBySkinType(skinType string) ([]string, error) {
 	query := fmt.Sprintf("SELECT ingredient FROM ingredient_skin_type WHERE %s = 'Yes'", skinType)
-	logger.New().Error(context.Background(), fmt.Sprintf("IngredientBySkinType query: %s", query))
+	logger.New().Info(context.Background(), fmt.Sprintf("IngredientBySkinType query: %s", query))
 
 	var res string
 	var ingredientsList []string
