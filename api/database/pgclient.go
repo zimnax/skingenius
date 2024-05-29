@@ -54,7 +54,7 @@ func (pg *PgConnector) IngredientByAge(ctx context.Context, age string) ([]strin
 		return nil, errors.New(fmt.Sprintf("failed to find db value for IngredientByAge value:'%s'", val))
 	}
 
-	query := fmt.Sprintf("SELECT ingredient FROM age_range WHERE %s = true", age)
+	query := fmt.Sprintf("SELECT ingredient FROM age_range WHERE %s = true", val)
 	logger.New().Info(ctx, fmt.Sprintf("IngredientByAge query: %s", query))
 
 	var res string
