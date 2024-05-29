@@ -33,10 +33,11 @@ func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
 
 	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("quiz request: %+v", qa))
 
-	iBySkinList, err := gc.geniusData.IngredientBySkinType(qa.SkinType)
+	iBySkinTypeList, err1 := gc.geniusData.IngredientBySkinType(qa.SkinType)
+	fmt.Println(fmt.Sprintf("IngredientBySkinType: [%d], error: %v", len(iBySkinTypeList), err1))
 
-	fmt.Println(iBySkinList)
-	fmt.Println(err)
+	iBySkinSensitivityList, err2 := gc.geniusData.IngredientBySkinSensitivity(qa.SkinType)
+	fmt.Println(fmt.Sprintf("IngredientBySkinType: [%d], error: %v", len(iBySkinSensitivityList), err2))
 
 	return nil
 }
