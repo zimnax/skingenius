@@ -37,3 +37,13 @@ var ageToDbValue = map[string]string{
 	"50s": "age50s",
 	"60s": "age60s",
 }
+
+var skinBenefitsToDbValue = map[string][]string{
+	"mnh":  {"moisturizing", "nourishing", "hydrating"},
+	"ebi":  {"exfoliating", "brightening", "improves_skin_tone"},
+	"sm":   {"smoothing", "minimize_pores"},
+	"srr":  {"smoothing", "reduces_wrinkles", "reduces_signs_of_aging"},
+	"rr":   {"reduces_acne", "deduces_blemishes"},
+	"cshr": {"calming", "soothing", "healing", "reduces_inflammation"},
+	"ides": {"improves_symptoms_of_psoriasis", "improves_symptoms_of_dermatitis", "improves_symptoms_of_eczema", "sunburn"},
+}

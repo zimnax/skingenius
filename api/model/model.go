@@ -8,5 +8,5 @@ type QuizAnswers struct {
 	FreeFromAllergens     []string `json:"q5"`
 	SkinConcern           string   `json:"q6"`
 	Age                   string   `json:"q7"`
-	ProductGoal           string   `json:"q8"`
+	ProductBenefit        string   `json:"q8"`
 }
