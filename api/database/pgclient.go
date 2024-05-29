@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"skingenius/logger"
+	"strings"
 )
 
 const dbname = "skingenius"
@@ -16,6 +17,7 @@ type Connector interface {
 	IngredientBySkinType(context.Context, string) ([]string, error)
 	IngredientBySkinSensitivity(context.Context, string) ([]string, error)
 	IngredientByAcne(context.Context, string) ([]string, error)
+	IngredientByPreferences(context.Context, []string) ([]string, error)
 }
 
 type PgConnector struct {
@@ -45,6 +47,37 @@ func NewClient(host string, port int, user, password string) (Connector, error) 
 	logger.New().Info(context.Background(), "Connected to the database!")
 
 	return &PgConnector{db: db}, nil
+}
+
+func (pg *PgConnector) IngredientByPreferences(ctx context.Context, pref []string) ([]string, error) {
+	if len(pref) == 0 {
+		logger.New().Info(ctx, fmt.Sprintf("IngredientByPreferences - no preferences selected"))
+		return []string{}, nil
+	}
+
+	query := fmt.Sprintf("SELECT ingredient FROM ingredient_preference WHERE ")
+	var conditions []string
+	for _, p := range pref {
+		conditions = append(conditions, fmt.Sprintf("%s=true", p))
+	}
+	query = query + strings.Join(conditions, " AND ")
+	logger.New().Info(ctx, fmt.Sprintf("IngredientByPreferences query: %s", query))
+
+	var res string
+	var ingredientsList []string
+
+	rows, err := pg.db.Query(query)
+	defer rows.Close()
+	if err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("IngredientByPreferences err: %v", err))
+		return nil, err
+	}
+	for rows.Next() {
+		rows.Scan(&res)
+		ingredientsList = append(ingredientsList, res)
+	}
+
+	return ingredientsList, nil
 }
 
 func (pg *PgConnector) IngredientByAcne(ctx context.Context, acne string) ([]string, error) {
