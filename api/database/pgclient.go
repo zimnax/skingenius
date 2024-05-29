@@ -18,6 +18,7 @@ type Connector interface {
 	IngredientByAcne(context.Context, string) ([]string, error)
 	IngredientByPreferences(context.Context, []string) ([]string, error)
 	IngredientByAllergens(context.Context, []string) ([]string, error)
+	IngredientBySkinConcern(context.Context, string) ([]string, error)
 }
 
 type PgConnector struct {
@@ -43,6 +44,38 @@ func NewClient(host string, port int, user, password string) (Connector, error) 
 	logger.New().Info(context.Background(), "Connected to the database!")
 
 	return &PgConnector{db: db}, nil
+}
+
+func (pg *PgConnector) IngredientBySkinConcern(ctx context.Context, concerns string) ([]string, error) {
+	val, ok := skinConcernToDbValue[concerns]
+	if !ok {
+		logger.New().Error(context.Background(), fmt.Sprintf("failed to find db value for IngredientBySkinConcern value:'%s'", concerns))
+		return nil, errors.New(fmt.Sprintf("failed to find db value for IngredientBySkinConcern value:'%s'", concerns))
+	}
+
+	query := fmt.Sprintf("SELECT ingredient FROM skin_concern WHERE ")
+	var conditions []string
+	for _, p := range val {
+		conditions = append(conditions, fmt.Sprintf("%s=true", p))
+	}
+	query = query + strings.Join(conditions, " AND ")
+	logger.New().Info(ctx, fmt.Sprintf("IngredientBySkinConcern query: %s", query))
+
+	var res string
+	var ingredientsList []string
+
+	rows, err := pg.db.Query(query)
+	defer rows.Close()
+	if err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("IngredientByAllergens err: %v", err))
+		return nil, err
+	}
+	for rows.Next() {
+		rows.Scan(&res)
+		ingredientsList = append(ingredientsList, res)
+	}
+
+	return ingredientsList, nil
 }
 
 func (pg *PgConnector) IngredientByAllergens(ctx context.Context, allergens []string) ([]string, error) {

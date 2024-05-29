@@ -48,5 +48,8 @@ func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
 	iByAllergens, err5 := gc.geniusData.IngredientByAllergens(ctx.UserContext(), qa.FreeFromAllergens)
 	fmt.Println(fmt.Sprintf("iByAllergens: [%d], error: %v", len(iByAllergens), err5))
 
+	iBySkinConcern, err6 := gc.geniusData.IngredientBySkinConcern(ctx.UserContext(), qa.SkinConcern)
+	fmt.Println(fmt.Sprintf("iBySkinConcern: [%d], error: %v", len(iBySkinConcern), err6))
+
 	return nil
 }
