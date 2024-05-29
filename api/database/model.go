@@ -43,7 +43,7 @@ var skinBenefitsToDbValue = map[string][]string{
 	"ebi":  {"exfoliating", "brightening", "improves_skin_tone"},
 	"sm":   {"smoothing", "minimize_pores"},
 	"srr":  {"smoothing", "reduces_wrinkles", "reduces_signs_of_aging"},
-	"rr":   {"reduces_acne", "deduces_blemishes"},
+	"rr":   {"reduces_acne", "reduces_blemishes"},
 	"cshr": {"calming", "soothing", "healing", "reduces_inflammation"},
-	"ides": {"improves_symptoms_of_psoriasis", "improves_symptoms_of_dermatitis", "improves_symptoms_of_eczema", "sunburn"},
+	"ides": {"improves_symptoms_of_psoriasis", "improves_symptoms_of_dermatitis", "improves_symptoms_of_eczema", "moisturizing", "cooling"},
 }

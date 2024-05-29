@@ -21,6 +21,8 @@ type Connector interface {
 	IngredientBySkinConcern(context.Context, string) ([]string, error)
 	IngredientByAge(context.Context, string) ([]string, error)
 	IngredientByProductBenefit(context.Context, string) ([]string, error)
+
+	FilerHardParameters(context.Context, string, string, string) ([]string, error)
 }
 
 type PgConnector struct {
@@ -46,6 +48,12 @@ func NewClient(host string, port int, user, password string) (Connector, error) 
 	logger.New().Info(context.Background(), "Connected to the database!")
 
 	return &PgConnector{db: db}, nil
+}
+
+func (pg *PgConnector) FilerHardParameters(ctx context.Context, sensitivity, preferences, allergies string) ([]string, error) {
+	//query := fmt.Sprintf("SELECT ingredient FROM ingredient_skin_type WHERE %s = 'Yes'", skinType)
+	//logger.New().Info(ctx, fmt.Sprintf("FilerHardParameters query: %s", query))
+	return nil, nil
 }
 
 func (pg *PgConnector) IngredientByProductBenefit(ctx context.Context, benefits string) ([]string, error) {

@@ -1,0 +1,34 @@
+
+func main() {
+	arrays := [][]string{
+		{"apple", "banana", "orange", "kiwi"},
+		{"banana", "kiwi", "grape"},
+		{"kiwi", "apple", "strawberry"},
+		{"orange", "kiwi", "mango"},
+		{"kiwi", "pineapple", "pear"},
+	}
+
+	intersection := findIntersection(arrays)
+	fmt.Println("Intersection:", intersection)
+}
+
+func findIntersection(arrays [][]string) []string {
+	// Map to store occurrences of elements
+	elementMap := make(map[string]int)
+	for _, arr := range arrays {
+		// Mark elements as seen in the first array
+		for _, element := range arr {
+			elementMap[element]++
+		}
+	}
+
+	var intersection []string
+	for element, count := range elementMap {
+		// If an element is seen in all arrays
+		if count == len(arrays) {
+			intersection = append(intersection, element)
+		}
+	}
+
+	return intersection
+}
