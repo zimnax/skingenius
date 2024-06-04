@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const dbname = "skingenius"
+const dbname = "skingenius_new"
 
 type Connector interface {
 	IngredientBySkinType(context.Context, string) ([]string, error)
