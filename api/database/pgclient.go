@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
+	"skingenius/database/model"
 	"skingenius/logger"
 	"strings"
 )
@@ -57,7 +58,7 @@ func (pg *PgConnector) FilerHardParameters(ctx context.Context, sensitivity, pre
 }
 
 func (pg *PgConnector) IngredientByProductBenefit(ctx context.Context, benefits string) ([]string, error) {
-	val, ok := skinBenefitsToDbValue[benefits]
+	val, ok := model.SkinBenefitsToDbValue[benefits]
 	if !ok {
 		logger.New().Error(context.Background(), fmt.Sprintf("failed to find db value for IngredientByProductBenefit value:'%s'", benefits))
 		return nil, errors.New(fmt.Sprintf("failed to find db value for IngredientByProductBenefit value:'%s'", benefits))
@@ -90,7 +91,7 @@ func (pg *PgConnector) IngredientByProductBenefit(ctx context.Context, benefits 
 }
 
 func (pg *PgConnector) IngredientByAge(ctx context.Context, age string) ([]string, error) {
-	val, ok := ageToDbValue[age]
+	val, ok := model.AgeToDbValue[age]
 	if !ok {
 		logger.New().Error(context.Background(), fmt.Sprintf("failed to find db value for IngredientByAge value:'%s'", val))
 		return nil, errors.New(fmt.Sprintf("failed to find db value for IngredientByAge value:'%s'", val))
@@ -117,7 +118,7 @@ func (pg *PgConnector) IngredientByAge(ctx context.Context, age string) ([]strin
 }
 
 func (pg *PgConnector) IngredientBySkinConcern(ctx context.Context, concerns string) ([]string, error) {
-	val, ok := skinConcernToDbValue[concerns]
+	val, ok := model.SkinConcernToDbValue[concerns]
 	if !ok {
 		logger.New().Error(context.Background(), fmt.Sprintf("failed to find db value for IngredientBySkinConcern value:'%s'", concerns))
 		return nil, errors.New(fmt.Sprintf("failed to find db value for IngredientBySkinConcern value:'%s'", concerns))
@@ -211,7 +212,7 @@ func (pg *PgConnector) IngredientByPreferences(ctx context.Context, pref []strin
 }
 
 func (pg *PgConnector) IngredientByAcne(ctx context.Context, acne string) ([]string, error) {
-	val, ok := skinAcneToDbValue[acne]
+	val, ok := model.SkinAcneToDbValue[acne]
 	if !ok {
 		logger.New().Error(context.Background(), fmt.Sprintf("failed to find db value for IngredientByAcne value:'%s'", acne))
 		return nil, errors.New(fmt.Sprintf("failed to find db value for IngredientByAcne value:'%s'", acne))
@@ -238,7 +239,7 @@ func (pg *PgConnector) IngredientByAcne(ctx context.Context, acne string) ([]str
 }
 
 func (pg *PgConnector) IngredientBySkinSensitivity(ctx context.Context, sensitivity string) ([]string, error) {
-	val, ok := skinSensitivityToDbValue[sensitivity]
+	val, ok := model.SkinSensitivityToDbValue[sensitivity]
 	if !ok {
 		logger.New().Error(context.Background(), fmt.Sprintf("failed to find db value for Skin sensitivity value:'%s'", sensitivity))
 		return nil, errors.New(fmt.Sprintf("failed to find db value for Skin sensitivity value:'%s'", sensitivity))

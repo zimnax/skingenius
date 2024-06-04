@@ -1,6 +1,6 @@
-package database
+package model
 
-var skinSensitivityToDbValue = map[string]string{
+var SkinSensitivityToDbValue = map[string]string{
 	"never":      "No",
 	"rarely":     "No",
 	"sometimes":  "No",
@@ -8,7 +8,7 @@ var skinSensitivityToDbValue = map[string]string{
 	"frequently": "Yes",
 }
 
-var skinAcneToDbValue = map[string]string{
+var SkinAcneToDbValue = map[string]string{
 	"rarely":          "No",
 	"occasionally":    "No",
 	"frequently":      "Yes",
@@ -16,7 +16,7 @@ var skinAcneToDbValue = map[string]string{
 	"almost_always":   "Yes",
 }
 
-var skinConcernToDbValue = map[string][]string{
+var SkinConcernToDbValue = map[string][]string{
 	"df":   {"dryness"},
 	"ov":   {"oiliness", "visible_pores"},
 	"ud":   {"uneven_skin_tone", "dark_spots"},
@@ -29,7 +29,7 @@ var skinConcernToDbValue = map[string][]string{
 	"ss":   {"sensitive_skin"},
 }
 
-var ageToDbValue = map[string]string{
+var AgeToDbValue = map[string]string{
 	"10s": "teen",
 	"20s": "age20s",
 	"30s": "age30s",
@@ -38,7 +38,7 @@ var ageToDbValue = map[string]string{
 	"60s": "age60s",
 }
 
-var skinBenefitsToDbValue = map[string][]string{
+var SkinBenefitsToDbValue = map[string][]string{
 	"mnh":  {"moisturizing", "nourishing", "hydrating"},
 	"ebi":  {"exfoliating", "brightening", "improves_skin_tone"},
 	"sm":   {"smoothing", "minimize_pores"},

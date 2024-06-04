@@ -13,9 +13,9 @@ import (
 )
 
 func main() {
-	db, err := database.NewClient(config.Host, config.Port, config.User, config.Password)
+	db, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to establich db connection, error: %v", err))
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 
