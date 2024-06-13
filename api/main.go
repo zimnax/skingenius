@@ -19,7 +19,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	quppaController, err := controller.NewGeniusController(db)
+	geniusController, err := controller.NewGeniusController(db)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to create genius controller instance: %v", err))
 		os.Exit(1)
@@ -28,7 +28,7 @@ func main() {
 	app := fiber.New()
 	middleware.FiberMiddleware(app)
 
-	routes.GeniusRoutes(app, quppaController)
+	routes.GeniusRoutes(app, geniusController)
 	routes.NotFoundRoute(app)
 
 	utils.StartServerWithGracefulShutdown(app)
