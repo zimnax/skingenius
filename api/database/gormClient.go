@@ -13,6 +13,11 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g *GormConnector) SaveIngredient(ingredient *model.Ingredient) error {
+	db := g.db.Save(ingredient)
+	return db.Error
+}
+
 func (g *GormConnector) IngredientBySkinType(ctx context.Context, s string) ([]string, error) {
 	//TODO implement me
 	panic("implement me")

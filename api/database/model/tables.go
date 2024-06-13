@@ -1,6 +1,9 @@
 package model
 
-import "database/sql/driver"
+import (
+	"database/sql/driver"
+	"github.com/lib/pq"
+)
 
 type Product struct {
 	Id          uint `gorm:"primaryKey;autoIncrement"`
@@ -13,6 +16,10 @@ type Product struct {
 type Ingredient struct {
 	Id                   uint `gorm:"primaryKey;autoIncrement"`
 	Name                 string
+	PubchemId            int
+	CasNumber            string
+	ECNumber             string
+	Synonyms             pq.StringArray          `gorm:"type:text[]"`
 	SkinType             []SkinType              `gorm:"many2many:ingredient_skintype;"`
 	SkinSensitivity      []SkinSensitivity       `gorm:"many2many:ingredient_skinsensitivity;"`
 	AcneBreakout         []AcneBreakouts         `gorm:"many2many:ingredient_acnebreakout;"`

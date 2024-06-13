@@ -13,21 +13,14 @@ import (
 
 const dbname = "skingenius_new"
 
-type Connector interface {
-	IngredientBySkinType(context.Context, string) ([]string, error)
-	IngredientBySkinSensitivity(context.Context, string) ([]string, error)
-	IngredientByAcne(context.Context, string) ([]string, error)
-	IngredientByPreferences(context.Context, []string) ([]string, error)
-	IngredientByAllergens(context.Context, []string) ([]string, error)
-	IngredientBySkinConcern(context.Context, string) ([]string, error)
-	IngredientByAge(context.Context, string) ([]string, error)
-	IngredientByProductBenefit(context.Context, string) ([]string, error)
-
-	FilerHardParameters(context.Context, string, string, string) ([]string, error)
-}
-
 type PgConnector struct {
 	db *sql.DB
+}
+
+func (pg *PgConnector) SaveIngredient(ingredient *model.Ingredient) error {
+
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewClient(host string, port int, user, password string) (Connector, error) {
