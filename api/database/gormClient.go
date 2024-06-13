@@ -14,6 +14,15 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) GetAllIngredients(ctx context.Context) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+	if err := g.db.Find(&ingredients).Error; err != nil {
+		return ingredients, err
+	}
+
+	return ingredients, nil
+}
+
 func (g GormConnector) GetAllPreferences(ctx context.Context) ([]model.Preference, error) {
 	var preferences []model.Preference
 	if err := g.db.Find(&preferences).Error; err != nil {
@@ -99,8 +108,12 @@ func NewGormClient(host string, port int, user, password string) (Connector, err
 	}
 	logger.New().Info(context.Background(), "Connected to the database!")
 
-	if migrationErr := automigrate(db); migrationErr != nil {
-		return nil, migrationErr
+	isMigrationOn := false
+	if isMigrationOn {
+		if migrationErr := automigrate(db); migrationErr != nil {
+			return nil, migrationErr
+		}
+
 	}
 
 	return &GormConnector{db: db}, nil

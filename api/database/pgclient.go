@@ -20,6 +20,7 @@ type Connector interface {
 	//
 	//FilerHardParameters(context.Context, string, string, string) ([]string, error)
 
+	GetAllIngredients(context.Context) ([]model.Ingredient, error)
 	GetAllSkintypes(context.Context) ([]model.Skintype, error)
 	GetAllSkinsensetivity(context.Context) ([]model.Skinsensitivity, error)
 	GetAllAcneBreakouts(context.Context) ([]model.Acnebreakout, error)
