@@ -2,6 +2,8 @@ package model
 
 import (
 	"database/sql/driver"
+	"github.com/lib/pq"
+	"gorm.io/gorm"
 )
 
 type Product struct {
@@ -31,6 +33,10 @@ type Ingredient struct {
 	//=======
 	ID                uint `gorm:"primaryKey;autoIncrement"`
 	Name              string
+	PubchemId         string
+	CasNumber         string
+	ECNumber          string
+	Synonyms          pq.StringArray    `gorm:"type:text[]"`
 	Skintypes         []Skintype        `gorm:"many2many:ingredient_skintypes;"`
 	Skinsensitivities []Skinsensitivity `gorm:"many2many:ingredient_skinsensitivities;"`
 	Acnebreakouts     []Acnebreakout    `gorm:"many2many:ingredient_acnebreakouts;"`
@@ -167,47 +173,54 @@ func (s IngredientPreferencesValue) Value() (driver.Value, error) {
 type IngredientSkintype struct {
 	IngredientID uint `gorm:"primaryKey"`
 	SkintypeID   uint `gorm:"primaryKey"` //  missing field skin_type_id for join table
-	Score        uint
+	Score        int
 }
 
 type IngredientSkinsensitivity struct {
 	IngredientID      uint `gorm:"primaryKey"`
 	SkinsensitivityID uint `gorm:"primaryKey"`
-	Score             uint
+	Score             int
 }
 
 type IngredientAcnebreakout struct {
 	IngredientID   uint `gorm:"primaryKey"`
 	AcnebreakoutID uint `gorm:"primaryKey"`
-	Score          uint
+	Score          int
 }
 
 type IngredientPreference struct {
 	IngredientID uint `gorm:"primaryKey"`
 	PreferenceID uint `gorm:"primaryKey"`
-	Score        uint
+	Score        int
+}
+
+func (ip *IngredientPreference) BeforeCreate(db *gorm.DB) error {
+	if customValue, ok := db.Statement.Context.Value("score").(int); ok {
+		ip.Score = customValue
+	}
+	return nil
 }
 
 type IngredientAllergy struct {
 	IngredientID uint `gorm:"primaryKey"`
 	AllergyID    uint `gorm:"primaryKey"`
-	Score        uint
+	Score        int
 }
 
 type IngredientSkinconcern struct {
 	IngredientID  uint `gorm:"primaryKey"`
 	SkinconcernID uint `gorm:"primaryKey"`
-	Score         uint
+	Score         int
 }
 
 type IngredientAge struct {
 	IngredientID uint `gorm:"primaryKey"`
 	AgeID        uint `gorm:"primaryKey"`
-	Score        uint
+	Score        int
 }
 
 type IngredientBenefit struct {
 	IngredientID uint `gorm:"primaryKey"`
 	BenefitID    uint `gorm:"primaryKey"`
-	Score        uint
+	Score        int
 }

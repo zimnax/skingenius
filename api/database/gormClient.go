@@ -14,16 +14,18 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
-<<<<<<< HEAD
-func (g *GormConnector) SaveIngredient(ingredient *model.Ingredient) error {
+func (g GormConnector) SavePreference(ctx context.Context, preference *model.Preference) error {
+
+	//g.db.WithContext(ctx).Model(&user).Association("Roles").Append(&role)
+
+	return nil
+}
+
+func (g GormConnector) SaveIngredient(ingredient *model.Ingredient) error {
 	db := g.db.Save(ingredient)
 	return db.Error
 }
 
-func (g *GormConnector) IngredientBySkinType(ctx context.Context, s string) ([]string, error) {
-	//TODO implement me
-	panic("implement me")
-=======
 func (g GormConnector) GetAllIngredients(ctx context.Context) ([]model.Ingredient, error) {
 	var ingredients []model.Ingredient
 	if err := g.db.Find(&ingredients).Error; err != nil {
@@ -31,7 +33,6 @@ func (g GormConnector) GetAllIngredients(ctx context.Context) ([]model.Ingredien
 	}
 
 	return ingredients, nil
->>>>>>> f64ca42e98e13531eefa029b4a555fbbece40a6b
 }
 
 func (g GormConnector) GetAllPreferences(ctx context.Context) ([]model.Preference, error) {
@@ -106,7 +107,7 @@ func (g GormConnector) GetAllSkintypes(ctx context.Context) ([]model.Skintype, e
 	return skintypes, nil
 }
 
-func NewGormClient(host string, port int, user, password string) (Connector, error) {
+func NewGormClient(host string, port int, user, password string, migrate bool) (Connector, error) {
 	dbInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)
 
@@ -119,8 +120,7 @@ func NewGormClient(host string, port int, user, password string) (Connector, err
 	}
 	logger.New().Info(context.Background(), "Connected to the database!")
 
-	isMigrationOn := false
-	if isMigrationOn {
+	if migrate {
 		if migrationErr := automigrate(db); migrationErr != nil {
 			return nil, migrationErr
 		}

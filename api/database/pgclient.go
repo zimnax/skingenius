@@ -288,6 +288,8 @@ type Connector interface {
 	//IngredientByProductBenefit(context.Context, string) ([]string, error)
 	//
 	//FilerHardParameters(context.Context, string, string, string) ([]string, error)
+	SaveIngredient(ingredient *model.Ingredient) error
+	SavePreference(ctx context.Context, preference *model.Preference) error
 
 	GetAllIngredients(context.Context) ([]model.Ingredient, error)
 	GetAllSkintypes(context.Context) ([]model.Skintype, error)

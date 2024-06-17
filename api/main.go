@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	db, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password)
+	db, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
