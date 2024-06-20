@@ -1,5 +1,39 @@
 package model
 
+import "fmt"
+
+func PreferencesCtxKey(prefId uint) string {
+	return fmt.Sprintf("ingredient_pref_score_%d", prefId)
+}
+
+func SkintypeCtxKey(skintypeId uint) string {
+	return fmt.Sprintf("skintype_score_%d", skintypeId)
+}
+
+func SkinsensetivityCtxKey(skinsensId uint) string {
+	return fmt.Sprintf("skinsens_score_%d", skinsensId)
+}
+
+func AcnebreakoutsCtxKey(acnebreakoutId uint) string {
+	return fmt.Sprintf("acnebreakouts_score_%d", acnebreakoutId)
+}
+
+func AllergiesCtxKey(allergyId uint) string {
+	return fmt.Sprintf("allergies_score_%d", allergyId)
+}
+
+func SkinconcernCtxKey(concernId uint) string {
+	return fmt.Sprintf("skinconcern_score_%d", concernId)
+}
+
+func AgeCtxKey(ageId uint) string {
+	return fmt.Sprintf("age_score_%d", ageId)
+}
+
+func BenefitsCtxKey(benefitId uint) string {
+	return fmt.Sprintf("benefits_score_%d", benefitId)
+}
+
 var SkinSensitivityToDbValue = map[string]string{
 	"never":      "No",
 	"rarely":     "No",

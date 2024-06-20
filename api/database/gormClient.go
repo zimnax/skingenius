@@ -14,6 +14,44 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) SetupJoinTables() error {
+	var err error
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Preferences", &model.IngredientPreference{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientPreference], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Skintypes", &model.IngredientSkintype{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientSkintype], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Skinsensitivities", &model.IngredientSkinsensitivity{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientSkinsensitivity], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Acnebreakouts", &model.IngredientAcnebreakout{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientAcnebreakout], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Allergies", &model.IngredientAllergy{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientAllergy], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Skinconcerns", &model.IngredientSkinconcern{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientSkinconcern], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Ages", &model.IngredientAge{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientAge], error: %v", err))
+	}
+
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Benefits", &model.IngredientBenefit{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientBenefit], error: %v", err))
+	}
+
+	return err
+}
+
 func (g GormConnector) SavePreference(ctx context.Context, preference *model.Preference) error {
 
 	//g.db.WithContext(ctx).Model(&user).Association("Roles").Append(&role)
@@ -21,8 +59,8 @@ func (g GormConnector) SavePreference(ctx context.Context, preference *model.Pre
 	return nil
 }
 
-func (g GormConnector) SaveIngredient(ingredient *model.Ingredient) error {
-	db := g.db.Save(ingredient)
+func (g GormConnector) SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error {
+	db := g.db.WithContext(ctx).Save(ingredient)
 	return db.Error
 }
 
@@ -158,6 +196,7 @@ func automigrate(db *gorm.DB) error {
 	if err = migrateSkinconcern(db); err != nil {
 		return err
 	}
+
 	if err = migrateAge(db); err != nil {
 		return err
 	}

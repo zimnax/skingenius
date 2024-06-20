@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql/driver"
+	"fmt"
 	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
@@ -15,22 +16,6 @@ type Product struct {
 }
 
 type Ingredient struct {
-	//<<<<<<< HEAD
-	//	Id                   uint `gorm:"primaryKey;autoIncrement"`
-	//	Name                 string
-	//	PubchemId            int
-	//	CasNumber            string
-	//	ECNumber             string
-	//	Synonyms             pq.StringArray          `gorm:"type:text[]"`
-	//	SkinType             []SkinType              `gorm:"many2many:ingredient_skintype;"`
-	//	SkinSensitivity      []SkinSensitivity       `gorm:"many2many:ingredient_skinsensitivity;"`
-	//	AcneBreakout         []AcneBreakouts         `gorm:"many2many:ingredient_acnebreakout;"`
-	//	IngredientPreference []IngredientPreferences `gorm:"many2many:ingredient_ingredientpreference;"`
-	//	Allergies            []Allergy               `gorm:"many2many:ingredient_allergies;"`
-	//	SkinConcerns         []Skinconcern           `gorm:"many2many:ingredient_skinconcern;"`
-	//	Ages                 []Age                   `gorm:"many2many:ingredient_age;"`
-	//	Benefits             []Benefit               `gorm:"many2many:ingredient_benefit;"`
-	//=======
 	ID                uint `gorm:"primaryKey;autoIncrement"`
 	Name              string
 	PubchemId         string
@@ -45,7 +30,6 @@ type Ingredient struct {
 	Skinconcerns      []Skinconcern     `gorm:"many2many:ingredient_skinconcerns;"`
 	Ages              []Age             `gorm:"many2many:ingredient_ages;"`
 	Benefits          []Benefit         `gorm:"many2many:ingredient_benefits;"`
-	//>>>>>>> f64ca42e98e13531eefa029b4a555fbbece40a6b
 }
 
 type Allergy struct {
@@ -176,16 +160,40 @@ type IngredientSkintype struct {
 	Score        int
 }
 
+func (ip *IngredientSkintype) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientSkintype")
+	if customValue, ok := db.Statement.Context.Value(SkintypeCtxKey(ip.SkintypeID)).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
+}
+
 type IngredientSkinsensitivity struct {
 	IngredientID      uint `gorm:"primaryKey"`
 	SkinsensitivityID uint `gorm:"primaryKey"`
 	Score             int
 }
 
+func (ip *IngredientSkinsensitivity) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientSkinsensitivity")
+	if customValue, ok := db.Statement.Context.Value(SkinsensetivityCtxKey(ip.SkinsensitivityID)).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
+}
+
 type IngredientAcnebreakout struct {
 	IngredientID   uint `gorm:"primaryKey"`
 	AcnebreakoutID uint `gorm:"primaryKey"`
 	Score          int
+}
+
+func (ip *IngredientAcnebreakout) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientAcnebreakout")
+	if customValue, ok := db.Statement.Context.Value(AcnebreakoutsCtxKey(ip.AcnebreakoutID)).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
 }
 
 type IngredientPreference struct {
@@ -195,7 +203,8 @@ type IngredientPreference struct {
 }
 
 func (ip *IngredientPreference) BeforeCreate(db *gorm.DB) error {
-	if customValue, ok := db.Statement.Context.Value("score").(int); ok {
+	fmt.Println("Before create IngredientPreference")
+	if customValue, ok := db.Statement.Context.Value(PreferencesCtxKey(ip.PreferenceID)).(int); ok {
 		ip.Score = customValue
 	}
 	return nil
@@ -207,10 +216,26 @@ type IngredientAllergy struct {
 	Score        int
 }
 
+func (ip *IngredientAllergy) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientAllergy")
+	if customValue, ok := db.Statement.Context.Value(AllergiesCtxKey(ip.AllergyID)).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
+}
+
 type IngredientSkinconcern struct {
 	IngredientID  uint `gorm:"primaryKey"`
 	SkinconcernID uint `gorm:"primaryKey"`
 	Score         int
+}
+
+func (ip *IngredientSkinconcern) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientSkinconcern")
+	if customValue, ok := db.Statement.Context.Value(SkinconcernCtxKey(ip.SkinconcernID)).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
 }
 
 type IngredientAge struct {
@@ -219,8 +244,24 @@ type IngredientAge struct {
 	Score        int
 }
 
+func (ip *IngredientAge) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientAge")
+	if customValue, ok := db.Statement.Context.Value(AgeCtxKey).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
+}
+
 type IngredientBenefit struct {
 	IngredientID uint `gorm:"primaryKey"`
 	BenefitID    uint `gorm:"primaryKey"`
 	Score        int
+}
+
+func (ip *IngredientBenefit) BeforeCreate(db *gorm.DB) error {
+	fmt.Println("Before create IngredientBenefit")
+	if customValue, ok := db.Statement.Context.Value(BenefitsCtxKey).(int); ok {
+		ip.Score = customValue
+	}
+	return nil
 }

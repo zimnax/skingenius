@@ -288,7 +288,7 @@ type Connector interface {
 	//IngredientByProductBenefit(context.Context, string) ([]string, error)
 	//
 	//FilerHardParameters(context.Context, string, string, string) ([]string, error)
-	SaveIngredient(ingredient *model.Ingredient) error
+	SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error
 	SavePreference(ctx context.Context, preference *model.Preference) error
 
 	GetAllIngredients(context.Context) ([]model.Ingredient, error)
@@ -300,6 +300,8 @@ type Connector interface {
 	GetAllSkinconcerns(context.Context) ([]model.Skinconcern, error)
 	GetAllAge(context.Context) ([]model.Age, error)
 	GetAllBenefits(context.Context) ([]model.Benefit, error)
+
+	SetupJoinTables() error
 }
 
 //type PgConnector struct {

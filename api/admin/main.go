@@ -18,152 +18,83 @@ import (
 	"time"
 )
 
-const (
-	IngredientName = iota
-	PubChemCID
-	INCIName
-	INCINumber
-	CASNumber
-	Vegetarian
-	Vegan
-	GlutenFree
-	Paleo
-	NutFree
-	SoyFree
-	LatexFree
-	SesameFree
-	CitrusFree
-	DyeFree
-	FragranceFree
-	ScentFree
-	Normal
-	Dry
-	Oily
-	Combination
-	NotSensitive
-	ALittleSensitive
-	ModeratelySensitive
-	Sensitive
-	VerySensitive
-	ExtremelySensitive
-	NotAcneProne
-	ALittleAcneProne
-	ModeratelyAcneProne
-	AcneProne
-	VeryAcneProne
-	ExtremelyAcneProne
-	SuitableForMatureSkin
-	Acne
-	Rosacea
-	CysticAcne
-	Hyperpigmentation
-	Melasma
-	Xerosis
-	Dryness
-	Redness
-	Oiliness
-	SignsOfAging
-	DarkSpots
-	SensitiveSkin
-	Dullness
-	UnevenSkinTone
-	Wrinkles
-	FineLines
-	LossOfElasticityFirmness
-	DamagedSkin
-	VisiblePores
-	CloggedPoresBlackheads
-	UnevenTexture
-	Eczema
-	Psoriasis
-	Dermatitis
-	SunburnedSkin
-	DarkCircles
-	Blemishes
-	Moisturizing
-	Nourishing
-	Hydrating
-	Exfoliating
-	Calming
-	Soothing
-	UVBarrier
-	Healing
-	Smoothing
-	ReducesAcne
-	ReducesBlemishes
-	ReducesWrinkles
-	ImprovesSymptomsOfEczema
-	ImprovesSymptomsOfPsoriasis
-	ImprovesSymptomsOfDermatitis
-	Brightening
-	ImprovesSkinTone
-	ReducesInflammation
-	MinimizesPores
-	AntiAging
-	Firming
-	Detoxifying
-	Balancing
-	ReducesRedness
-	Clarifying
-	AntiBacterial
-	StimulatesCollagenProduction
-	ReducesFineLines
-	AntioxidantProtection
-	SkinBarrierProtection
-	Teen
-	Twenties
-	Thirties
-	Forties
-	Fifties
-	SixtiesPlus
-)
-
 func main() {
-
-	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 
-	allPreferences, err := dbClient.GetAllPreferences(context.Background())
-	fmt.Println(allPreferences)
-
-	//records := readCsvFile("admin/inventory.csv")
-	//for i, record := range records {
-	//	if i > 1 {
-	//		ingredient := model.Ingredient{
-	//			//ID:                0,
-	//			Name:      record[IngredientName],
-	//			PubchemId: record[PubChemCID],
-	//			CasNumber: record[CASNumber],
-	//			ECNumber:  "",
-	//			Synonyms:  []string{},
-	//
-	//			Preferences: []model.Preference{
-	//				{},
-	//			},
-	//
-	//			Skintypes: []model.Skintype{
-	//				{},
-	//			},
-	//			Skinsensitivities: nil,
-	//			Acnebreakouts:     nil,
-	//			Allergies:         nil,
-	//			Skinconcerns:      nil,
-	//			Ages:              nil,
-	//			Benefits:          nil,
-	//		}
-	//	}
-	//}
-
-	ingredient := model.Ingredient{
-		//ID:                0,
-		Name: "Testname",
+	if err = dbClient.SetupJoinTables(); err != nil {
+		os.Exit(1)
+		return
 	}
 
-	ingredient.Preferences = allPreferences
-	dbClient.SaveIngredient(&ingredient)
+	allPreferences, err := dbClient.GetAllPreferences(context.Background())
+	allskintypes, err := dbClient.GetAllSkintypes(context.Background())
+	allskinsensetivities, err := dbClient.GetAllSkinsensetivity(context.Background())
+	allAcnebreakouts, err := dbClient.GetAllAcneBreakouts(context.Background())
+	//allAllergies, err := dbClient.GetAllAllergies(context.Background())
+	//allSkinconcerns, err := dbClient.GetAllSkinconcerns(context.Background())
+	//allAges, err := dbClient.GetAllAge(context.Background())
+	//allBenefits, err := dbClient.GetAllBenefits(context.Background())
+
+	records := readCsvFile("admin/inventory.csv")
+	for i, record := range records {
+		if i == 3 {
+			//if i > 1 {
+			fmt.Println(record)
+			ctx := context.WithValue(context.Background(), "key", "val")
+
+			ctx, ipref := assignPreferencesScore(ctx, record, allPreferences)
+			ctx, iskintype := assignSkintypeScore(ctx, record, allskintypes)
+			ctx, iskinSens := assignSkinSensitivityScore(ctx, record, allskinsensetivities)
+			ctx, iacneBreakouts := assignAcneBreakoutScore(ctx, record, allAcnebreakouts)
+
+			ingredient := model.Ingredient{
+				Name:      record[IngredientName],
+				PubchemId: record[PubChemCID],
+				CasNumber: record[CASNumber],
+				ECNumber:  "",
+				Synonyms:  []string{},
+
+				Preferences:       ipref,
+				Skintypes:         iskintype,
+				Skinsensitivities: iskinSens,
+				Acnebreakouts:     iacneBreakouts,
+
+				Allergies:    nil,
+				Skinconcerns: nil,
+				Ages:         nil,
+				Benefits:     nil,
+			}
+
+			dbClient.SaveIngredient(ctx, &ingredient)
+		}
+	}
+
+	//ingredient := model.Ingredient{
+	//	Name: "Testname",
+	//}
+	//
+	//
+	//ctx = context.WithValue(ctx, model.SkintypeCtxKey, 13)
+	//ctx = context.WithValue(ctx, model.SkinsensetivityCtxKey, 14)
+	//ctx = context.WithValue(ctx, model.AcnebreakoutsCtxKey, 15)
+	//ctx = context.WithValue(ctx, model.AllergiesCtxKey, 22)
+	//ctx = context.WithValue(ctx, model.SkinconcernCtxKey, 22)
+	//ctx = context.WithValue(ctx, model.AgeCtxKey, 28)
+	//ctx = context.WithValue(ctx, model.BenefitsCtxKey, 29)
+	//
+	//ingredient.Preferences = allPreferences
+	//ingredient.Skintypes = allskintypes
+	//ingredient.Skinsensitivities = allskinsensetivities
+	//ingredient.Acnebreakouts = allAcnebreakouts
+	//ingredient.Allergies = allAllergies
+	//ingredient.Skinconcerns = allSkinconcerns
+	//ingredient.Ages = allAges
+	//ingredient.Benefits = allBenefits
 
 	//var pref []model.Preference
 	//var ctx context.Context
