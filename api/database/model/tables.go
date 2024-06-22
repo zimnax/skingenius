@@ -34,17 +34,100 @@ type Ingredient struct {
 
 type Allergy struct {
 	ID   uint `gorm:"primaryKey"`
-	Name string
+	Name AllergyValue
+}
+
+type AllergyValue string
+
+const (
+	AllergyNuts                AllergyValue = "nuts"
+	AllergySoy                 AllergyValue = "soy"
+	AllergyLatex               AllergyValue = "latex"
+	AllergySesame              AllergyValue = "sesame"
+	AllergyCitrus              AllergyValue = "citrus"
+	AllergyDye                 AllergyValue = "dye"
+	AllergyArtificialFragrance AllergyValue = "artificial_fragrance"
+	AllergyScent               AllergyValue = "scent"
+)
+
+func (s *AllergyValue) Scan(value interface{}) error {
+	*s = AllergyValue(value.(string))
+	return nil
+}
+
+func (s AllergyValue) Value() (driver.Value, error) {
+	return string(s), nil
 }
 
 type Skinconcern struct {
 	ID   uint `gorm:"primaryKey"`
-	Name string
+	Name SkinconcernValue
+}
+
+type SkinconcernValue string
+
+const (
+	ConcernRosacea                  SkinconcernValue = "rosacea"
+	ConcernHyperpigmentation        SkinconcernValue = "hyperpigmentation"
+	ConcernMelasma                  SkinconcernValue = "melasma"
+	ConcernCysticAcne               SkinconcernValue = "cystic_acne"
+	ConcernAcne                     SkinconcernValue = "acne"
+	ConcernXerosis                  SkinconcernValue = "xerosis"
+	ConcernDryness                  SkinconcernValue = "dryness"
+	ConcernOiliness                 SkinconcernValue = "oiliness"
+	ConcernUnevenSkinTone           SkinconcernValue = "uneven_skin_tone"
+	ConcernSignsOfAging             SkinconcernValue = "signs_of_aging"
+	ConcernFineLines                SkinconcernValue = "fine_lines"
+	ConcernWrinkles                 SkinconcernValue = "wrinkles"
+	ConcernDarkSpots                SkinconcernValue = "dark_spots"
+	ConcernLostOfElasticityFirmness SkinconcernValue = "lost_of_elasticity_firmness"
+	ConcernVisiblePores             SkinconcernValue = "visible_pores"
+	ConcernCloggedPoresBlackheads   SkinconcernValue = "clogged_pores_blackheads"
+	ConcernRedness                  SkinconcernValue = "redness"
+	ConcernDullness                 SkinconcernValue = "dullness"
+	ConcernDamagedSkin              SkinconcernValue = "damaged_skin"
+	ConcernUnevenTexture            SkinconcernValue = "uneven_texture"
+	ConcernEczema                   SkinconcernValue = "eczema"
+	ConcernPsoriasis                SkinconcernValue = "psoriasis"
+	ConcernDermatitis               SkinconcernValue = "dermatitis"
+	ConcernSunburnedSkin            SkinconcernValue = "sunburned_skin"
+	ConcernDarkCircles              SkinconcernValue = "dark_circles"
+	ConcernBlemishes                SkinconcernValue = "blemishes"
+	ConcernSensitiveSkin            SkinconcernValue = "sensitive_skin"
+)
+
+func (s *SkinconcernValue) Scan(value interface{}) error {
+	*s = SkinconcernValue(value.(string))
+	return nil
+}
+
+func (s SkinconcernValue) Value() (driver.Value, error) {
+	return string(s), nil
 }
 
 type Age struct {
 	ID    uint `gorm:"primaryKey"`
-	Value int
+	Value AgeValue
+}
+
+type AgeValue int
+
+const (
+	Age10 AgeValue = 10
+	Age20 AgeValue = 20
+	Age30 AgeValue = 30
+	Age40 AgeValue = 40
+	Age50 AgeValue = 50
+	Age60 AgeValue = 60
+)
+
+func (s *AgeValue) Scan(value interface{}) error {
+	*s = AgeValue(value.(int64))
+	return nil
+}
+
+func (s AgeValue) Value() (driver.Value, error) {
+	return int(s), nil
 }
 
 type Benefit struct {
@@ -246,8 +329,10 @@ type IngredientAge struct {
 
 func (ip *IngredientAge) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientAge")
-	if customValue, ok := db.Statement.Context.Value(AgeCtxKey).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(AgeCtxKey(ip.AgeID)).(int); ok {
 		ip.Score = customValue
+	} else {
+		fmt.Println(fmt.Sprintf("ERROR"))
 	}
 	return nil
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,6 +12,7 @@ import (
 	"skingenius/database"
 	dbmodel "skingenius/database/model"
 	"skingenius/pubchem/model"
+	"strconv"
 	"strings"
 )
 
@@ -19,7 +21,7 @@ const dirname = "pubchem/ingredients/"
 
 func main() {
 
-	db, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password)
+	db, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -50,7 +52,7 @@ func parseIngredientsAndSoreToDb(db database.Connector) {
 			var i dbmodel.Ingredient
 
 			i.Name = respById.Record.RecordTitle
-			i.PubchemId = respById.Record.RecordNumber
+			i.PubchemId = strconv.Itoa(respById.Record.RecordNumber)
 
 			fmt.Println(fmt.Sprintf("Name: %#v", respById.Record.RecordTitle))
 			fmt.Println(fmt.Sprintf("CID: %#v", respById.Record.RecordNumber))
@@ -76,7 +78,7 @@ func parseIngredientsAndSoreToDb(db database.Connector) {
 				}
 			}
 
-			saveErr := db.SaveIngredient(&i)
+			saveErr := db.SaveIngredient(context.Background(), &i)
 			if saveErr != nil {
 				fmt.Println(fmt.Sprintf("failed ot save ingredient [%s], error: %v", file.Name(), saveErr))
 			}

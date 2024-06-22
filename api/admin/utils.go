@@ -166,3 +166,137 @@ func assignAcneBreakoutScore(ctx context.Context, record []string, allAcneBreako
 	}
 	return ctx, iAcneBreakout
 }
+
+func assignAllergyScore(ctx context.Context, record []string, allAllergy []model.Allergy) (context.Context, []model.Allergy) {
+	iallergies := allAllergy
+	for _, iallergy := range iallergies {
+		var score int
+
+		switch iallergy.Name {
+		case model.AllergyNuts:
+			score = yesNoTo01(record[NutFree])
+		case model.AllergySoy:
+			score = yesNoTo01(record[SoyFree])
+		case model.AllergyLatex:
+			score = yesNoTo01(record[LatexFree])
+		case model.AllergySesame:
+			score = yesNoTo01(record[SesameFree])
+		case model.AllergyCitrus:
+			score = yesNoTo01(record[CitrusFree])
+		case model.AllergyDye:
+			score = yesNoTo01(record[DyeFree])
+		case model.AllergyArtificialFragrance:
+			score = yesNoTo01(record[FragranceFree])
+		case model.AllergyScent:
+			score = yesNoTo01(record[ScentFree])
+		}
+
+		ctx = context.WithValue(ctx, model.AllergiesCtxKey(iallergy.ID), score)
+	}
+
+	return ctx, iallergies
+}
+
+func assignSkinConcernScore(ctx context.Context, record []string, allSkinconcern []model.Skinconcern) (context.Context, []model.Skinconcern) {
+	iconcerns := allSkinconcern
+	for _, concern := range iconcerns {
+		var stringScore string
+
+		switch concern.Name {
+		case model.ConcernAcne:
+			stringScore = record[Acne]
+		case model.ConcernRosacea:
+			stringScore = record[Rosacea]
+		case model.ConcernCysticAcne:
+			stringScore = record[CysticAcne]
+		case model.ConcernHyperpigmentation:
+			stringScore = record[Hyperpigmentation]
+		case model.ConcernMelasma:
+			stringScore = record[Melasma]
+		case model.ConcernXerosis:
+			stringScore = record[Xerosis]
+		case model.ConcernDryness:
+			stringScore = record[Dryness]
+		case model.ConcernRedness:
+			stringScore = record[Redness]
+		case model.ConcernOiliness:
+			stringScore = record[Oiliness]
+		case model.ConcernUnevenSkinTone:
+			stringScore = record[UnevenSkinTone]
+		case model.ConcernSignsOfAging:
+			stringScore = record[SignsOfAging]
+		case model.ConcernFineLines:
+			stringScore = record[FineLines]
+		case model.ConcernWrinkles:
+			stringScore = record[Wrinkles]
+		case model.ConcernDarkSpots:
+			stringScore = record[DarkSpots]
+		case model.ConcernLostOfElasticityFirmness:
+			stringScore = record[LossOfElasticityFirmness]
+		case model.ConcernVisiblePores:
+			stringScore = record[VisiblePores]
+		case model.ConcernCloggedPoresBlackheads:
+			stringScore = record[CloggedPoresBlackheads]
+		case model.ConcernDullness:
+			stringScore = record[Dullness]
+		case model.ConcernDamagedSkin:
+			stringScore = record[DamagedSkin]
+		case model.ConcernUnevenTexture:
+			stringScore = record[UnevenTexture]
+		case model.ConcernEczema:
+			stringScore = record[Eczema]
+		case model.ConcernPsoriasis:
+			stringScore = record[Psoriasis]
+		case model.ConcernDermatitis:
+			stringScore = record[Dermatitis]
+		case model.ConcernSunburnedSkin:
+			stringScore = record[SunburnedSkin]
+		case model.ConcernDarkCircles:
+			stringScore = record[DarkCircles]
+		case model.ConcernBlemishes:
+			stringScore = record[Blemishes]
+		case model.ConcernSensitiveSkin:
+			stringScore = record[SensitiveSkin]
+		}
+
+		stringScore = strings.ReplaceAll(stringScore, " ", "")
+		if stringScore == "" {
+			stringScore = "0" // Default velue
+		}
+
+		score, err := strconv.Atoi(stringScore)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("failed to cast skinConcern score: [%s] for skinConcern %s", stringScore, concern.Name))
+		}
+
+		ctx = context.WithValue(ctx, model.SkinconcernCtxKey(concern.ID), score)
+	}
+
+	return ctx, iconcerns
+}
+
+func assignAgeScore(ctx context.Context, record []string, allAges []model.Age) (context.Context, []model.Age) {
+	iAllAges := allAges
+	for _, age := range iAllAges {
+		var score int
+
+		switch age.Value {
+		case model.Age10:
+			score = yesNoTo01(record[Teen])
+		case model.Age20:
+			score = yesNoTo01(record[Twenties])
+		case model.Age30:
+			score = yesNoTo01(record[Thirties])
+		case model.Age40:
+			score = yesNoTo01(record[Forties])
+		case model.Age50:
+			score = yesNoTo01(record[Fifties])
+		case model.Age60:
+			score = yesNoTo01(record[SixtiesPlus])
+		}
+
+		ctx = context.WithValue(ctx, model.AgeCtxKey(age.ID), score)
+	}
+
+	return ctx, iAllAges
+}

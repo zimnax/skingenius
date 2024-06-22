@@ -35,9 +35,9 @@ func main() {
 	allskintypes, err := dbClient.GetAllSkintypes(context.Background())
 	allskinsensetivities, err := dbClient.GetAllSkinsensetivity(context.Background())
 	allAcnebreakouts, err := dbClient.GetAllAcneBreakouts(context.Background())
-	//allAllergies, err := dbClient.GetAllAllergies(context.Background())
-	//allSkinconcerns, err := dbClient.GetAllSkinconcerns(context.Background())
-	//allAges, err := dbClient.GetAllAge(context.Background())
+	allAllergies, err := dbClient.GetAllAllergies(context.Background())
+	allSkinconcerns, err := dbClient.GetAllSkinconcerns(context.Background())
+	allAges, err := dbClient.GetAllAge(context.Background())
 	//allBenefits, err := dbClient.GetAllBenefits(context.Background())
 
 	records := readCsvFile("admin/inventory.csv")
@@ -51,6 +51,9 @@ func main() {
 			ctx, iskintype := assignSkintypeScore(ctx, record, allskintypes)
 			ctx, iskinSens := assignSkinSensitivityScore(ctx, record, allskinsensetivities)
 			ctx, iacneBreakouts := assignAcneBreakoutScore(ctx, record, allAcnebreakouts)
+			ctx, iallergies := assignAllergyScore(ctx, record, allAllergies)
+			ctx, iskinConcerns := assignSkinConcernScore(ctx, record, allSkinconcerns)
+			ctx, iages := assignAgeScore(ctx, record, allAges)
 
 			ingredient := model.Ingredient{
 				Name:      record[IngredientName],
@@ -63,11 +66,11 @@ func main() {
 				Skintypes:         iskintype,
 				Skinsensitivities: iskinSens,
 				Acnebreakouts:     iacneBreakouts,
+				Allergies:         iallergies,
+				Skinconcerns:      iskinConcerns,
+				Ages:              iages,
 
-				Allergies:    nil,
-				Skinconcerns: nil,
-				Ages:         nil,
-				Benefits:     nil,
+				Benefits: nil,
 			}
 
 			dbClient.SaveIngredient(ctx, &ingredient)

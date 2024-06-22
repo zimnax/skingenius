@@ -365,6 +365,8 @@ func migrateAllergy(db *gorm.DB) error {
 		return fmt.Errorf(fmt.Sprintf("SetupJoinTable failed for table [IngredientAllergy], error: %v", err))
 	}
 
+	db.Migrator().DropTable(&model.Allergy{})
+
 	if err = db.AutoMigrate(&model.Allergy{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Allergy], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Allergy], error: %v", err))
@@ -376,8 +378,9 @@ func migrateAllergy(db *gorm.DB) error {
 		{ID: 3, Name: "latex"},
 		{ID: 4, Name: "sesame"},
 		{ID: 5, Name: "citrus"},
-		{ID: 6, Name: "artificial_fragrance"},
-		{ID: 7, Name: "scent"},
+		{ID: 6, Name: "dye"},
+		{ID: 7, Name: "artificial_fragrance"},
+		{ID: 8, Name: "scent"},
 	}
 
 	if res := db.Create(as); res.Error != nil {
