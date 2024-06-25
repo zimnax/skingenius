@@ -301,6 +301,9 @@ type Connector interface {
 	GetAllAge(context.Context) ([]model.Age, error)
 	GetAllBenefits(context.Context) ([]model.Benefit, error)
 
+	GetIngredientsBySkintype(context.Context, string) ([]model.Ingredient, error)
+	GetIngredientsBySkinsensitivity(context.Context, string) ([]model.Ingredient, error)
+
 	SetupJoinTables() error
 }
 

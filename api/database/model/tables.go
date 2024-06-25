@@ -30,6 +30,8 @@ type Ingredient struct {
 	Skinconcerns      []Skinconcern     `gorm:"many2many:ingredient_skinconcerns;"`
 	Ages              []Age             `gorm:"many2many:ingredient_ages;"`
 	Benefits          []Benefit         `gorm:"many2many:ingredient_benefits;"`
+
+	Score int
 }
 
 type Allergy struct {
@@ -132,7 +134,51 @@ func (s AgeValue) Value() (driver.Value, error) {
 
 type Benefit struct {
 	ID   uint `gorm:"primaryKey"`
-	Name string
+	Name BenefitValue
+}
+
+type BenefitValue string
+
+const (
+	BenefitMoisturizing                 BenefitValue = "moisturizing"
+	BenefitNourishing                   BenefitValue = "nourishing"
+	BenefitHydrating                    BenefitValue = "hydrating"
+	BenefitExfoliating                  BenefitValue = "exfoliating"
+	BenefitCalming                      BenefitValue = "calming"
+	BenefitSoothing                     BenefitValue = "soothing"
+	BenefitUVBarrier                    BenefitValue = "uv_barrier"
+	BenefitHealing                      BenefitValue = "healing"
+	BenefitSmoothing                    BenefitValue = "smoothing"
+	BenefitReducesAcne                  BenefitValue = "reduces_acne"
+	BenefitReducesBlemishes             BenefitValue = "reduces_blemishes"
+	BenefitReducesWrinkles              BenefitValue = "reduces_wrinkles"
+	BenefitImprovesSymptomsOfEczema     BenefitValue = "improves_symptoms_of_eczema"
+	BenefitImprovesSymptomsOfPsoriasis  BenefitValue = "improves_symptoms_of_psoriasis"
+	BenefitImprovesSymptomsOfDermatitis BenefitValue = "improves_symptoms_of_dermatitis"
+	BenefitBrightening                  BenefitValue = "brightening"
+	BenefitImprovesSkinTone             BenefitValue = "improves_skin_tone"
+	BenefitReducesInflammation          BenefitValue = "reduces_inflammation"
+	BenefitMinimizesPores               BenefitValue = "minimizes_pores"
+	BenefitAntiAging                    BenefitValue = "anti_aging"
+	BenefitFirming                      BenefitValue = "firming"
+	BenefitDetoxifying                  BenefitValue = "detoxifying"
+	BenefitBalancing                    BenefitValue = "balancing"
+	BenefitReducesRedness               BenefitValue = "reduces_redness"
+	BenefitClarifying                   BenefitValue = "clarifying"
+	BenefitAntiBacterial                BenefitValue = "anti_bacterial"
+	BenefitStimulatesCollagenProduction BenefitValue = "stimulates_collagen_production"
+	BenefitReducesFineLines             BenefitValue = "reduces_fine_lines"
+	BenefitAntioxidantProtection        BenefitValue = "antioxidant_protection"
+	BenefitSkinBarrierProtection        BenefitValue = "skin_barrier_protection"
+)
+
+func (s *BenefitValue) Scan(value interface{}) error {
+	*s = BenefitValue(value.(string))
+	return nil
+}
+
+func (s BenefitValue) Value() (driver.Value, error) {
+	return string(s), nil
 }
 
 // ---  Skin type
@@ -345,7 +391,7 @@ type IngredientBenefit struct {
 
 func (ip *IngredientBenefit) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientBenefit")
-	if customValue, ok := db.Statement.Context.Value(BenefitsCtxKey).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(BenefitsCtxKey(ip.BenefitID)).(int); ok {
 		ip.Score = customValue
 	}
 	return nil

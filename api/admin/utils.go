@@ -300,3 +300,88 @@ func assignAgeScore(ctx context.Context, record []string, allAges []model.Age) (
 
 	return ctx, iAllAges
 }
+
+func assignBenefitsScore(ctx context.Context, record []string, allBenefits []model.Benefit) (context.Context, []model.Benefit) {
+	iAllBenefits := allBenefits
+	for _, benefit := range iAllBenefits {
+		var stringScore string
+
+		switch benefit.Name {
+		case model.BenefitMoisturizing:
+			stringScore = record[Moisturizing]
+		case model.BenefitNourishing:
+			stringScore = record[Nourishing]
+		case model.BenefitHydrating:
+			stringScore = record[Hydrating]
+		case model.BenefitExfoliating:
+			stringScore = record[Exfoliating]
+		case model.BenefitCalming:
+			stringScore = record[Calming]
+		case model.BenefitSoothing:
+			stringScore = record[Soothing]
+		case model.BenefitUVBarrier:
+			stringScore = record[UVBarrier]
+		case model.BenefitHealing:
+			stringScore = record[Healing]
+		case model.BenefitSmoothing:
+			stringScore = record[Smoothing]
+		case model.BenefitReducesAcne:
+			stringScore = record[ReducesAcne]
+		case model.BenefitReducesBlemishes:
+			stringScore = record[ReducesBlemishes]
+		case model.BenefitReducesWrinkles:
+			stringScore = record[ReducesWrinkles]
+		case model.BenefitImprovesSymptomsOfEczema:
+			stringScore = record[ImprovesSymptomsOfEczema]
+		case model.BenefitImprovesSymptomsOfPsoriasis:
+			stringScore = record[ImprovesSymptomsOfPsoriasis]
+		case model.BenefitImprovesSymptomsOfDermatitis:
+			stringScore = record[ImprovesSymptomsOfDermatitis]
+		case model.BenefitBrightening:
+			stringScore = record[Brightening]
+		case model.BenefitImprovesSkinTone:
+			stringScore = record[ImprovesSkinTone]
+		case model.BenefitReducesInflammation:
+			stringScore = record[ReducesInflammation]
+		case model.BenefitMinimizesPores:
+			stringScore = record[MinimizesPores]
+		case model.BenefitAntiAging:
+			stringScore = record[AntiAging]
+		case model.BenefitFirming:
+			stringScore = record[Firming]
+		case model.BenefitDetoxifying:
+			stringScore = record[Detoxifying]
+		case model.BenefitBalancing:
+			stringScore = record[Balancing]
+		case model.BenefitReducesRedness:
+			stringScore = record[ReducesRedness]
+		case model.BenefitClarifying:
+			stringScore = record[Clarifying]
+		case model.BenefitAntiBacterial:
+			stringScore = record[AntiBacterial]
+		case model.BenefitStimulatesCollagenProduction:
+			stringScore = record[StimulatesCollagenProduction]
+		case model.BenefitReducesFineLines:
+			stringScore = record[ReducesFineLines]
+		case model.BenefitAntioxidantProtection:
+			stringScore = record[AntioxidantProtection]
+		case model.BenefitSkinBarrierProtection:
+			stringScore = record[SkinBarrierProtection]
+
+		}
+
+		stringScore = strings.ReplaceAll(stringScore, " ", "")
+		if stringScore == "" {
+			stringScore = "0" // Default velue
+		}
+
+		score, err := strconv.Atoi(stringScore)
+		if err != nil {
+			fmt.Println(fmt.Sprintf("failed to cast skinConcern score: [%s] for skinConcern %s", stringScore, benefit.Name))
+		}
+
+		ctx = context.WithValue(ctx, model.BenefitsCtxKey(benefit.ID), score)
+	}
+
+	return ctx, iAllBenefits
+}

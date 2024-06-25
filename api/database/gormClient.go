@@ -14,6 +14,52 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) GetIngredientsBySkinsensitivity(ctx context.Context, skinsensitivity string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	/*
+		SELECT ingredients.id, ingredients.name, skinsensitivities.sensitivity, ingredient_skinsensitivities.score
+		FROM public.ingredients
+		INNER JOIN ingredient_skinsensitivities ON ingredients.id = ingredient_skinsensitivities.ingredient_id
+		INNER JOIN skinsensitivities ON Skinsensitivities.id = ingredient_skinsensitivities.skinsensitivity_id
+		WHERE skinsensitivities.sensitivity = 'never' AND ingredient_skinsensitivities.score != 0
+		ORDER BY id ASC
+	*/
+
+	err := g.db.Select("ingredients.id, ingredients.name, skinsensitivities.sensitivity, ingredient_skinsensitivities.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_skinsensitivities ON ingredients.id = ingredient_skinsensitivities.ingredient_id").
+		Joins("INNER JOIN skinsensitivities ON Skinsensitivities.id = ingredient_skinsensitivities.skinsensitivity_id").
+		Where("skinsensitivities.sensitivity = (?) AND ingredient_skinsensitivities.score != 0", skinsensitivity).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
+func (g GormConnector) GetIngredientsBySkintype(ctx context.Context, skintype string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	//err := g.db.Preload(clause.Associations).Find(&ingredients).Error // WORKS
+
+	/*
+		SELECT ingredients.id, ingredients.name, ingredient_skintypes.skintype_id, skintypes.type, ingredient_skintypes.score
+		FROM public.ingredients
+		INNER JOIN ingredient_skintypes ON ingredients.id = ingredient_skintypes.ingredient_id
+		INNER JOIN skintypes ON skintypes.id = ingredient_skintypes.skintype_id
+		WHERE skintypes.type = 'dry' AND ingredient_skintypes.score != 0
+		ORDER BY id ASC
+	*/
+
+	err := g.db.Select("ingredients.id, ingredients.name, ingredient_skintypes.skintype_id, ingredient_skintypes.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_skintypes ON ingredients.id = ingredient_skintypes.ingredient_id").
+		Joins("INNER JOIN skintypes ON skintypes.id = ingredient_skintypes.skintype_id").
+		Where("skintypes.type = (?) AND ingredient_skintypes.score != 0", skintype).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
 func (g GormConnector) SetupJoinTables() error {
 	var err error
 
@@ -373,14 +419,14 @@ func migrateAllergy(db *gorm.DB) error {
 	}
 
 	as := []model.Allergy{
-		{ID: 1, Name: "nuts"},
-		{ID: 2, Name: "soy"},
-		{ID: 3, Name: "latex"},
-		{ID: 4, Name: "sesame"},
-		{ID: 5, Name: "citrus"},
-		{ID: 6, Name: "dye"},
-		{ID: 7, Name: "artificial_fragrance"},
-		{ID: 8, Name: "scent"},
+		{ID: 1, Name: model.AllergyNuts},
+		{ID: 2, Name: model.AllergySoy},
+		{ID: 3, Name: model.AllergyLatex},
+		{ID: 4, Name: model.AllergySesame},
+		{ID: 5, Name: model.AllergyCitrus},
+		{ID: 6, Name: model.AllergyDye},
+		{ID: 7, Name: model.AllergyArtificialFragrance},
+		{ID: 8, Name: model.AllergyScent},
 	}
 
 	if res := db.Create(as); res.Error != nil {
