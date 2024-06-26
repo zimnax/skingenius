@@ -278,18 +278,9 @@ const dbname = "skingenius_new"
 //
 // =======
 type Connector interface {
-	//IngredientBySkinType(context.Context, string) ([]string, error)
-	//IngredientBySkinSensitivity(context.Context, string) ([]string, error)
-	//IngredientByAcne(context.Context, string) ([]string, error)
-	//IngredientByPreferences(context.Context, []string) ([]string, error)
-	//IngredientByAllergens(context.Context, []string) ([]string, error)
-	//IngredientBySkinConcern(context.Context, string) ([]string, error)
-	//IngredientByAge(context.Context, string) ([]string, error)
-	//IngredientByProductBenefit(context.Context, string) ([]string, error)
-	//
 	//FilerHardParameters(context.Context, string, string, string) ([]string, error)
 	SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error
-	SavePreference(ctx context.Context, preference *model.Preference) error
+	//SavePreference(ctx context.Context, preference *model.Preference) error
 
 	GetAllIngredients(context.Context) ([]model.Ingredient, error)
 	GetAllSkintypes(context.Context) ([]model.Skintype, error)
@@ -303,6 +294,12 @@ type Connector interface {
 
 	GetIngredientsBySkintype(context.Context, string) ([]model.Ingredient, error)
 	GetIngredientsBySkinsensitivity(context.Context, string) ([]model.Ingredient, error)
+	GetIngredientsByAcneBreakouts(context.Context, string) ([]model.Ingredient, error)
+	GetIngredientsByPreferences(context.Context, []string) ([]model.Ingredient, error)
+	GetIngredientsByAllergies(context.Context, []string) ([]model.Ingredient, error)
+	GetIngredientsBySkinconcerns(context.Context, []string) ([]model.Ingredient, error)
+	GetIngredientsByAge(context.Context, string) ([]model.Ingredient, error)
+	GetIngredientsByBenefits(context.Context, []string) ([]model.Ingredient, error)
 
 	SetupJoinTables() error
 }

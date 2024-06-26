@@ -14,6 +14,116 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) GetIngredientsByBenefits(ctx context.Context, benefits []string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	err := g.db.Select("ingredients.id, ingredients.name, benefits.name, ingredient_benefits.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_benefits ON ingredients.id = ingredient_benefits.ingredient_id").
+		Joins("INNER JOIN benefits ON benefits.id = ingredient_benefits.benefit_id").
+		Where("benefits.name IN (?) AND ingredient_benefits.score = 1", benefits).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
+func (g GormConnector) GetIngredientsBySkinconcerns(ctx context.Context, concerns []string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	/*
+		SELECT ingredients.id, ingredients.name, skinconcerns.name, ingredient_skinconcerns.score
+		FROM public.ingredients
+		INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id
+		INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id
+		WHERE skinconcerns.name IN ('acne') AND ingredient_skinconcerns.score = 1
+	*/
+
+	err := g.db.Select("ingredients.id, ingredients.name, skinconcerns.name, ingredient_skinconcerns.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id").
+		Joins("INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id").
+		Where("skinconcerns.name IN (?) AND ingredient_skinconcerns.score = 1", concerns).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
+func (g GormConnector) GetIngredientsByAllergies(ctx context.Context, allergies []string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	/*
+		SELECT ingredients.id, ingredients.name, allergies.name, ingredient_allergies.score
+		FROM public.ingredients
+		INNER JOIN ingredient_allergies ON ingredients.id = ingredient_allergies.ingredient_id
+		INNER JOIN allergies ON allergies.id = ingredient_allergies.allergy_id
+		WHERE allergies.name NOT IN ('soy','nuts','latex') AND ingredient_allergies.score != 0
+	*/
+
+	err := g.db.Select("ingredients.id, ingredients.name, allergies.name, ingredient_allergies.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_allergies ON ingredients.id = ingredient_allergies.ingredient_id").
+		Joins("INNER JOIN allergies ON allergies.id = ingredient_allergies.allergy_id").
+		Where("allergies.name IN (?) AND ingredient_allergies.score = 1", allergies).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
+func (g GormConnector) GetIngredientsByPreferences(ctx context.Context, preferences []string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	/*
+		SELECT ingredients.id, ingredients.name, preferences.name, ingredient_preferences.score
+		FROM public.ingredients
+		INNER JOIN ingredient_preferences ON ingredients.id = ingredient_preferences.ingredient_id
+		INNER JOIN preferences ON preferences.id = ingredient_preferences.preference_id
+		WHERE preferences.name IN ('vegetarian','paleo') AND ingredient_preferences.score = 1
+	*/
+
+	err := g.db.Select("ingredients.id, ingredients.name, preferences.name, ingredient_preferences.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_preferences ON ingredients.id = ingredient_preferences.ingredient_id").
+		Joins("INNER JOIN preferences ON preferences.id = ingredient_preferences.preference_id").
+		Where("preferences.name IN (?) AND ingredient_preferences.score = 1", preferences).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
+func (g GormConnector) GetIngredientsByAge(ctx context.Context, age string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	/*
+		SELECT ingredients.id, ingredients.name, ages.value, ingredient_ages.score
+		FROM public.ingredients
+		INNER JOIN ingredient_ages ON ingredients.id = ingredient_ages.ingredient_id
+		INNER JOIN ages ON ages.id = ingredient_ages.age_id
+		WHERE ages.value = 30 AND ingredient_ages.score != 0
+	*/
+
+	err := g.db.Select("ingredients.id, ingredients.name, ages.value, ingredient_ages.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_ages ON ingredients.id = ingredient_ages.ingredient_id").
+		Joins("INNER JOIN ages ON ages.id = ingredient_ages.age_id").
+		Where("ages.value = (?) AND ingredient_ages.score != 0", age).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
+func (g GormConnector) GetIngredientsByAcneBreakouts(ctx context.Context, frequency string) ([]model.Ingredient, error) {
+	var ingredients []model.Ingredient
+
+	err := g.db.Select("ingredients.id, ingredients.name, acnebreakouts.frequency, ingredient_acnebreakouts.score").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_acnebreakouts ON ingredients.id = ingredient_acnebreakouts.ingredient_id").
+		Joins("INNER JOIN acnebreakouts ON acnebreakouts.id = ingredient_acnebreakouts.acnebreakout_id").
+		Where("acnebreakouts.frequency = (?) AND ingredient_acnebreakouts.score != 0", frequency).
+		Find(&ingredients).Error
+
+	return ingredients, err
+}
+
 func (g GormConnector) GetIngredientsBySkinsensitivity(ctx context.Context, skinsensitivity string) ([]model.Ingredient, error) {
 	var ingredients []model.Ingredient
 
@@ -98,12 +208,12 @@ func (g GormConnector) SetupJoinTables() error {
 	return err
 }
 
-func (g GormConnector) SavePreference(ctx context.Context, preference *model.Preference) error {
-
-	//g.db.WithContext(ctx).Model(&user).Association("Roles").Append(&role)
-
-	return nil
-}
+//func (g GormConnector) SavePreference(ctx context.Context, preference *model.Preference) error {
+//
+//	//g.db.WithContext(ctx).Model(&user).Association("Roles").Append(&role)
+//
+//	return nil
+//}
 
 func (g GormConnector) SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error {
 	db := g.db.WithContext(ctx).Save(ingredient)
