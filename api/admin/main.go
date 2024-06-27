@@ -18,6 +18,9 @@ import (
 	"time"
 )
 
+/*
+TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
+*/
 func main() {
 	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
 	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
@@ -31,59 +34,53 @@ func main() {
 		return
 	}
 
-	ing, err := dbClient.GetIingredientBySkintype(context.Background())
+	allPreferences, err := dbClient.GetAllPreferences(context.Background())
+	allskintypes, err := dbClient.GetAllSkintypes(context.Background())
+	allskinsensetivities, err := dbClient.GetAllSkinsensetivity(context.Background())
+	allAcnebreakouts, err := dbClient.GetAllAcneBreakouts(context.Background())
+	allAllergies, err := dbClient.GetAllAllergies(context.Background())
+	allSkinconcerns, err := dbClient.GetAllSkinconcerns(context.Background())
+	allAges, err := dbClient.GetAllAge(context.Background())
+	allBenefits, err := dbClient.GetAllBenefits(context.Background())
 
-	fmt.Println(len(ing))
-	fmt.Println(fmt.Sprintf("%+v", ing[19]))
-	fmt.Println(err)
+	records := readCsvFile("admin/inventory.csv")
+	for i, record := range records {
 
-	//allPreferences, err := dbClient.GetAllPreferences(context.Background())
-	//allskintypes, err := dbClient.GetAllSkintypes(context.Background())
-	//allskinsensetivities, err := dbClient.GetAllSkinsensetivity(context.Background())
-	//allAcnebreakouts, err := dbClient.GetAllAcneBreakouts(context.Background())
-	//allAllergies, err := dbClient.GetAllAllergies(context.Background())
-	//allSkinconcerns, err := dbClient.GetAllSkinconcerns(context.Background())
-	//allAges, err := dbClient.GetAllAge(context.Background())
-	//allBenefits, err := dbClient.GetAllBenefits(context.Background())
-	//
-	//records := readCsvFile("admin/inventory.csv")
-	//for i, record := range records {
-	//
-	//	if i > 1 {
-	//		fmt.Println(record)
-	//		ctx := context.WithValue(context.Background(), "key", "val")
-	//
-	//		ctx, ipref := assignPreferencesScore(ctx, record, allPreferences)
-	//		ctx, iskintype := assignSkintypeScore(ctx, record, allskintypes)
-	//		ctx, iskinSens := assignSkinSensitivityScore(ctx, record, allskinsensetivities)
-	//		ctx, iacneBreakouts := assignAcneBreakoutScore(ctx, record, allAcnebreakouts)
-	//		ctx, iallergies := assignAllergyScore(ctx, record, allAllergies)
-	//		ctx, iskinConcerns := assignSkinConcernScore(ctx, record, allSkinconcerns)
-	//		ctx, iages := assignAgeScore(ctx, record, allAges)
-	//		ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
-	//
-	//		ingredient := model.Ingredient{
-	//			Name:      record[IngredientName],
-	//			PubchemId: record[PubChemCID],
-	//			CasNumber: record[CASNumber],
-	//			ECNumber:  "",
-	//			Synonyms:  []string{},
-	//
-	//			Preferences:       ipref,
-	//			Skintypes:         iskintype,
-	//			Skinsensitivities: iskinSens,
-	//			Acnebreakouts:     iacneBreakouts,
-	//			Allergies:         iallergies,
-	//			Skinconcerns:      iskinConcerns,
-	//			Ages:              iages,
-	//			Benefits:          ibenefits,
-	//		}
-	//
-	//		dbClient.SaveIngredient(ctx, &ingredient)
-	//		fmt.Println(fmt.Sprintf("Ingredient [%s] has ben saved", ingredient.Name))
-	//		time.Sleep(1 * time.Second)
-	//	}
-	//}
+		if i >= 2 {
+			fmt.Println(record)
+			ctx := context.WithValue(context.Background(), "key", "val")
+
+			ctx, ipref := assignPreferencesScore(ctx, record, allPreferences)
+			ctx, iskintype := assignSkintypeScore(ctx, record, allskintypes)
+			ctx, iskinSens := assignSkinSensitivityScore(ctx, record, allskinsensetivities)
+			ctx, iacneBreakouts := assignAcneBreakoutScore(ctx, record, allAcnebreakouts)
+			ctx, iallergies := assignAllergyScore(ctx, record, allAllergies)
+			ctx, iskinConcerns := assignSkinConcernScore(ctx, record, allSkinconcerns)
+			ctx, iages := assignAgeScore(ctx, record, allAges)
+			ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
+
+			ingredient := model.Ingredient{
+				Name:      record[IngredientName],
+				PubchemId: record[PubChemCID],
+				CasNumber: record[CASNumber],
+				ECNumber:  "",
+				Synonyms:  []string{},
+
+				Preferences:       ipref,
+				Skintypes:         iskintype,
+				Skinsensitivities: iskinSens,
+				Acnebreakouts:     iacneBreakouts,
+				Allergies:         iallergies,
+				Skinconcerns:      iskinConcerns,
+				Ages:              iages,
+				Benefits:          ibenefits,
+			}
+
+			dbClient.SaveIngredient(ctx, &ingredient)
+			fmt.Println(fmt.Sprintf("Ingredient [%s] has ben saved", ingredient.Name))
+			time.Sleep(1 * time.Second)
+		}
+	}
 
 	// ---------------  Inventory page
 
