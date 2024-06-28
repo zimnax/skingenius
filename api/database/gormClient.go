@@ -14,6 +14,51 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingredients []int) ([]model.Product, error) {
+
+	/*
+
+		SELECT products.id, products.name
+		FROM public.products
+		INNER JOIN product_ingredient ON products.id =product_ingredient.product_id
+		INNER JOIN ingredients ON ingredients.id =product_ingredient.ingredient_id
+		WHERE ingredients.id in (5)
+		GROUP BY products.id, products.name
+		HAVING COUNT(DISTINCT ingredients.name) = 1;
+
+	*/
+
+	var products []model.Product
+
+	err := g.db.Select("products.id, products.name").
+		Table("products").
+		Joins("INNER JOIN product_ingredient ON products.id =product_ingredient.product_id").
+		Joins("INNER JOIN ingredients ON ingredients.id =product_ingredient.ingredient_id").
+		Where("ingredients.id IN (?)", ingredients).
+		Group("products.id, products.name").
+		Having("COUNT(DISTINCT ingredients.name) = ?", len(ingredients)).
+		Find(&products).Error
+
+	return products, err
+}
+
+func (g GormConnector) SaveProduct(ctx context.Context, product *model.Product) error {
+	return g.db.WithContext(ctx).Create(product).Error
+}
+
+func (g GormConnector) FindProductByName(ctx context.Context, name string) (*model.Product, error) {
+	//clause.Associations
+	var product model.Product
+	err := g.db.Preload("Ingredients").Where("name = ?", name).First(&product).Error
+	return &product, err
+}
+
+func (g GormConnector) FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error) {
+	var ingredient model.Ingredient
+	err := g.db.Where("name = ?", name).First(&ingredient).Error
+	return &ingredient, err
+}
+
 func (g GormConnector) GetIngredientsByBenefits(ctx context.Context, benefits []string) ([]model.Ingredient, error) {
 	var ingredients []model.Ingredient
 
@@ -369,6 +414,11 @@ func automigrate(db *gorm.DB) error {
 	if err = db.AutoMigrate(&model.Ingredient{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
+	}
+
+	if err = db.AutoMigrate(&model.Product{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
 	}
 
 	logger.New().Info(context.Background(), "Auto-migration finished successfully")

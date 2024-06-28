@@ -8,7 +8,7 @@ import (
 )
 
 type Product struct {
-	ID          uint
+	ID          uint `gorm:"primaryKey;autoIncrement"`
 	Name        string
 	Brand       string
 	Link        string
