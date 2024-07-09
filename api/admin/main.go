@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/csv"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -22,65 +21,22 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
-	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	//_, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true)
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 
-	if err = dbClient.SetupJoinTables(); err != nil {
-		os.Exit(1)
-		return
-	}
+	ctx := context.Background()
 
-	allPreferences, err := dbClient.GetAllPreferences(context.Background())
-	allskintypes, err := dbClient.GetAllSkintypes(context.Background())
-	allskinsensetivities, err := dbClient.GetAllSkinsensetivity(context.Background())
-	allAcnebreakouts, err := dbClient.GetAllAcneBreakouts(context.Background())
-	allAllergies, err := dbClient.GetAllAllergies(context.Background())
-	allSkinconcerns, err := dbClient.GetAllSkinconcerns(context.Background())
-	allAges, err := dbClient.GetAllAge(context.Background())
-	allBenefits, err := dbClient.GetAllBenefits(context.Background())
+	storeIngredients(ctx, dbClient, "admin/inventory.csv")
+	//storeProducts(context.Background(), dbClient, "admin/products-to-ingredients.csv")
 
-	records := readCsvFile("admin/inventory.csv")
-	for i, record := range records {
-
-		if i >= 2 {
-			fmt.Println(record)
-			ctx := context.WithValue(context.Background(), "key", "val")
-
-			ctx, ipref := assignPreferencesScore(ctx, record, allPreferences)
-			ctx, iskintype := assignSkintypeScore(ctx, record, allskintypes)
-			ctx, iskinSens := assignSkinSensitivityScore(ctx, record, allskinsensetivities)
-			ctx, iacneBreakouts := assignAcneBreakoutScore(ctx, record, allAcnebreakouts)
-			ctx, iallergies := assignAllergyScore(ctx, record, allAllergies)
-			ctx, iskinConcerns := assignSkinConcernScore(ctx, record, allSkinconcerns)
-			ctx, iages := assignAgeScore(ctx, record, allAges)
-			ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
-
-			ingredient := model.Ingredient{
-				Name:      record[IngredientName],
-				PubchemId: record[PubChemCID],
-				CasNumber: record[CASNumber],
-				ECNumber:  "",
-				Synonyms:  []string{},
-
-				Preferences:       ipref,
-				Skintypes:         iskintype,
-				Skinsensitivities: iskinSens,
-				Acnebreakouts:     iacneBreakouts,
-				Allergies:         iallergies,
-				Skinconcerns:      iskinConcerns,
-				Ages:              iages,
-				Benefits:          ibenefits,
-			}
-
-			dbClient.SaveIngredient(ctx, &ingredient)
-			fmt.Println(fmt.Sprintf("Ingredient [%s] has ben saved", ingredient.Name))
-			time.Sleep(1 * time.Second)
-		}
-	}
+	//ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), []int{1})
+	//fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
+	//fmt.Println(fmt.Sprintf("Products: %+v", ps))
+	//fmt.Println(err)
 
 	// ---------------  Inventory page
 
@@ -144,29 +100,6 @@ func main() {
 	//containerWindow.SetContent(tabs)
 	//containerWindow.CenterOnScreen()
 	//containerWindow.ShowAndRun()
-}
-
-func readCsvFile(filePath string) [][]string {
-
-	dir, err := os.Getwd()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Current directory: ", dir)
-
-	f, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal("Unable to read input file "+filePath, " ", err)
-	}
-	defer f.Close()
-
-	csvReader := csv.NewReader(f)
-	records, err := csvReader.ReadAll()
-	if err != nil {
-		log.Fatal("Unable to parse file as CSV for "+filePath, err)
-	}
-
-	return records
 }
 
 // ------- TABS ---->>

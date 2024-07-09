@@ -8,7 +8,7 @@ import (
 )
 
 type Product struct {
-	ID          uint
+	ID          uint `gorm:"primaryKey;autoIncrement"`
 	Name        string
 	Brand       string
 	Link        string
@@ -50,6 +50,7 @@ const (
 	AllergyDye                 AllergyValue = "dye"
 	AllergyArtificialFragrance AllergyValue = "artificial_fragrance"
 	AllergyScent               AllergyValue = "scent"
+	AllergyNone                AllergyValue = "no_allergy"
 )
 
 func (s *AllergyValue) Scan(value interface{}) error {
@@ -96,6 +97,7 @@ const (
 	ConcernDarkCircles              SkinconcernValue = "dark_circles"
 	ConcernBlemishes                SkinconcernValue = "blemishes"
 	ConcernSensitiveSkin            SkinconcernValue = "sensitive_skin"
+	ConcernNone                     SkinconcernValue = "no_concern"
 )
 
 func (s *SkinconcernValue) Scan(value interface{}) error {

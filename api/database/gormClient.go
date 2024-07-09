@@ -14,6 +14,51 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingredients []int) ([]model.Product, error) {
+
+	/*
+
+		SELECT products.id, products.name
+		FROM public.products
+		INNER JOIN product_ingredient ON products.id =product_ingredient.product_id
+		INNER JOIN ingredients ON ingredients.id =product_ingredient.ingredient_id
+		WHERE ingredients.id in (5)
+		GROUP BY products.id, products.name
+		HAVING COUNT(DISTINCT ingredients.name) = 1;
+
+	*/
+
+	var products []model.Product
+
+	err := g.db.Select("products.id, products.name").
+		Table("products").
+		Joins("INNER JOIN product_ingredient ON products.id =product_ingredient.product_id").
+		Joins("INNER JOIN ingredients ON ingredients.id =product_ingredient.ingredient_id").
+		Where("ingredients.id IN (?)", ingredients).
+		Group("products.id, products.name").
+		Having("COUNT(DISTINCT ingredients.name) = ?", len(ingredients)).
+		Find(&products).Error
+
+	return products, err
+}
+
+func (g GormConnector) SaveProduct(ctx context.Context, product *model.Product) error {
+	return g.db.WithContext(ctx).Create(product).Error
+}
+
+func (g GormConnector) FindProductByName(ctx context.Context, name string) (*model.Product, error) {
+	//clause.Associations
+	var product model.Product
+	err := g.db.Preload("Ingredients").Where("name = ?", name).First(&product).Error
+	return &product, err
+}
+
+func (g GormConnector) FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error) {
+	var ingredient model.Ingredient
+	err := g.db.Where("name = ?", name).First(&ingredient).Error
+	return &ingredient, err
+}
+
 func (g GormConnector) GetIngredientsByBenefits(ctx context.Context, benefits []string) ([]model.Ingredient, error) {
 	var ingredients []model.Ingredient
 
@@ -361,14 +406,14 @@ func automigrate(db *gorm.DB) error {
 		return err
 	}
 
-	//if err = db.AutoMigrate(&model.Product{}); err != nil {
-	//	logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
-	//	return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
-	//}
-
 	if err = db.AutoMigrate(&model.Ingredient{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
+	}
+
+	if err = db.AutoMigrate(&model.Product{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
 	}
 
 	logger.New().Info(context.Background(), "Auto-migration finished successfully")
@@ -389,36 +434,36 @@ func migrateBenefit(db *gorm.DB) error {
 	}
 
 	benefits := []model.Benefit{
-		{ID: 1, Name: "moisturizing"},
-		{ID: 2, Name: "nourishing"},
-		{ID: 3, Name: "hydrating"},
-		{ID: 4, Name: "exfoliating"},
-		{ID: 5, Name: "calming"},
-		{ID: 6, Name: "soothing"},
-		{ID: 7, Name: "uv_barrier"},
-		{ID: 8, Name: "healing"},
-		{ID: 9, Name: "smoothing"},
-		{ID: 10, Name: "reduces_acne"},
-		{ID: 11, Name: "reduces_blemishes"},
-		{ID: 12, Name: "reduces_wrinkles"},
-		{ID: 13, Name: "improves_symptoms_of_eczema"},
-		{ID: 14, Name: "improves_symptoms_of_psoriasis"},
-		{ID: 15, Name: "improves_symptoms_of_dermatitis"},
-		{ID: 16, Name: "brightening"},
-		{ID: 17, Name: "improves_skin_tone"},
-		{ID: 18, Name: "reduces_inflammation"},
-		{ID: 19, Name: "minimizes_pores"},
-		{ID: 20, Name: "anti_aging"},
-		{ID: 21, Name: "firming"},
-		{ID: 22, Name: "detoxifying"},
-		{ID: 23, Name: "balancing"},
-		{ID: 24, Name: "reduces_redness"},
-		{ID: 25, Name: "clarifying"},
-		{ID: 26, Name: "anti_bacterial"},
-		{ID: 27, Name: "stimulates_collagen_production"},
-		{ID: 28, Name: "reduces_fine_lines"},
-		{ID: 29, Name: "antioxidant_protection"},
-		{ID: 30, Name: "skin_barrier_protection"},
+		{ID: 1, Name: model.BenefitMoisturizing},
+		{ID: 2, Name: model.BenefitNourishing},
+		{ID: 3, Name: model.BenefitHydrating},
+		{ID: 4, Name: model.BenefitExfoliating},
+		{ID: 5, Name: model.BenefitCalming},
+		{ID: 6, Name: model.BenefitSoothing},
+		{ID: 7, Name: model.BenefitUVBarrier},
+		{ID: 8, Name: model.BenefitHealing},
+		{ID: 9, Name: model.BenefitSmoothing},
+		{ID: 10, Name: model.BenefitReducesAcne},
+		{ID: 11, Name: model.BenefitReducesBlemishes},
+		{ID: 12, Name: model.BenefitReducesWrinkles},
+		{ID: 13, Name: model.BenefitImprovesSymptomsOfEczema},
+		{ID: 14, Name: model.BenefitImprovesSymptomsOfPsoriasis},
+		{ID: 15, Name: model.BenefitImprovesSymptomsOfDermatitis},
+		{ID: 16, Name: model.BenefitBrightening},
+		{ID: 17, Name: model.BenefitImprovesSkinTone},
+		{ID: 18, Name: model.BenefitReducesInflammation},
+		{ID: 19, Name: model.BenefitMinimizesPores},
+		{ID: 20, Name: model.BenefitAntiAging},
+		{ID: 21, Name: model.BenefitFirming},
+		{ID: 22, Name: model.BenefitDetoxifying},
+		{ID: 23, Name: model.BenefitBalancing},
+		{ID: 24, Name: model.BenefitReducesRedness},
+		{ID: 25, Name: model.BenefitClarifying},
+		{ID: 26, Name: model.BenefitAntiBacterial},
+		{ID: 27, Name: model.BenefitStimulatesCollagenProduction},
+		{ID: 28, Name: model.BenefitReducesFineLines},
+		{ID: 29, Name: model.BenefitAntioxidantProtection},
+		{ID: 30, Name: model.BenefitSkinBarrierProtection},
 	}
 
 	if res := db.Create(benefits); res.Error != nil {
@@ -444,12 +489,12 @@ func migrateAge(db *gorm.DB) error {
 	}
 
 	ages := []model.Age{
-		{ID: 1, Value: 10},
-		{ID: 2, Value: 20},
-		{ID: 3, Value: 30},
-		{ID: 4, Value: 40},
-		{ID: 5, Value: 50},
-		{ID: 6, Value: 60},
+		{ID: 1, Value: model.Age10},
+		{ID: 2, Value: model.Age20},
+		{ID: 3, Value: model.Age30},
+		{ID: 4, Value: model.Age40},
+		{ID: 5, Value: model.Age50},
+		{ID: 6, Value: model.Age60},
 	}
 
 	if res := db.Create(ages); res.Error != nil {
@@ -469,39 +514,42 @@ func migrateSkinconcern(db *gorm.DB) error {
 		return fmt.Errorf(fmt.Sprintf("SetupJoinTable failed for table [IngredientSkinconcern], error: %v", err))
 	}
 
+	db.Migrator().DropTable(&model.Skinconcern{})
+
 	if err = db.AutoMigrate(&model.Skinconcern{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Skinconcern], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Skinconcern], error: %v", err))
 	}
 
 	concerns := []model.Skinconcern{
-		{ID: 1, Name: "rosacea"},
-		{ID: 2, Name: "hyperpigmentation"},
-		{ID: 3, Name: "melasma"},
-		{ID: 4, Name: "cystic_acne"},
-		{ID: 5, Name: "acne"},
-		{ID: 6, Name: "xerosis"},
-		{ID: 7, Name: "dryness"},
-		{ID: 8, Name: "oiliness"},
-		{ID: 9, Name: "uneven_skin_tone"},
-		{ID: 10, Name: "signs_of_aging"},
-		{ID: 11, Name: "fine_lines"},
-		{ID: 12, Name: "wrinkles"},
-		{ID: 13, Name: "dark_spots"},
-		{ID: 14, Name: "lost_of_elasticity_firmness"},
-		{ID: 15, Name: "visible_pores"},
-		{ID: 16, Name: "clogged_pores_blackheads"},
-		{ID: 17, Name: "redness"},
-		{ID: 18, Name: "dullness"},
-		{ID: 19, Name: "damaged_skin"},
-		{ID: 20, Name: "uneven_texture"},
-		{ID: 21, Name: "eczema"},
-		{ID: 22, Name: "psoriasis"},
-		{ID: 23, Name: "dermatitis"},
-		{ID: 24, Name: "sunburned_skin"},
-		{ID: 25, Name: "dark_circles"},
-		{ID: 26, Name: "blemishes"},
-		{ID: 27, Name: "sensitive_skin"},
+		{ID: 1, Name: model.ConcernRosacea},
+		{ID: 2, Name: model.ConcernHyperpigmentation},
+		{ID: 3, Name: model.ConcernMelasma},
+		{ID: 4, Name: model.ConcernCysticAcne},
+		{ID: 5, Name: model.ConcernAcne},
+		{ID: 6, Name: model.ConcernXerosis},
+		{ID: 7, Name: model.ConcernDryness},
+		{ID: 8, Name: model.ConcernOiliness},
+		{ID: 9, Name: model.ConcernUnevenSkinTone},
+		{ID: 10, Name: model.ConcernSignsOfAging},
+		{ID: 11, Name: model.ConcernFineLines},
+		{ID: 12, Name: model.ConcernWrinkles},
+		{ID: 13, Name: model.ConcernDarkSpots},
+		{ID: 14, Name: model.ConcernLostOfElasticityFirmness},
+		{ID: 15, Name: model.ConcernVisiblePores},
+		{ID: 16, Name: model.ConcernCloggedPoresBlackheads},
+		{ID: 17, Name: model.ConcernRedness},
+		{ID: 18, Name: model.ConcernDullness},
+		{ID: 19, Name: model.ConcernDamagedSkin},
+		{ID: 20, Name: model.ConcernUnevenTexture},
+		{ID: 21, Name: model.ConcernEczema},
+		{ID: 22, Name: model.ConcernPsoriasis},
+		{ID: 23, Name: model.ConcernDermatitis},
+		{ID: 24, Name: model.ConcernSunburnedSkin},
+		{ID: 25, Name: model.ConcernDarkCircles},
+		{ID: 26, Name: model.ConcernBlemishes},
+		{ID: 27, Name: model.ConcernSensitiveSkin},
+		{ID: 28, Name: model.ConcernNone},
 	}
 
 	if res := db.Create(concerns); res.Error != nil {
@@ -537,6 +585,7 @@ func migrateAllergy(db *gorm.DB) error {
 		{ID: 6, Name: model.AllergyDye},
 		{ID: 7, Name: model.AllergyArtificialFragrance},
 		{ID: 8, Name: model.AllergyScent},
+		{ID: 9, Name: model.AllergyNone},
 	}
 
 	if res := db.Create(as); res.Error != nil {

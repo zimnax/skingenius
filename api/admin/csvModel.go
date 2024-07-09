@@ -99,3 +99,8 @@ const (
 	Fifties
 	SixtiesPlus
 )
+
+const (
+	ProductName = iota
+	ProductIngredientName
+)
