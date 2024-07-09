@@ -22,39 +22,40 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 	for i, record := range records {
 		//if record[ProductName] == "Perfect Facial Hydrating Cream" {
 
-		if currentProduct.Name != record[ProductName] {
-			fmt.Println(fmt.Sprintf("Creating a new product: %s", record[ProductName]))
+		if i >= 1 { // skip headers
+			if currentProduct.Name != record[ProductName] {
+				fmt.Println(fmt.Sprintf("Creating a new product: %s", record[ProductName]))
 
-			if !first {
-				if saveErr := dbClient.SaveProduct(ctx, &currentProduct); saveErr != nil {
-					fmt.Println(fmt.Sprintf("failed to save product [%s], error: %v", currentProduct.Name, saveErr))
-					continue
+				if !first {
+					time.Sleep(200 * time.Millisecond) // delay before saving next
+
+					if saveErr := dbClient.SaveProduct(ctx, &currentProduct); saveErr != nil {
+						fmt.Println(fmt.Sprintf("failed to save product [%s], error: %v", currentProduct.Name, saveErr))
+						continue
+					}
+					fmt.Println(fmt.Sprintf("product [%s] saved", currentProduct.Name))
+					first = true
 				}
-				fmt.Println(fmt.Sprintf("product [%s] has ben saved", currentProduct.Name))
-				first = true
+
+				currentProduct = model.Product{
+					Name:  record[ProductName],
+					Brand: record[ProductBrand],
+					Link:  record[ProductLink],
+				}
+
+				first = false
 			}
 
-			currentProduct = model.Product{
-				Name:  record[ProductName],
-				Brand: record[ProductBrand],
-				Link:  record[ProductLink],
+			ingredient, err := dbClient.FindIngredientByName(ctx, record[ProductIngredientName])
+			if err != nil {
+				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s]", record[ProductIngredientName]))
+				fmt.Println(err)
+				continue
 			}
-
-			first = false
+			currentProduct.Ingredients = append(currentProduct.Ingredients, *ingredient)
+			fmt.Println(fmt.Sprintf("%d - product %s : added ingredient %s", i, currentProduct.Name, ingredient.Name))
 		}
-
-		ingredient, err := dbClient.FindIngredientByName(ctx, record[ProductIngredientName])
-		if err != nil {
-			fmt.Println(fmt.Sprintf("failed to find igredient by name [%s]", record[ProductIngredientName]))
-			fmt.Println(err)
-			continue
-		}
-		currentProduct.Ingredients = append(currentProduct.Ingredients, *ingredient)
-		fmt.Println(fmt.Sprintf("%d - product %s : added ingredient %s", i, currentProduct.Name, ingredient.Name))
-
-		time.Sleep(200 * time.Millisecond)
 	}
-	//}
 }
 
 func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string) {
@@ -77,7 +78,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 	records := readCsvFile(filepath)
 	for i, record := range records {
 
-		if i >= 2 {
+		if i >= 2 { // skip headers
 			fmt.Println(record)
 			ctx := context.WithValue(context.Background(), "key", "val")
 
@@ -108,8 +109,8 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			}
 
 			dbClient.SaveIngredient(ctx, &ingredient)
-			fmt.Println(fmt.Sprintf("Ingredient [%s] has ben saved", ingredient.Name))
-			time.Sleep(1 * time.Second)
+			fmt.Println(fmt.Sprintf("Ingredient [%s] saved", ingredient.Name))
+			time.Sleep(200 * time.Millisecond)
 		}
 	}
 }
