@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -20,14 +21,16 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	_, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true)
-	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	//_, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true)
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 
-	//storeIngredients(context.Background(), dbClient)
+	ctx := context.Background()
+
+	storeIngredients(ctx, dbClient, "admin/inventory.csv")
 	//storeProducts(context.Background(), dbClient, "admin/products-to-ingredients.csv")
 
 	//ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), []int{1})

@@ -51,7 +51,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 	}
 }
 
-func storeIngredients(ctx context.Context, dbClient database.Connector) {
+func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string) {
 	var err error
 
 	if err = dbClient.SetupJoinTables(); err != nil {
@@ -68,7 +68,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector) {
 	allAges, err := dbClient.GetAllAge(ctx)
 	allBenefits, err := dbClient.GetAllBenefits(ctx)
 
-	records := readCsvFile("admin/inventory.csv")
+	records := readCsvFile(filepath)
 	for i, record := range records {
 
 		if i >= 2 {
