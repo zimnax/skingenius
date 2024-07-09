@@ -21,8 +21,8 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true)
-	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
+	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true)
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -30,8 +30,8 @@ func main() {
 
 	ctx := context.Background()
 
-	//storeIngredients(ctx, dbClient, "admin/ingredients_master.csv")
-	storeProducts(ctx, dbClient, "admin/products_master.csv")
+	storeIngredients(ctx, dbClient, "admin/ingredients_master.csv")
+	//storeProducts(ctx, dbClient, "admin/products_master.csv")
 
 	//ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), []int{1})
 	//fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
