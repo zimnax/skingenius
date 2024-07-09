@@ -20,6 +20,8 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 	first := true
 
 	for i, record := range records {
+		//if record[ProductName] == "Perfect Facial Hydrating Cream" {
+
 		if currentProduct.Name != record[ProductName] {
 			fmt.Println(fmt.Sprintf("Creating a new product: %s", record[ProductName]))
 
@@ -33,7 +35,9 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 			}
 
 			currentProduct = model.Product{
-				Name: record[ProductName],
+				Name:  record[ProductName],
+				Brand: record[ProductBrand],
+				Link:  record[ProductLink],
 			}
 
 			first = false
@@ -41,7 +45,8 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 
 		ingredient, err := dbClient.FindIngredientByName(ctx, record[ProductIngredientName])
 		if err != nil {
-			fmt.Println(fmt.Sprintf("failed to find igredient my name [%s]", record[ProductIngredientName]))
+			fmt.Println(fmt.Sprintf("failed to find igredient by name [%s]", record[ProductIngredientName]))
+			fmt.Println(err)
 			continue
 		}
 		currentProduct.Ingredients = append(currentProduct.Ingredients, *ingredient)
@@ -49,6 +54,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 
 		time.Sleep(200 * time.Millisecond)
 	}
+	//}
 }
 
 func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string) {

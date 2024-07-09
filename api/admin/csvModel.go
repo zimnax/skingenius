@@ -101,6 +101,8 @@ const (
 )
 
 const (
-	ProductName = iota
-	ProductIngredientName
+	ProductIngredientName = iota
+	ProductBrand
+	ProductName
+	ProductLink
 )
