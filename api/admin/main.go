@@ -22,7 +22,7 @@ TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
 	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true)
-	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
