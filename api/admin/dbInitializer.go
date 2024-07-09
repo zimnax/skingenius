@@ -8,6 +8,7 @@ import (
 	"os"
 	"skingenius/database"
 	"skingenius/database/model"
+	"strings"
 	"time"
 )
 
@@ -23,8 +24,10 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 		//if record[ProductName] == "Perfect Facial Hydrating Cream" {
 
 		if i >= 1 { // skip headers
-			if currentProduct.Name != record[ProductName] {
-				fmt.Println(fmt.Sprintf("Creating a new product: %s", record[ProductName]))
+			productName := strings.ToLower(record[ProductName])
+
+			if currentProduct.Name != productName {
+				fmt.Println(fmt.Sprintf("Creating a new product: %s", productName))
 
 				if !first {
 					time.Sleep(200 * time.Millisecond) // delay before saving next
@@ -38,7 +41,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 				}
 
 				currentProduct = model.Product{
-					Name:  record[ProductName],
+					Name:  productName,
 					Brand: record[ProductBrand],
 					Link:  record[ProductLink],
 				}
@@ -46,9 +49,10 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 				first = false
 			}
 
-			ingredient, err := dbClient.FindIngredientByName(ctx, record[ProductIngredientName])
+			ingredientNameToFind := strings.ToLower(record[ProductIngredientName])
+			ingredient, err := dbClient.FindIngredientByName(ctx, ingredientNameToFind)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s]", record[ProductIngredientName]))
+				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s]", ingredientNameToFind))
 				fmt.Println(err)
 				continue
 			}
@@ -92,7 +96,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
 
 			ingredient := model.Ingredient{
-				Name:      record[IngredientName],
+				Name:      strings.ToLower(record[IngredientName]),
 				PubchemId: record[PubChemCID],
 				CasNumber: record[CASNumber],
 				ECNumber:  "",
