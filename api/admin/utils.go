@@ -385,3 +385,70 @@ func assignBenefitsScore(ctx context.Context, record []string, allBenefits []mod
 
 	return ctx, iAllBenefits
 }
+
+func mergeIngredients(ingredients ...[]model.Ingredient) []string {
+
+	// Initialize a map to track unique elements
+	unique := make(map[string]bool)
+
+	// Function to append unique elements from a slice to the map
+	appendUnique := func(slice []model.Ingredient) {
+		for _, ing := range slice {
+			unique[ing.Name] = true
+		}
+	}
+
+	for _, ingredientList := range ingredients {
+		appendUnique(ingredientList)
+	}
+
+	// Create a slice from the unique map keys
+	var merged []string
+	for str := range unique {
+		merged = append(merged, str)
+	}
+
+	return merged
+}
+
+func uniqueIngredientsNames(ingredients ...[]model.Ingredient) []string {
+	// Create a map to count occurrences of each string
+	countMap := make(map[string]int)
+
+	// Populate the count map
+	for _, slice := range ingredients {
+		unique := make(map[string]bool)
+		for _, ing := range slice {
+			if !unique[ing.Name] {
+				countMap[ing.Name]++
+				unique[ing.Name] = true
+			}
+		}
+	}
+
+	// Find strings that appear in all slices (count == len(ingredients))
+	var result []string
+	for str, count := range countMap {
+		if count == len(ingredients) {
+			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
+func getIngredientsNames(is []model.Ingredient) []string {
+	var names []string
+	for _, i := range is {
+		names = append(names, i.Name)
+	}
+	return names
+}
+
+func getIngredientsIds(is []model.Ingredient) []uint {
+	var ids []uint
+	for _, i := range is {
+		ids = append(ids, i.ID)
+	}
+	return ids
+}
