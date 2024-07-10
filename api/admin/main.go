@@ -173,11 +173,11 @@ func findBestProducts(dbClient database.Connector, ctx context.Context,
 	//fmt.Println(fmt.Sprintf("-->> q7 ingredients: %v", getIngredientsNames(q7Ing)))
 	//fmt.Println(fmt.Sprintf("-->> q8 ingredients: %v", getIngredientsNames(q8Ing)))
 
-	iNames := uniqueIngredientsNames(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing)
+	iNames := uniqueIngredientsNames(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing)
 	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(iNames)))
 	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", iNames))
 
-	ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), iNames)
+	ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), iNames, uint(3)) // len(iNames)
 	fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
 	fmt.Println(fmt.Sprintf("Products: %+v", ps))
 	fmt.Println(err)

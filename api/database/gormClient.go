@@ -14,7 +14,7 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
-func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingredients []string) ([]model.Product, error) {
+func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingredients []string, accuracy uint) ([]model.Product, error) {
 
 	/*
 
@@ -36,7 +36,7 @@ func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingre
 		Joins("INNER JOIN ingredients ON ingredients.id =product_ingredient.ingredient_id").
 		Where("ingredients.name IN (?)", ingredients).
 		Group("products.id, products.name").
-		Having("COUNT(DISTINCT ingredients.name) = ?", len(ingredients)).
+		Having("COUNT(DISTINCT ingredients.name) = ?", accuracy).
 		Find(&products).Error
 
 	return products, err
