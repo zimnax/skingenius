@@ -115,9 +115,12 @@ func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Co
 	q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, _ := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 	//q1Ing, _, _, _, _, _, _, _ := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 
-	uiMap := uniqueIngredientsNamesMap(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing) // q8Ing
-	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(uiMap)))
+	//uiMap := uniqueIngredientsNamesMap(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing) // q8Ing
+	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(uiMap)))
 	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", uiMap))
+
+	iWithScores := mergeIngredientsWithScores(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing)
+	fmt.Println("iWithScores: ", len(iWithScores))
 
 	ps, err := dbClient.FindAllProducts(ctx)
 	if err != nil {
@@ -138,7 +141,7 @@ func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Co
 
 		m := make(map[string]int)
 		for _, ingredient := range p.Ingredients {
-			if iScore, ok := uiMap[ingredient.Name]; ok {
+			if iScore, ok := iWithScores[ingredient.Name]; ok {
 				m[ingredient.Name] = iScore
 			}
 		}

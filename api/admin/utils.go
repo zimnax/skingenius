@@ -459,6 +459,18 @@ func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]int
 	return result
 }
 
+func mergeIngredientsWithScores(ingredients ...[]model.Ingredient) map[string]int {
+	imap := make(map[string]int)
+
+	for _, ingredient := range ingredients {
+		for _, i := range ingredient {
+			imap[i.Name] = imap[i.Name] + i.Score
+		}
+	}
+
+	return imap
+}
+
 func getIngredientsNames(is []model.Ingredient) []string {
 	var names []string
 	for _, i := range is {
