@@ -411,7 +411,7 @@ func mergeIngredients(ingredients ...[]model.Ingredient) []string {
 	return merged
 }
 
-func uniqueIngredientsNames(ingredients ...[]model.Ingredient) []string {
+func uniqueIngredientsNamesList(ingredients ...[]model.Ingredient) []string {
 	// Create a map to count occurrences of each string
 	countMap := make(map[string]int)
 
@@ -431,6 +431,28 @@ func uniqueIngredientsNames(ingredients ...[]model.Ingredient) []string {
 	for str, count := range countMap {
 		if count == len(ingredients) {
 			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
+func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]int {
+	countMap := make(map[string]int)
+	scoreMap := make(map[string]int)
+
+	for _, answerIngredients := range ingredients {
+		for _, ingredient := range answerIngredients {
+			countMap[ingredient.Name]++
+			scoreMap[ingredient.Name] = scoreMap[ingredient.Name] + ingredient.Score
+		}
+	}
+
+	// Find strings that appear in all slices (count == len(ingredients))
+	result := make(map[string]int)
+	for str, count := range countMap {
+		if count == len(ingredients) {
+			result[str] = scoreMap[str]
 		}
 	}
 

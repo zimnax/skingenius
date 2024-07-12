@@ -42,7 +42,7 @@ func main() {
 	q7AgeAnswer := 30
 	q8BenefitsAnswer := []string{"moisturizing"}
 
-	findBestProducts(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
+	findBestProducts_RatingStrategy(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 
 	// ---------------  Inventory page
 
@@ -108,58 +108,54 @@ func main() {
 	//containerWindow.ShowAndRun()
 }
 
-func findBestProducts(dbClient database.Connector, ctx context.Context,
+func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Context,
 	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
 	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
 
-	q1Ing, err := dbClient.GetIngredientsBySkintype(ctx, q1SkinTypeAnswer)
+	q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, _ := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
+	//q1Ing, _, _, _, _, _, _, _ := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
+
+	uiMap := uniqueIngredientsNamesMap(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing) // q8Ing
+	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(uiMap)))
+	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", uiMap))
+
+	ps, err := dbClient.FindAllProducts(ctx)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by skintype, error: %v", err))
+		panic(err)
 	}
 
-	q2Ing, err := dbClient.GetIngredientsBySkinsensitivity(ctx, q2SkinSensitivityAnswer)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by skinsensitivity, error: %v", err))
+	for _, p := range ps {
+		if p.Name == "" {
+			continue
+		}
+
+		pr, err := dbClient.FindProductByName(context.Background(), p.Name)
+		if err != nil {
+			panic(err)
+		}
+
+		p = *pr
+
+		m := make(map[string]int)
+		for _, ingredient := range p.Ingredients {
+			if iScore, ok := uiMap[ingredient.Name]; ok {
+				m[ingredient.Name] = iScore
+			}
+		}
+
+		if len(m) != 0 {
+			fmt.Println(fmt.Sprintf("[%s] __ %d __ %+v", p.Name, len(m), m))
+		}
 	}
 
-	q3Ing, err := dbClient.GetIngredientsByAcneBreakouts(ctx, q3AcneBreakoutsAnswer)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by acnebreakouts, error: %v", err))
-	}
+}
 
-	q4Ing, err := dbClient.GetIngredientsByPreferences(ctx, q4PreferencesAnswer)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by preferences, error: %v", err))
-	}
+func findBestProducts_matchBestStrategy(dbClient database.Connector, ctx context.Context,
+	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
+	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
 
-	q5Ing, err := dbClient.GetIngredientsByAllergies(ctx, q5AllergiesAnswer)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by allergies, error: %v", err))
-	}
-
-	q6Ing, err := dbClient.GetIngredientsBySkinconcerns(ctx, q6SkinConcernAnswer)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by skinconcerns, error: %v", err))
-	}
-
-	q7Ing, err := dbClient.GetIngredientsByAge(ctx, fmt.Sprintf("%d", q7AgeAnswer))
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by age, error: %v", err))
-	}
-
-	q8Ing, err := dbClient.GetIngredientsByBenefits(ctx, q8BenefitsAnswer)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to get ingredients by benefits, error: %v", err))
-	}
-
-	fmt.Println(fmt.Sprintf("q1 ingredients: %v", len(q1Ing)))
-	fmt.Println(fmt.Sprintf("q2 ingredients: %v", len(q2Ing)))
-	fmt.Println(fmt.Sprintf("q3 ingredients: %v", len(q3Ing)))
-	fmt.Println(fmt.Sprintf("q4 ingredients: %v", len(q4Ing)))
-	fmt.Println(fmt.Sprintf("q5 ingredients: %v", len(q5Ing)))
-	fmt.Println(fmt.Sprintf("q6 ingredients: %v", len(q6Ing)))
-	fmt.Println(fmt.Sprintf("q7 ingredients: %v", len(q7Ing)))
-	fmt.Println(fmt.Sprintf("q8 ingredients: %v", len(q8Ing)))
+	q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer,
+		q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 
 	//mergedIngredientsList := mergeIngredients(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing)
 	//fmt.Println(fmt.Sprintf("merged ingredients: %v", len(mergedIngredientsList)))
@@ -173,7 +169,7 @@ func findBestProducts(dbClient database.Connector, ctx context.Context,
 	//fmt.Println(fmt.Sprintf("-->> q7 ingredients: %v", getIngredientsNames(q7Ing)))
 	//fmt.Println(fmt.Sprintf("-->> q8 ingredients: %v", getIngredientsNames(q8Ing)))
 
-	iNames := uniqueIngredientsNames(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing)
+	iNames := uniqueIngredientsNamesList(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing)
 	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(iNames)))
 	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", iNames))
 
@@ -181,6 +177,66 @@ func findBestProducts(dbClient database.Connector, ctx context.Context,
 	fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
 	fmt.Println(fmt.Sprintf("Products: %+v", ps))
 	fmt.Println(err)
+}
+
+func findIngredientsByQuestion(dbClient database.Connector, ctx context.Context,
+	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
+	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) (
+	q1Ing []model.Ingredient, q2Ing []model.Ingredient, q3Ing []model.Ingredient, q4Ing []model.Ingredient,
+	q5Ing []model.Ingredient, q6Ing []model.Ingredient, q7Ing []model.Ingredient, q8Ing []model.Ingredient) {
+
+	var err error
+
+	q1Ing, err = dbClient.GetIngredientsBySkintype(ctx, q1SkinTypeAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by skintype, error: %v", err))
+	}
+
+	q2Ing, err = dbClient.GetIngredientsBySkinsensitivity(ctx, q2SkinSensitivityAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by skinsensitivity, error: %v", err))
+	}
+
+	q3Ing, err = dbClient.GetIngredientsByAcneBreakouts(ctx, q3AcneBreakoutsAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by acnebreakouts, error: %v", err))
+	}
+
+	q4Ing, err = dbClient.GetIngredientsByPreferences(ctx, q4PreferencesAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by preferences, error: %v", err))
+	}
+
+	q5Ing, err = dbClient.GetIngredientsByAllergies(ctx, q5AllergiesAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by allergies, error: %v", err))
+	}
+
+	q6Ing, err = dbClient.GetIngredientsBySkinconcerns(ctx, q6SkinConcernAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by skinconcerns, error: %v", err))
+	}
+
+	q7Ing, err = dbClient.GetIngredientsByAge(ctx, fmt.Sprintf("%d", q7AgeAnswer))
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by age, error: %v", err))
+	}
+
+	q8Ing, err = dbClient.GetIngredientsByBenefits(ctx, q8BenefitsAnswer)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to get ingredients by benefits, error: %v", err))
+	}
+
+	fmt.Println(fmt.Sprintf("q1 ingredients: %v", len(q1Ing)))
+	fmt.Println(fmt.Sprintf("q2 ingredients: %v", len(q2Ing)))
+	fmt.Println(fmt.Sprintf("q3 ingredients: %v", len(q3Ing)))
+	fmt.Println(fmt.Sprintf("q4 ingredients: %v", len(q4Ing)))
+	fmt.Println(fmt.Sprintf("q5 ingredients: %v", len(q5Ing)))
+	fmt.Println(fmt.Sprintf("q6 ingredients: %v", len(q6Ing)))
+	fmt.Println(fmt.Sprintf("q7 ingredients: %v", len(q7Ing)))
+	fmt.Println(fmt.Sprintf("q8 ingredients: %v", len(q8Ing)))
+
+	return
 }
 
 // ------- TABS ---->>

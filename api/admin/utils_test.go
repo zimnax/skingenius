@@ -48,13 +48,13 @@ func Test_yesNoTo01(t *testing.T) {
 func Test_UniqueIngredients(t *testing.T) {
 
 	is := [][]model.Ingredient{
-		{{Name: "name1"}, {Name: "name2"}, {Name: "name3"}},
-		{{Name: "name1"}, {Name: "name2"}, {Name: "name33"}},
-		{{Name: "name1"}, {Name: "name222"}, {Name: "name333"}},
-		{{Name: "name1"}, {Name: "name222"}, {Name: "name3333"}},
+		{{Name: "name1", Score: 1}, {Name: "name2"}, {Name: "name3"}},
+		{{Name: "name1", Score: 1}, {Name: "name2"}, {Name: "name33"}},
+		{{Name: "name1", Score: 1}, {Name: "name222"}, {Name: "name333"}},
+		{{Name: "name1", Score: 1}, {Name: "name222"}, {Name: "name3333"}},
 	}
 
-	actual := uniqueIngredientsNames(is...)
+	actual := uniqueIngredientsNamesMap(is...)
 	if len(actual) != 1 {
 		t.Fatalf("expected 1, actual %d", len(actual))
 	}
