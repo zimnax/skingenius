@@ -21,8 +21,8 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
-	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
+	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -127,6 +127,8 @@ func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Co
 		panic(err)
 	}
 
+	productScoreMap := make(map[string]int)
+
 	for _, p := range ps {
 		if p.Name == "" {
 			continue
@@ -148,8 +150,17 @@ func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Co
 
 		if len(m) != 0 {
 			fmt.Println(fmt.Sprintf("[%s] __ %d __ %+v", p.Name, len(m), m))
+			totalScore := 0
+			for _, i := range m {
+				totalScore = totalScore + i
+			}
+
+			productScoreMap[p.Name] = totalScore
 		}
+
 	}
+
+	fmt.Println(fmt.Sprintf("product score map: %#v", productScoreMap))
 
 }
 
