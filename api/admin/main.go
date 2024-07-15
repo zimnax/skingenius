@@ -21,8 +21,8 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
-	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
+	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -106,91 +106,6 @@ func main() {
 	//containerWindow.SetContent(tabs)
 	//containerWindow.CenterOnScreen()
 	//containerWindow.ShowAndRun()
-}
-
-func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Context,
-	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
-	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
-
-	q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, _ := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
-	//q1Ing, _, _, _, _, _, _, _ := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
-
-	//uiMap := uniqueIngredientsNamesMap(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing) // q8Ing
-	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(uiMap)))
-	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", uiMap))
-
-	iWithScores := mergeIngredientsWithScores(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing)
-	fmt.Println("iWithScores: ", len(iWithScores))
-
-	ps, err := dbClient.FindAllProducts(ctx)
-	if err != nil {
-		panic(err)
-	}
-
-	productScoreMap := make(map[string]int)
-
-	for _, p := range ps {
-		if p.Name == "" {
-			continue
-		}
-
-		pr, err := dbClient.FindProductByName(context.Background(), p.Name)
-		if err != nil {
-			panic(err)
-		}
-
-		p = *pr
-
-		m := make(map[string]int)
-		for _, ingredient := range p.Ingredients {
-			if iScore, ok := iWithScores[ingredient.Name]; ok {
-				m[ingredient.Name] = iScore
-			}
-		}
-
-		if len(m) != 0 {
-			fmt.Println(fmt.Sprintf("[%s] __ %d __ %+v", p.Name, len(m), m))
-			totalScore := 0
-			for _, i := range m {
-				totalScore = totalScore + i
-			}
-
-			productScoreMap[p.Name] = totalScore
-		}
-
-	}
-
-	fmt.Println(fmt.Sprintf("product score map: %#v", productScoreMap))
-
-}
-
-func findBestProducts_matchBestStrategy(dbClient database.Connector, ctx context.Context,
-	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
-	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
-
-	q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer,
-		q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
-
-	//mergedIngredientsList := mergeIngredients(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing)
-	//fmt.Println(fmt.Sprintf("merged ingredients: %v", len(mergedIngredientsList)))
-
-	//fmt.Println(fmt.Sprintf("-->> q1 ingredients: %v", getIngredientsNames(q1Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q2 ingredients: %v", getIngredientsNames(q2Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q3 ingredients: %v", getIngredientsNames(q3Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q4 ingredients: %v", getIngredientsNames(q4Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q5 ingredients: %v", getIngredientsNames(q5Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q6 ingredients: %v", getIngredientsNames(q6Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q7 ingredients: %v", getIngredientsNames(q7Ing)))
-	//fmt.Println(fmt.Sprintf("-->> q8 ingredients: %v", getIngredientsNames(q8Ing)))
-
-	iNames := uniqueIngredientsNamesList(q1Ing, q2Ing, q3Ing, q4Ing, q5Ing, q6Ing, q7Ing, q8Ing)
-	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(iNames)))
-	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", iNames))
-
-	ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), iNames, uint(3)) // len(iNames)
-	fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
-	fmt.Println(fmt.Sprintf("Products: %+v", ps))
-	fmt.Println(err)
 }
 
 func findIngredientsByQuestion(dbClient database.Connector, ctx context.Context,
