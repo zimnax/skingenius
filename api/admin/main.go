@@ -14,6 +14,7 @@ import (
 	"skingenius/config"
 	"skingenius/database"
 	"skingenius/database/model"
+	"skingenius/xlsx"
 	"time"
 )
 
@@ -21,8 +22,8 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
-	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
+	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -30,19 +31,47 @@ func main() {
 
 	ctx := context.Background()
 
+	answers := xlsx.ReadAnswers("admin/input.xlsx")
+
+	a1SkinType := model.SkinTypeMapping[answers[0]]
+	a2SkinSensitivity := model.SensitivityMapping[answers[1]]
+	a3Acne := model.AcneProneMapping[answers[2]]
+	a4Age := model.AgeMapping[answers[3]]
+	a5Preference := string(model.PreferenceMapping[answers[4]])
+	a6Allergy := string(model.AllergiesMapping[answers[5]])
+	a7Concerns := string(model.SkinConcernsMapping[answers[6]])
+	a8Benefits := string(model.BenefitsMapping[answers[7]])
+
+	fmt.Println("********************  Answers  ********************")
+	fmt.Println("Skin type: ", a1SkinType)
+	fmt.Println("Sensitivity: ", a2SkinSensitivity)
+	fmt.Println("Acne: ", a3Acne)
+	fmt.Println("Age: ", a4Age)
+	fmt.Println("Preference: ", a5Preference)
+	fmt.Println("Allergy: ", a6Allergy)
+	fmt.Println("Concerns: ", a7Concerns)
+	fmt.Println("Benefits: ", a8Benefits)
+	fmt.Println("********************  Answers  ********************")
+
+	//func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Context,
+	//	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
+	//	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
+
+	findBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
+
 	//storeIngredients(ctx, dbClient, "admin/ingredients_master.csv")
 	//storeProducts(ctx, dbClient, "admin/products_master.csv")
 
-	q1SkinTypeAnswer := "oily"
-	q2SkinSensitivityAnswer := "rarely"
-	q3AcneBreakoutsAnswer := "never"
-	q4PreferencesAnswer := []string{"paleo"}
-	q5AllergiesAnswer := []string{"soy"}
-	q6SkinConcernAnswer := []string{"oiliness"}
-	q7AgeAnswer := 30
-	q8BenefitsAnswer := []string{"moisturizing"}
+	//q1SkinTypeAnswer := "dry"
+	//q2SkinSensitivityAnswer := "often"
+	//q3AcneBreakoutsAnswer := "occasionally"
+	//q4PreferencesAnswer := []string{"vegan"}
+	//q5AllergiesAnswer := []string{"nuts"}
+	//q6SkinConcernAnswer := []string{"oiliness", "acne"}
+	//q7AgeAnswer := 30
+	//q8BenefitsAnswer := []string{"moisturizing", "soothing", "reduces_acne"}
 
-	findBestProducts_RatingStrategy(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
+	//findBestProducts_RatingStrategy(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer, q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 
 	// ---------------  Inventory page
 

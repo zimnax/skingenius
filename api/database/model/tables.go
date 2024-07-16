@@ -268,10 +268,11 @@ type Preference struct {
 type IngredientPreferencesValue string
 
 const (
-	Paleo      IngredientPreferencesValue = "paleo"
-	Vegetarian IngredientPreferencesValue = "vegetarian"
-	Vegan      IngredientPreferencesValue = "vegan"
-	GlutenFree IngredientPreferencesValue = "glutenfree"
+	Paleo        IngredientPreferencesValue = "paleo"
+	Vegetarian   IngredientPreferencesValue = "vegetarian"
+	Vegan        IngredientPreferencesValue = "vegan"
+	GlutenFree   IngredientPreferencesValue = "glutenfree"
+	NoPreference IngredientPreferencesValue = "no_preference"
 )
 
 func (s *IngredientPreferencesValue) Scan(value interface{}) error {
