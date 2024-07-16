@@ -84,7 +84,7 @@ func (g GormConnector) GetIngredientsByBenefits(ctx context.Context, benefits []
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_benefits ON ingredients.id = ingredient_benefits.ingredient_id").
 		Joins("INNER JOIN benefits ON benefits.id = ingredient_benefits.benefit_id").
-		Where("benefits.name IN (?) AND ingredient_benefits.score > 0", benefits).
+		Where("benefits.name IN (?)", benefits).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -105,7 +105,7 @@ func (g GormConnector) GetIngredientsBySkinconcerns(ctx context.Context, concern
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id").
 		Joins("INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id").
-		Where("skinconcerns.name IN (?) AND ingredient_skinconcerns.score > 0", concerns).
+		Where("skinconcerns.name IN (?)", concerns).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -126,7 +126,7 @@ func (g GormConnector) GetIngredientsByAllergies(ctx context.Context, allergies 
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_allergies ON ingredients.id = ingredient_allergies.ingredient_id").
 		Joins("INNER JOIN allergies ON allergies.id = ingredient_allergies.allergy_id").
-		Where("allergies.name IN (?) AND ingredient_allergies.score > 0", allergies).
+		Where("allergies.name IN (?)", allergies).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -147,7 +147,7 @@ func (g GormConnector) GetIngredientsByPreferences(ctx context.Context, preferen
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_preferences ON ingredients.id = ingredient_preferences.ingredient_id").
 		Joins("INNER JOIN preferences ON preferences.id = ingredient_preferences.preference_id").
-		Where("preferences.name IN (?) AND ingredient_preferences.score > 0", preferences).
+		Where("preferences.name IN (?)", preferences).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -168,7 +168,7 @@ func (g GormConnector) GetIngredientsByAge(ctx context.Context, age string) ([]m
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_ages ON ingredients.id = ingredient_ages.ingredient_id").
 		Joins("INNER JOIN ages ON ages.id = ingredient_ages.age_id").
-		Where("ages.value = (?) AND ingredient_ages.score > 0", age).
+		Where("ages.value = (?)", age).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -181,7 +181,7 @@ func (g GormConnector) GetIngredientsByAcneBreakouts(ctx context.Context, freque
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_acnebreakouts ON ingredients.id = ingredient_acnebreakouts.ingredient_id").
 		Joins("INNER JOIN acnebreakouts ON acnebreakouts.id = ingredient_acnebreakouts.acnebreakout_id").
-		Where("acnebreakouts.frequency = (?) AND ingredient_acnebreakouts.score > 0", frequency).
+		Where("acnebreakouts.frequency = (?)", frequency).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -203,7 +203,7 @@ func (g GormConnector) GetIngredientsBySkinsensitivity(ctx context.Context, skin
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_skinsensitivities ON ingredients.id = ingredient_skinsensitivities.ingredient_id").
 		Joins("INNER JOIN skinsensitivities ON Skinsensitivities.id = ingredient_skinsensitivities.skinsensitivity_id").
-		Where("skinsensitivities.sensitivity = (?) AND ingredient_skinsensitivities.score > 0", skinsensitivity).
+		Where("skinsensitivities.sensitivity = (?)", skinsensitivity).
 		Find(&ingredients).Error
 
 	return ingredients, err
@@ -227,7 +227,7 @@ func (g GormConnector) GetIngredientsBySkintype(ctx context.Context, skintype st
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_skintypes ON ingredients.id = ingredient_skintypes.ingredient_id").
 		Joins("INNER JOIN skintypes ON skintypes.id = ingredient_skintypes.skintype_id").
-		Where("skintypes.type = (?) AND ingredient_skintypes.score > 0", skintype).
+		Where("skintypes.type = (?)", skintype).
 		Find(&ingredients).Error
 
 	return ingredients, err

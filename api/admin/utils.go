@@ -486,3 +486,13 @@ func getIngredientsIds(is []model.Ingredient) []uint {
 	}
 	return ids
 }
+
+func IngredientsSliceToMap(is []model.Ingredient) map[string]int {
+	m := make(map[string]int)
+
+	for _, i := range is {
+		m[i.Name] = i.Score
+	}
+
+	return m
+}

@@ -43,3 +43,23 @@ func SingleProductExtendedReport(filename string, headers []string, productName 
 
 	return nil
 }
+
+func WriteToCsv(filename string, headers []string, data [][]string) error {
+	file, err := os.OpenFile(filename+".csv", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		return err
+	}
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	writer.Write(headers)
+	for _, scores := range data {
+		writer.Write(scores)
+	}
+
+	writer.Write([]string{"", "", ""})
+	writer.Write([]string{"", "", ""})
+
+	return nil
+}

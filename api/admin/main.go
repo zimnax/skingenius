@@ -23,12 +23,8 @@ TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
 	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
-<<<<<<< Updated upstream
-
 	fmt.Println("Skingenious 2024")
 
-=======
->>>>>>> Stashed changes
 	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
@@ -147,59 +143,59 @@ func main() {
 func findIngredientsByQuestion(dbClient database.Connector, ctx context.Context,
 	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
 	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) (
-	q1Ing []model.Ingredient, q2Ing []model.Ingredient, q3Ing []model.Ingredient, q4Ing []model.Ingredient,
-	q5Ing []model.Ingredient, q6Ing []model.Ingredient, q7Ing []model.Ingredient, q8Ing []model.Ingredient) {
+	skintypeIng []model.Ingredient, skinSensIng []model.Ingredient, acneIng []model.Ingredient, prefIng []model.Ingredient,
+	allergiesIng []model.Ingredient, skinConcernIng []model.Ingredient, ageIng []model.Ingredient, benefitsIng []model.Ingredient) {
 
 	var err error
 
-	q1Ing, err = dbClient.GetIngredientsBySkintype(ctx, q1SkinTypeAnswer)
+	skintypeIng, err = dbClient.GetIngredientsBySkintype(ctx, q1SkinTypeAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by skintype, error: %v", err))
 	}
 
-	q2Ing, err = dbClient.GetIngredientsBySkinsensitivity(ctx, q2SkinSensitivityAnswer)
+	skinSensIng, err = dbClient.GetIngredientsBySkinsensitivity(ctx, q2SkinSensitivityAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by skinsensitivity, error: %v", err))
 	}
 
-	q3Ing, err = dbClient.GetIngredientsByAcneBreakouts(ctx, q3AcneBreakoutsAnswer)
+	acneIng, err = dbClient.GetIngredientsByAcneBreakouts(ctx, q3AcneBreakoutsAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by acnebreakouts, error: %v", err))
 	}
 
-	q4Ing, err = dbClient.GetIngredientsByPreferences(ctx, q4PreferencesAnswer)
+	prefIng, err = dbClient.GetIngredientsByPreferences(ctx, q4PreferencesAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by preferences, error: %v", err))
 	}
 
-	q5Ing, err = dbClient.GetIngredientsByAllergies(ctx, q5AllergiesAnswer)
+	allergiesIng, err = dbClient.GetIngredientsByAllergies(ctx, q5AllergiesAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by allergies, error: %v", err))
 	}
 
-	q6Ing, err = dbClient.GetIngredientsBySkinconcerns(ctx, q6SkinConcernAnswer)
+	skinConcernIng, err = dbClient.GetIngredientsBySkinconcerns(ctx, q6SkinConcernAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by skinconcerns, error: %v", err))
 	}
 
-	q7Ing, err = dbClient.GetIngredientsByAge(ctx, fmt.Sprintf("%d", q7AgeAnswer))
+	ageIng, err = dbClient.GetIngredientsByAge(ctx, fmt.Sprintf("%d", q7AgeAnswer))
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by age, error: %v", err))
 	}
 
-	q8Ing, err = dbClient.GetIngredientsByBenefits(ctx, q8BenefitsAnswer)
+	benefitsIng, err = dbClient.GetIngredientsByBenefits(ctx, q8BenefitsAnswer)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to get ingredients by benefits, error: %v", err))
 	}
 
-	fmt.Println(fmt.Sprintf("Skin type ingredients: %v", len(q1Ing)))
-	fmt.Println(fmt.Sprintf("Skin sensitivity ingredients: %v", len(q2Ing)))
-	fmt.Println(fmt.Sprintf("Acne breakout ingredients: %v", len(q3Ing)))
-	fmt.Println(fmt.Sprintf("Preference ingredients: %v", len(q4Ing)))
-	fmt.Println(fmt.Sprintf("Allergy ingredients: %v", len(q5Ing)))
-	fmt.Println(fmt.Sprintf("Skin concerns ingredients: %v", len(q6Ing)))
-	fmt.Println(fmt.Sprintf("By Age ingredients: %v", len(q7Ing)))
-	fmt.Println(fmt.Sprintf("Benefits ingredients: %v", len(q8Ing)))
+	fmt.Println(fmt.Sprintf("Skin type ingredients: %v", len(skintypeIng)))
+	fmt.Println(fmt.Sprintf("Skin sensitivity ingredients: %v", len(skinSensIng)))
+	fmt.Println(fmt.Sprintf("Acne breakout ingredients: %v", len(acneIng)))
+	fmt.Println(fmt.Sprintf("Preference ingredients: %v", len(prefIng)))
+	fmt.Println(fmt.Sprintf("Allergy ingredients: %v", len(allergiesIng)))
+	fmt.Println(fmt.Sprintf("Skin concerns ingredients: %v", len(skinConcernIng)))
+	fmt.Println(fmt.Sprintf("By Age ingredients: %v", len(ageIng)))
+	fmt.Println(fmt.Sprintf("Benefits ingredients: %v", len(benefitsIng)))
 
 	return
 }
