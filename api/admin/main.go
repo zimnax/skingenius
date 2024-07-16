@@ -28,6 +28,7 @@ func main() {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
+	time.Sleep(100 * time.Millisecond)
 
 	ctx := context.Background()
 
@@ -42,7 +43,7 @@ func main() {
 	a7Concerns := string(model.SkinConcernsMapping[answers[6]])
 	a8Benefits := string(model.BenefitsMapping[answers[7]])
 
-	fmt.Println("********************  Answers  ********************")
+	fmt.Println("\n\n ********************  Answers  ********************")
 	fmt.Println("Skin type: ", a1SkinType)
 	fmt.Println("Sensitivity: ", a2SkinSensitivity)
 	fmt.Println("Acne: ", a3Acne)
@@ -51,7 +52,7 @@ func main() {
 	fmt.Println("Allergy: ", a6Allergy)
 	fmt.Println("Concerns: ", a7Concerns)
 	fmt.Println("Benefits: ", a8Benefits)
-	fmt.Println("********************  Answers  ********************")
+	fmt.Println("********************  Answers  ******************** \n\n ")
 
 	//func findBestProducts_RatingStrategy(dbClient database.Connector, ctx context.Context,
 	//	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
@@ -185,14 +186,14 @@ func findIngredientsByQuestion(dbClient database.Connector, ctx context.Context,
 		fmt.Println(fmt.Sprintf("failed to get ingredients by benefits, error: %v", err))
 	}
 
-	fmt.Println(fmt.Sprintf("q1 ingredients: %v", len(q1Ing)))
-	fmt.Println(fmt.Sprintf("q2 ingredients: %v", len(q2Ing)))
-	fmt.Println(fmt.Sprintf("q3 ingredients: %v", len(q3Ing)))
-	fmt.Println(fmt.Sprintf("q4 ingredients: %v", len(q4Ing)))
-	fmt.Println(fmt.Sprintf("q5 ingredients: %v", len(q5Ing)))
-	fmt.Println(fmt.Sprintf("q6 ingredients: %v", len(q6Ing)))
-	fmt.Println(fmt.Sprintf("q7 ingredients: %v", len(q7Ing)))
-	fmt.Println(fmt.Sprintf("q8 ingredients: %v", len(q8Ing)))
+	fmt.Println(fmt.Sprintf("Skin type ingredients: %v", len(q1Ing)))
+	fmt.Println(fmt.Sprintf("Skin sensitivity ingredients: %v", len(q2Ing)))
+	fmt.Println(fmt.Sprintf("Acne breakout ingredients: %v", len(q3Ing)))
+	fmt.Println(fmt.Sprintf("Preference ingredients: %v", len(q4Ing)))
+	fmt.Println(fmt.Sprintf("Allergy ingredients: %v", len(q5Ing)))
+	fmt.Println(fmt.Sprintf("Skin concerns ingredients: %v", len(q6Ing)))
+	fmt.Println(fmt.Sprintf("By Age ingredients: %v", len(q7Ing)))
+	fmt.Println(fmt.Sprintf("Benefits ingredients: %v", len(q8Ing)))
 
 	return
 }
