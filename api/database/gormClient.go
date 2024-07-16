@@ -119,7 +119,7 @@ func (g GormConnector) GetIngredientsByAllergies(ctx context.Context, allergies 
 		FROM public.ingredients
 		INNER JOIN ingredient_allergies ON ingredients.id = ingredient_allergies.ingredient_id
 		INNER JOIN allergies ON allergies.id = ingredient_allergies.allergy_id
-		WHERE allergies.name NOT IN ('soy','nuts','latex') AND ingredient_allergies.score > 0
+		WHERE allergies.name IN ('soy','nuts','latex') AND ingredient_allergies.score > 0
 	*/
 
 	err := g.db.Select("ingredients.id, ingredients.name, ingredient_allergies.score").
