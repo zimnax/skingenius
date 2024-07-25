@@ -12,6 +12,7 @@ type Product struct {
 	Name        string
 	Brand       string
 	Link        string
+	Image       string
 	Ingredients []Ingredient `gorm:"many2many:product_ingredient;"`
 }
 

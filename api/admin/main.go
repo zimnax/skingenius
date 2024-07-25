@@ -22,10 +22,10 @@ import (
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
 */
 func main() {
-	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
 	fmt.Println("Skingenious 2024")
 
-	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
+	//dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -60,10 +60,10 @@ func main() {
 	//	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
 	//	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
 
-	findBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
+	//findBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 
 	//storeIngredients(ctx, dbClient, "admin/ingredients_master.csv")
-	//storeProducts(ctx, dbClient, "admin/products_master.csv")
+	storeProducts(ctx, dbClient, "admin/products_master.csv")
 
 	//q1SkinTypeAnswer := "dry"
 	//q2SkinSensitivityAnswer := "often"

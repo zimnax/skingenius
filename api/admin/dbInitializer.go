@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"skingenius/admin/image"
 	"skingenius/database"
 	"skingenius/database/model"
 	"strings"
@@ -20,6 +21,8 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 	}
 	first := true
 
+	var missingImages []string
+
 	for i, record := range records {
 		//if record[ProductName] == "Perfect Facial Hydrating Cream" {
 
@@ -28,6 +31,10 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 
 			if currentProduct.Name != productName {
 				fmt.Println(fmt.Sprintf("Creating a new product: %s", productName))
+
+				if productName == "" {
+					continue
+				}
 
 				if !first {
 					time.Sleep(200 * time.Millisecond) // delay before saving next
@@ -40,10 +47,16 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 					first = true
 				}
 
+				imgBase64, err := image.ReadImageToBase64V2("admin/resources/product_pictures/" + strings.TrimSpace(productName) + ".jpg")
+				if err != nil {
+					missingImages = append(missingImages, productName)
+				}
+
 				currentProduct = model.Product{
 					Name:  productName,
 					Brand: record[ProductBrand],
 					Link:  record[ProductLink],
+					Image: imgBase64,
 				}
 
 				first = false
@@ -60,6 +73,8 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 			fmt.Println(fmt.Sprintf("%d - product %s : added ingredient %s", i, currentProduct.Name, ingredient.Name))
 		}
 	}
+
+	fmt.Println(fmt.Sprintf("Missing images: %#v ", missingImages))
 }
 
 func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string) {
