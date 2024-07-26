@@ -13,6 +13,7 @@ type Product struct {
 	Brand       string
 	Link        string
 	Image       string
+	Score       int          `sql:"-"`
 	Ingredients []Ingredient `gorm:"many2many:product_ingredient;"`
 }
 

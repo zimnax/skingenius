@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+/*
+cd /etc/postgresql/16/main/
+nano pg_hba.conf
+sudo service postgresql restart
+*/
+
 type GormConnector struct {
 	db *gorm.DB
 }
