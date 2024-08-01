@@ -13,7 +13,7 @@ import (
 )
 
 /*
-windows build -  $Env:GOOS = "linux"; $Env:GOARCH = "amd64"; go build -o skingv1 .\main.go
+build on windows -  $Env:GOOS = "linux"; $Env:GOARCH = "amd64"; go build -o skingv1 .\main.go
 */
 func main() {
 	db, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true)

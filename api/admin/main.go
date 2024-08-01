@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -23,17 +24,17 @@ func main() {
 	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
 	fmt.Println("Skingenious 2024")
 
-	_, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true) // REMOTE
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 	time.Sleep(100 * time.Millisecond)
 
-	return
+	//return
 
-	//ctx := context.Background()
-	//
+	ctx := context.Background()
+
 	//answers := xlsx.ReadAnswers("admin/input.xlsx")
 	//
 	//a1SkinType := model.SkinTypeMapping[answers[0]]
@@ -62,6 +63,9 @@ func main() {
 
 	//top3 := engine.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 	//fmt.Println(fmt.Sprintf("TOP 3: %+v", top3))
+
+	//storeIngredients(ctx, dbClient, "admin/ingredients_master.csv")
+	storeProducts(ctx, dbClient, "admin/products_master.csv")
 
 	// ---------------  Inventory page
 
