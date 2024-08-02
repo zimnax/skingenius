@@ -39,5 +39,5 @@ type Connector interface {
 
 	SetupJoinTables() error
 
-	SaveRecommendations(context.Context, string, []int) error
+	SaveRecommendations(context.Context, string, []int32) error
 }

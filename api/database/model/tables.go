@@ -8,8 +8,8 @@ import (
 )
 
 type UserRecommendations struct {
-	UserId              string `gorm:"primaryKey"`
-	RecommendedProducts []int
+	UserId              string        `gorm:"primaryKey"`
+	RecommendedProducts pq.Int32Array `gorm:"type:integer[]"`
 }
 
 type Product struct {

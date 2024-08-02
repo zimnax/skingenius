@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"skingenius/database/model"
@@ -20,10 +21,10 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
-func (g GormConnector) SaveRecommendations(ctx context.Context, userId string, pIds []int) error {
+func (g GormConnector) SaveRecommendations(ctx context.Context, userId string, pIds []int32) error {
 	return g.db.WithContext(ctx).Create(model.UserRecommendations{
 		UserId:              userId,
-		RecommendedProducts: pIds,
+		RecommendedProducts: pq.Int32Array(pIds),
 	}).Error
 }
 

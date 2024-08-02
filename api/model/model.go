@@ -12,5 +12,5 @@ type QuizAnswers struct {
 }
 
 type SaveRecommendationsReq struct {
-	ProductIds []int `json:"recommendations"`
+	ProductIds []int32 `json:"recommendations"`
 }
