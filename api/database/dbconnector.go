@@ -38,4 +38,6 @@ type Connector interface {
 	GetIngredientsByBenefits(context.Context, []string) ([]model.Ingredient, error)
 
 	SetupJoinTables() error
+
+	SaveRecommendations(context.Context, string, []int) error
 }

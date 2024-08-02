@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"net/http"
 	"skingenius/database"
 	dbmodel "skingenius/database/model"
 	"skingenius/engine"
@@ -29,7 +30,7 @@ func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
 	userAnswers := model.QuizAnswers{}
 	if err := ctx.BodyParser(&userAnswers); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
-			fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", userAnswers))
+			fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", err))
 		return ctx.SendString(fmt.Sprintf("failed to unmarshall userAnswers req, err: %v", err))
 	}
 
@@ -94,17 +95,21 @@ func (gc *GeniusController) SaveRecommendation(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveRecommendation route")
 
 	userId := ctx.Params("id")
-
 	fmt.Println(fmt.Sprintf("userID: %s", userId))
 	fmt.Println(fmt.Sprintf("req body: %s", string(ctx.Body())))
 
-	//userAnswers := model.QuizAnswers{}
-	//if err := ctx.BodyParser(&userAnswers); err != nil {
-	//	logger.New().Error(ctx.Context(), packageLogPrefix+
-	//		fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", userAnswers))
-	//	return ctx.SendString(fmt.Sprintf("failed to unmarshall userAnswers req, err: %v", err))
-	//}
+	recommendedProducts := model.SaveRecommendationsReq{}
+	if err := ctx.BodyParser(&recommendedProducts); err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+
+			fmt.Sprintf("failed to unmarshall saveRecommendations req, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to unmarshall saveRecommendations req, err: %v", err))
+	}
 
-	return nil
-
+	err := gc.geniusData.SaveRecommendations(ctx.Context(), userId, recommendedProducts.ProductIds)
+	if err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+
+			fmt.Sprintf("failed to save user recommendations, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to save user recommendations, err: %v", err))
+	}
+	return ctx.Status(http.StatusCreated).JSON(nil)
 }

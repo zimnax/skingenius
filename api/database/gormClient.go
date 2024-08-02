@@ -20,6 +20,13 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) SaveRecommendations(ctx context.Context, userId string, pIds []int) error {
+	return g.db.WithContext(ctx).Create(model.UserRecommendations{
+		UserId:              userId,
+		RecommendedProducts: pIds,
+	}).Error
+}
+
 func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, error) {
 	var products []model.Product
 	if err := g.db.Find(&products).Error; err != nil {
@@ -438,6 +445,11 @@ func automigrate(db *gorm.DB) error {
 	if err = db.AutoMigrate(&model.Product{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
+	}
+
+	if err = db.AutoMigrate(&model.UserRecommendations{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))
 	}
 
 	logger.New().Info(context.Background(), "Auto-migration finished successfully")

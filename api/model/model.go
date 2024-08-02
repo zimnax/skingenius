@@ -10,3 +10,7 @@ type QuizAnswers struct {
 	Age                string   `json:"q7"`
 	ProductBenefit     []string `json:"q8"`
 }
+
+type SaveRecommendationsReq struct {
+	ProductIds []int `json:"recommendations"`
+}

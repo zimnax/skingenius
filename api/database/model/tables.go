@@ -7,6 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserRecommendations struct {
+	UserId              string `gorm:"primaryKey"`
+	RecommendedProducts []int
+}
+
 type Product struct {
 	ID          uint `gorm:"primaryKey;autoIncrement"`
 	Name        string
