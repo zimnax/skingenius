@@ -113,3 +113,30 @@ func (gc *GeniusController) SaveRecommendation(ctx *fiber.Ctx) error {
 	}
 	return ctx.Status(http.StatusCreated).JSON(nil)
 }
+
+func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
+	logger.New().Info(ctx.Context(), packageLogPrefix+"GetRecommendation route")
+
+	userId := ctx.Params("id")
+	fmt.Println(fmt.Sprintf("userID: %s", userId))
+
+	pIds, err := gc.geniusData.GetRecommendations(ctx.Context(), userId)
+	if err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+
+			fmt.Sprintf("failed to get user recommendations, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get user recommendations, err: %v", err))
+	}
+
+	fmt.Println(fmt.Sprintf("product ids %v by userId %s", pIds, userId))
+
+	fullProducts, err := gc.geniusData.FindProductsByIds(ctx.Context(), pIds)
+	if err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+
+			fmt.Sprintf("failed to get full Products recommendations, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get full product recommendations, err: %v", err))
+	}
+
+	fmt.Println(fmt.Sprintf("full products let %d by userId %s", len(fullProducts), userId))
+
+	return ctx.Status(http.StatusOK).JSON(fullProducts)
+}

@@ -17,6 +17,7 @@ type Connector interface {
 	FindAllProducts(ctx context.Context) ([]model.Product, error)
 	FindProductByName(ctx context.Context, name string) (*model.Product, error)
 	FindAllProductsWithIngredients(ctx context.Context, ingredients []string, accuracy uint) ([]model.Product, error)
+	FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error)
 
 	GetAllIngredients(context.Context) ([]model.Ingredient, error)
 	GetAllSkintypes(context.Context) ([]model.Skintype, error)
@@ -40,4 +41,5 @@ type Connector interface {
 	SetupJoinTables() error
 
 	SaveRecommendations(context.Context, string, []int32) error
+	GetRecommendations(context.Context, string) ([]int32, error)
 }
