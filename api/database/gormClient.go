@@ -24,22 +24,21 @@ type GormConnector struct {
 func (g GormConnector) FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error) {
 	var products []model.Product
 
-	err := g.db.WithContext(ctx).Select("products.id, products.name, product.brand, product.link, product.image").
+	err := g.db.WithContext(ctx).Select("products.id, products.name, products.brand, products.link, products.image").
 		Table("products").
-		Where("products.id IN (?)", ids).
-		Find(&products).Error
+		Where("products.id IN (?)", ids).Find(&products).Error
 
 	return products, err
 }
 
 func (g GormConnector) GetRecommendations(ctx context.Context, s string) ([]int32, error) {
-	var productIds pq.Int32Array
+	var ur model.UserRecommendations
 
 	err := g.db.WithContext(ctx).Select("user_recommendations.user_id, user_recommendations.recommended_products").
 		Table("user_recommendations").
-		Where("user_recommendations.user_id = ?", s).Find(&productIds).Error
+		Where("user_recommendations.user_id = ?", s).Find(&ur).Error
 
-	return productIds, err
+	return ur.RecommendedProducts, err
 }
 
 func (g GormConnector) SaveRecommendations(ctx context.Context, userId string, pIds []int32) error {
