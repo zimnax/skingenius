@@ -10,6 +10,6 @@ func GeniusRoutes(a *fiber.App, gc *controller.GeniusController) {
 
 	route.Post("/submitQuiz", gc.SubmitQuiz)
 	route.Post("/user/:id/recommendation", gc.SaveRecommendation)
-	route.Get("/user/:id/recommendations", gc.SaveRecommendation)
+	route.Get("/user/:id/recommendation", gc.GetRecommendation)
 
 }
