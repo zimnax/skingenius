@@ -22,6 +22,9 @@ type GormConnector struct {
 }
 
 func (g GormConnector) SaveRecommendations(ctx context.Context, userId string, pIds []int32) error {
+
+	fmt.Println(fmt.Sprintf("Product ids to save: %v", pIds))
+
 	return g.db.WithContext(ctx).Create(model.UserRecommendations{
 		UserId:              userId,
 		RecommendedProducts: pq.Int32Array(pIds),
