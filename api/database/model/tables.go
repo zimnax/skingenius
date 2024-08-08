@@ -12,6 +12,18 @@ type UserRecommendations struct {
 	RecommendedProducts pq.Int32Array `gorm:"type:integer[]"`
 }
 
+type UserQuiz struct {
+	UserId             string `gorm:"primaryKey"`
+	SkinType           string
+	SkinSensitivity    string
+	AcneBreakouts      string
+	ProductPreferences pq.StringArray `gorm:"type:text[]"`
+	FreeFromAllergens  pq.StringArray `gorm:"type:text[]"`
+	SkinConcern        pq.StringArray `gorm:"type:text[]"`
+	Age                int
+	ProductBenefit     pq.StringArray `gorm:"type:text[]"`
+}
+
 type Product struct {
 	ID          uint `gorm:"primaryKey;autoIncrement"`
 	Name        string

@@ -21,6 +21,19 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error) {
+	var uq model.UserQuiz
+	err := g.db.WithContext(ctx).First(&uq, userId).Error
+
+	return uq, err
+}
+
+func (g GormConnector) SaveQuiz(ctx context.Context, quiz model.UserQuiz) error {
+
+	fmt.Println(fmt.Sprintf("quiz to save in db: %#v", quiz))
+	return g.db.WithContext(ctx).Create(quiz).Error
+}
+
 func (g GormConnector) FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error) {
 	var products []model.Product
 
@@ -471,6 +484,11 @@ func automigrate(db *gorm.DB) error {
 	if err = db.AutoMigrate(&model.UserRecommendations{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))
+	}
+
+	if err = db.AutoMigrate(&model.UserQuiz{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [UserQuiz], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [UserQuiz], error: %v", err))
 	}
 
 	logger.New().Info(context.Background(), "Auto-migration finished successfully")
