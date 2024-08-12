@@ -23,7 +23,8 @@ type GormConnector struct {
 
 func (g GormConnector) GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error) {
 	var uq model.UserQuiz
-	err := g.db.WithContext(ctx).Find(&uq, userId).Error
+	//err := g.db.WithContext(ctx).Find(&uq, userId).Error
+	err := g.db.WithContext(ctx).Where("user_id = ?", userId).First(&uq).Error
 
 	return uq, err
 }
