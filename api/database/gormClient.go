@@ -32,7 +32,7 @@ func (g GormConnector) GetQuiz(ctx context.Context, userId string) (model.UserQu
 func (g GormConnector) SaveQuiz(ctx context.Context, quiz model.UserQuiz) error {
 
 	fmt.Println(fmt.Sprintf("quiz to save in db: %#v", quiz))
-	return g.db.WithContext(ctx).Create(quiz).Error
+	return g.db.WithContext(ctx).Save(quiz).Error
 }
 
 func (g GormConnector) FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error) {
