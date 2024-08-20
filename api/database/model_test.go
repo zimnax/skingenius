@@ -18,5 +18,6 @@ func Test_FindTop3ByIds(t *testing.T) {
 	ps, err := db.FindProductsByIds(context.Background(), []int32{100, 89, 85})
 
 	fmt.Println(err)
+	fmt.Println(fmt.Sprintf("products len:: %d", len(ps)))
 	fmt.Println(fmt.Sprintf("0: %d", len(ps[0].Ingredients)))
 }
