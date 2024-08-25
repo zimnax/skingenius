@@ -25,7 +25,7 @@ func NewGeniusController(db database.Connector) (*GeniusController, error) {
 }
 
 func (gc *GeniusController) SubmitQuizV2(ctx *fiber.Ctx) error {
-	logger.New().Info(ctx.Context(), packageLogPrefix+"SubmitQuiz route")
+	logger.New().Info(ctx.Context(), packageLogPrefix+"SubmitQuizV2 route")
 
 	userAnswers := model.QuizAnswers{}
 	if err := ctx.BodyParser(&userAnswers); err != nil {
@@ -62,7 +62,7 @@ func (gc *GeniusController) SubmitQuizV2(ctx *fiber.Ctx) error {
 		a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
 	}
 
-	fmt.Println("\n\n ********************  Answers  ********************")
+	fmt.Println("\n\n ********************  Answers V2 ********************")
 	fmt.Println("Skin type: ", a1SkinType)
 	fmt.Println("Sensitivity: ", a2SkinSensitivity)
 	fmt.Println("Acne: ", a3Acne)

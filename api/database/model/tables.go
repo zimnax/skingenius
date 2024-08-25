@@ -51,7 +51,7 @@ type Ingredient struct {
 	Ages              []Age             `gorm:"many2many:ingredient_ages;"`
 	Benefits          []Benefit         `gorm:"many2many:ingredient_benefits;"`
 
-	Score int
+	Score float64
 }
 
 type Allergy struct {
