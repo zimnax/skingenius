@@ -1,11 +1,143 @@
 package main
 
+//const (
+//	IngredientName = iota
+//	PubChemCID
+//	INCIName
+//	INCINumber
+//	CASNumber
+//	Vegetarian
+//	Vegan
+//	GlutenFree
+//	Paleo
+//	NutFree
+//	SoyFree
+//	LatexFree
+//	SesameFree
+//	CitrusFree
+//	DyeFree
+//	FragranceFree
+//	ScentFree
+//	Normal
+//	Dry
+//	Oily
+//	Combination
+//	NotSensitive
+//	ALittleSensitive
+//	ModeratelySensitive
+//	Sensitive
+//	VerySensitive
+//	ExtremelySensitive
+//	NotAcneProne
+//	ALittleAcneProne
+//	ModeratelyAcneProne
+//	AcneProne
+//	VeryAcneProne
+//	ExtremelyAcneProne
+//	SuitableForMatureSkin
+//	Acne
+//	Rosacea
+//	CysticAcne
+//	Hyperpigmentation
+//	Melasma
+//	Xerosis
+//	Dryness
+//	Redness
+//	Oiliness
+//	SignsOfAging
+//	DarkSpots
+//	SensitiveSkin
+//	Dullness
+//	UnevenSkinTone
+//	Wrinkles
+//	FineLines
+//	LossOfElasticityFirmness
+//	DamagedSkin
+//	VisiblePores
+//	CloggedPoresBlackheads
+//	UnevenTexture
+//	Eczema
+//	Psoriasis
+//	Dermatitis
+//	SunburnedSkin
+//	DarkCircles
+//	Blemishes
+//	Moisturizing
+//	Nourishing
+//	Hydrating
+//	Exfoliating
+//	Calming
+//	Soothing
+//	UVBarrier
+//	Healing
+//	Smoothing
+//	ReducesAcne
+//	ReducesBlemishes
+//	ReducesWrinkles
+//	ImprovesSymptomsOfEczema
+//	ImprovesSymptomsOfPsoriasis
+//	ImprovesSymptomsOfDermatitis
+//	Brightening
+//	ImprovesSkinTone
+//	ReducesInflammation
+//	MinimizesPores
+//	AntiAging
+//	Firming
+//	Detoxifying
+//	Balancing
+//	ReducesRedness
+//	Clarifying
+//	AntiBacterial
+//	StimulatesCollagenProduction
+//	ReducesFineLines
+//	AntioxidantProtection
+//	SkinBarrierProtection
+//	Teen
+//	Twenties
+//	Thirties
+//	Forties
+//	Fifties
+//	SixtiesPlus
+//)
+
 const (
 	IngredientName = iota
-	PubChemCID
+	Aliases
 	INCIName
-	INCINumber
-	CASNumber
+	Active_Inactive
+	Allergen_Potential
+	Single_Compound
+	Components
+	Risk_of_irritation
+	Role_in_formulation
+	Note
+	Comedogenic_Rating
+	Normal
+	Dry
+	Oily
+	Combination
+
+	NotSensitive
+	ALittleSensitive
+	ModeratelySensitive
+	Sensitive
+	VerySensitive
+	ExtremelySensitive
+
+	NotAcneProne
+	ALittleAcneProne
+	ModeratelyAcneProne
+	AcneProne
+	VeryAcneProne
+	ExtremelyAcneProne
+
+	Teen
+	Twenties
+	Thirties
+	Forties
+	Fifties
+	SixtiesPlus
+
 	Vegetarian
 	Vegan
 	GlutenFree
@@ -18,86 +150,42 @@ const (
 	DyeFree
 	FragranceFree
 	ScentFree
-	Normal
-	Dry
-	Oily
-	Combination
-	NotSensitive
-	ALittleSensitive
-	ModeratelySensitive
-	Sensitive
-	VerySensitive
-	ExtremelySensitive
-	NotAcneProne
-	ALittleAcneProne
-	ModeratelyAcneProne
-	AcneProne
-	VeryAcneProne
-	ExtremelyAcneProne
-	SuitableForMatureSkin
-	Acne
+
 	Rosacea
-	CysticAcne
-	Hyperpigmentation
-	Melasma
-	Xerosis
-	Dryness
-	Redness
-	Oiliness
-	SignsOfAging
-	DarkSpots
-	SensitiveSkin
+	RosaceaDescription
+
+	Hyperpigmentation_UnevenSkin_tone
+	Hyperpigmentation_UnevenSkin_tone_Description
+
+	Acne
+	Acne_Description
+
+	Dryness_Dehydration
+	Dryness_Dehydration_Description
+
+	Oiliness_Shine
+	Oiliness_Shine_Description
+
+	Fine_lines_Wrinkles
+	Fine_lines_Wrinkles_Description
+
+	Loss_of_Elasticity_firmness
+	Loss_of_Elasticity_firmness_Description
+
+	Visible_pores_Uneven_texture
+	Visible_pores_Uneven_texture_Description
+
+	Clogged_pores_blackheads
+	Clogged_pores_blackheads_Description
+
 	Dullness
-	UnevenSkinTone
-	Wrinkles
-	FineLines
-	LossOfElasticityFirmness
-	DamagedSkin
-	VisiblePores
-	CloggedPoresBlackheads
-	UnevenTexture
-	Eczema
-	Psoriasis
-	Dermatitis
-	SunburnedSkin
-	DarkCircles
+	Dullness_Description
+
+	Dark_circles
+	Dark_circles_Description
+
 	Blemishes
-	Moisturizing
-	Nourishing
-	Hydrating
-	Exfoliating
-	Calming
-	Soothing
-	UVBarrier
-	Healing
-	Smoothing
-	ReducesAcne
-	ReducesBlemishes
-	ReducesWrinkles
-	ImprovesSymptomsOfEczema
-	ImprovesSymptomsOfPsoriasis
-	ImprovesSymptomsOfDermatitis
-	Brightening
-	ImprovesSkinTone
-	ReducesInflammation
-	MinimizesPores
-	AntiAging
-	Firming
-	Detoxifying
-	Balancing
-	ReducesRedness
-	Clarifying
-	AntiBacterial
-	StimulatesCollagenProduction
-	ReducesFineLines
-	AntioxidantProtection
-	SkinBarrierProtection
-	Teen
-	Twenties
-	Thirties
-	Forties
-	Fifties
-	SixtiesPlus
+	Blemishes_Description
 )
 
 const (

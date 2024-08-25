@@ -40,6 +40,7 @@ type Ingredient struct {
 	PubchemId         string
 	CasNumber         string
 	ECNumber          string
+	Type              string
 	Synonyms          pq.StringArray    `gorm:"type:text[]"`
 	Skintypes         []Skintype        `gorm:"many2many:ingredient_skintypes;"`
 	Skinsensitivities []Skinsensitivity `gorm:"many2many:ingredient_skinsensitivities;"`
@@ -89,34 +90,47 @@ type Skinconcern struct {
 type SkinconcernValue string
 
 const (
-	ConcernRosacea                  SkinconcernValue = "rosacea"
-	ConcernHyperpigmentation        SkinconcernValue = "hyperpigmentation"
-	ConcernMelasma                  SkinconcernValue = "melasma"
-	ConcernCysticAcne               SkinconcernValue = "cystic_acne"
-	ConcernAcne                     SkinconcernValue = "acne"
-	ConcernXerosis                  SkinconcernValue = "xerosis"
-	ConcernDryness                  SkinconcernValue = "dryness"
-	ConcernOiliness                 SkinconcernValue = "oiliness"
-	ConcernUnevenSkinTone           SkinconcernValue = "uneven_skin_tone"
-	ConcernSignsOfAging             SkinconcernValue = "signs_of_aging"
-	ConcernFineLines                SkinconcernValue = "fine_lines"
-	ConcernWrinkles                 SkinconcernValue = "wrinkles"
-	ConcernDarkSpots                SkinconcernValue = "dark_spots"
-	ConcernLostOfElasticityFirmness SkinconcernValue = "lost_of_elasticity_firmness"
-	ConcernVisiblePores             SkinconcernValue = "visible_pores"
-	ConcernCloggedPoresBlackheads   SkinconcernValue = "clogged_pores_blackheads"
-	ConcernRedness                  SkinconcernValue = "redness"
-	ConcernDullness                 SkinconcernValue = "dullness"
-	ConcernDamagedSkin              SkinconcernValue = "damaged_skin"
-	ConcernUnevenTexture            SkinconcernValue = "uneven_texture"
-	ConcernEczema                   SkinconcernValue = "eczema"
-	ConcernPsoriasis                SkinconcernValue = "psoriasis"
-	ConcernDermatitis               SkinconcernValue = "dermatitis"
-	ConcernSunburnedSkin            SkinconcernValue = "sunburned_skin"
-	ConcernDarkCircles              SkinconcernValue = "dark_circles"
-	ConcernBlemishes                SkinconcernValue = "blemishes"
-	ConcernSensitiveSkin            SkinconcernValue = "sensitive_skin"
-	ConcernNone                     SkinconcernValue = "no_concern"
+	//ConcernRosacea                  SkinconcernValue = "rosacea"
+	//ConcernHyperpigmentation        SkinconcernValue = "hyperpigmentation"
+	//ConcernMelasma                  SkinconcernValue = "melasma"
+	//ConcernCysticAcne               SkinconcernValue = "cystic_acne"
+	//ConcernAcne                     SkinconcernValue = "acne"
+	//ConcernXerosis                  SkinconcernValue = "xerosis"
+	//ConcernDryness                  SkinconcernValue = "dryness"
+	//ConcernOiliness                 SkinconcernValue = "oiliness"
+	//ConcernUnevenSkinTone           SkinconcernValue = "uneven_skin_tone"
+	//ConcernSignsOfAging             SkinconcernValue = "signs_of_aging"
+	//ConcernFineLines                SkinconcernValue = "fine_lines"
+	//ConcernWrinkles                 SkinconcernValue = "wrinkles"
+	//ConcernDarkSpots                SkinconcernValue = "dark_spots"
+	//ConcernLostOfElasticityFirmness SkinconcernValue = "lost_of_elasticity_firmness"
+	//ConcernVisiblePores             SkinconcernValue = "visible_pores"
+	//ConcernCloggedPoresBlackheads   SkinconcernValue = "clogged_pores_blackheads"
+	//ConcernRedness                  SkinconcernValue = "redness"
+	//ConcernDullness                 SkinconcernValue = "dullness"
+	//ConcernDamagedSkin              SkinconcernValue = "damaged_skin"
+	//ConcernUnevenTexture            SkinconcernValue = "uneven_texture"
+	//ConcernEczema                   SkinconcernValue = "eczema"
+	//ConcernPsoriasis                SkinconcernValue = "psoriasis"
+	//ConcernDermatitis               SkinconcernValue = "dermatitis"
+	//ConcernSunburnedSkin            SkinconcernValue = "sunburned_skin"
+	//ConcernDarkCircles              SkinconcernValue = "dark_circles"
+	//ConcernBlemishes                SkinconcernValue = "blemishes"
+	//ConcernSensitiveSkin            SkinconcernValue = "sensitive_skin"
+
+	ConcernAcne                             SkinconcernValue = "acne"
+	ConcernRosacea                          SkinconcernValue = "rosacea"
+	ConcernDryness_Dehydration              SkinconcernValue = "dryness_dehydration"
+	ConcernHyperpigmentation_UnevenSkinTone SkinconcernValue = "hyperpigmentation_unevenskintone"
+	ConcernOiliness_Shine                   SkinconcernValue = "oiliness_shine"
+	ConcernFine_lines_Wrinkles              SkinconcernValue = "fine_lines_wrinkles"
+	ConcernLoss_of_Elasticity_firmness      SkinconcernValue = "loss_of_elasticity_firmness"
+	ConcernVisible_pores_Uneven_texture     SkinconcernValue = "visible_pores_uneven_texture"
+	ConcernClogged_pores_blackheads         SkinconcernValue = "clogged_pores_blackheads"
+	ConcernDullness                         SkinconcernValue = "dullness"
+	ConcernDark_circles                     SkinconcernValue = "dark_circles"
+	ConcernBlemishes                        SkinconcernValue = "blemishes"
+	ConcernNone                             SkinconcernValue = "no_concern"
 )
 
 func (s *SkinconcernValue) Scan(value interface{}) error {
@@ -306,14 +320,14 @@ func (s IngredientPreferencesValue) Value() (driver.Value, error) {
 // ------ Custom join tables
 
 type IngredientSkintype struct {
-	IngredientID uint `gorm:"primaryKey"`
-	SkintypeID   uint `gorm:"primaryKey"` //  missing field skin_type_id for join table
-	Score        int
+	IngredientID uint    `gorm:"primaryKey"`
+	SkintypeID   uint    `gorm:"primaryKey"` //  missing field skin_type_id for join table
+	Score        float64 `gorm:"type:decimal(4,2);"`
 }
 
 func (ip *IngredientSkintype) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientSkintype")
-	if customValue, ok := db.Statement.Context.Value(SkintypeCtxKey(ip.SkintypeID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(SkintypeCtxKey(ip.SkintypeID)).(float64); ok {
 		ip.Score = customValue
 	}
 	return nil
@@ -322,12 +336,12 @@ func (ip *IngredientSkintype) BeforeCreate(db *gorm.DB) error {
 type IngredientSkinsensitivity struct {
 	IngredientID      uint `gorm:"primaryKey"`
 	SkinsensitivityID uint `gorm:"primaryKey"`
-	Score             int
+	Score             bool
 }
 
 func (ip *IngredientSkinsensitivity) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientSkinsensitivity")
-	if customValue, ok := db.Statement.Context.Value(SkinsensetivityCtxKey(ip.SkinsensitivityID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(SkinsensetivityCtxKey(ip.SkinsensitivityID)).(bool); ok {
 		ip.Score = customValue
 	}
 	return nil
@@ -336,12 +350,12 @@ func (ip *IngredientSkinsensitivity) BeforeCreate(db *gorm.DB) error {
 type IngredientAcnebreakout struct {
 	IngredientID   uint `gorm:"primaryKey"`
 	AcnebreakoutID uint `gorm:"primaryKey"`
-	Score          int
+	Score          bool
 }
 
 func (ip *IngredientAcnebreakout) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientAcnebreakout")
-	if customValue, ok := db.Statement.Context.Value(AcnebreakoutsCtxKey(ip.AcnebreakoutID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(AcnebreakoutsCtxKey(ip.AcnebreakoutID)).(bool); ok {
 		ip.Score = customValue
 	}
 	return nil
@@ -350,12 +364,12 @@ func (ip *IngredientAcnebreakout) BeforeCreate(db *gorm.DB) error {
 type IngredientPreference struct {
 	IngredientID uint `gorm:"primaryKey"`
 	PreferenceID uint `gorm:"primaryKey"`
-	Score        int
+	Score        bool
 }
 
 func (ip *IngredientPreference) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientPreference")
-	if customValue, ok := db.Statement.Context.Value(PreferencesCtxKey(ip.PreferenceID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(PreferencesCtxKey(ip.PreferenceID)).(bool); ok {
 		ip.Score = customValue
 	}
 	return nil
@@ -364,26 +378,26 @@ func (ip *IngredientPreference) BeforeCreate(db *gorm.DB) error {
 type IngredientAllergy struct {
 	IngredientID uint `gorm:"primaryKey"`
 	AllergyID    uint `gorm:"primaryKey"`
-	Score        int
+	Score        bool
 }
 
 func (ip *IngredientAllergy) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientAllergy")
-	if customValue, ok := db.Statement.Context.Value(AllergiesCtxKey(ip.AllergyID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(AllergiesCtxKey(ip.AllergyID)).(bool); ok {
 		ip.Score = customValue
 	}
 	return nil
 }
 
 type IngredientSkinconcern struct {
-	IngredientID  uint `gorm:"primaryKey"`
-	SkinconcernID uint `gorm:"primaryKey"`
-	Score         int
+	IngredientID  uint    `gorm:"primaryKey"`
+	SkinconcernID uint    `gorm:"primaryKey"`
+	Score         float64 `gorm:"type:decimal(4,2);"`
 }
 
 func (ip *IngredientSkinconcern) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientSkinconcern")
-	if customValue, ok := db.Statement.Context.Value(SkinconcernCtxKey(ip.SkinconcernID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(SkinconcernCtxKey(ip.SkinconcernID)).(float64); ok {
 		ip.Score = customValue
 	}
 	return nil
@@ -392,12 +406,12 @@ func (ip *IngredientSkinconcern) BeforeCreate(db *gorm.DB) error {
 type IngredientAge struct {
 	IngredientID uint `gorm:"primaryKey"`
 	AgeID        uint `gorm:"primaryKey"`
-	Score        int
+	Score        bool
 }
 
 func (ip *IngredientAge) BeforeCreate(db *gorm.DB) error {
 	fmt.Println("Before create IngredientAge")
-	if customValue, ok := db.Statement.Context.Value(AgeCtxKey(ip.AgeID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(AgeCtxKey(ip.AgeID)).(bool); ok {
 		ip.Score = customValue
 	} else {
 		fmt.Println(fmt.Sprintf("ERROR"))

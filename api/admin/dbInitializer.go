@@ -92,7 +92,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 	allAllergies, err := dbClient.GetAllAllergies(ctx)
 	allSkinconcerns, err := dbClient.GetAllSkinconcerns(ctx)
 	allAges, err := dbClient.GetAllAge(ctx)
-	allBenefits, err := dbClient.GetAllBenefits(ctx)
+	//allBenefits, err := dbClient.GetAllBenefits(ctx)
 
 	records := readCsvFile(filepath)
 	for i, record := range records {
@@ -108,14 +108,15 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			ctx, iallergies := assignAllergyScore(ctx, record, allAllergies)
 			ctx, iskinConcerns := assignSkinConcernScore(ctx, record, allSkinconcerns)
 			ctx, iages := assignAgeScore(ctx, record, allAges)
-			ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
+			//ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
 
 			ingredient := model.Ingredient{
-				Name:      strings.ToLower(record[IngredientName]),
-				PubchemId: record[PubChemCID],
-				CasNumber: record[CASNumber],
-				ECNumber:  "",
-				Synonyms:  []string{},
+				Name: strings.ToLower(record[IngredientName]),
+				Type: strings.ToLower(record[Active_Inactive]),
+				//PubchemId: record[PubChemCID],
+				//CasNumber: record[CASNumber],
+				ECNumber: "",
+				Synonyms: strings.Split(record[Aliases], ","),
 
 				Preferences:       ipref,
 				Skintypes:         iskintype,
@@ -124,7 +125,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 				Allergies:         iallergies,
 				Skinconcerns:      iskinConcerns,
 				Ages:              iages,
-				Benefits:          ibenefits,
+				//Benefits:          ibenefits,
 			}
 
 			dbClient.SaveIngredient(ctx, &ingredient)

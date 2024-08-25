@@ -432,6 +432,8 @@ func NewGormClient(host string, port int, user, password string, migrate bool) (
 	return &GormConnector{db: db}, nil
 }
 
+// <<---------------------- Migrations ----------------------->>
+
 func automigrate(db *gorm.DB) error {
 	logger.New().Info(context.Background(), "Auto-migration started")
 
@@ -594,35 +596,50 @@ func migrateSkinconcern(db *gorm.DB) error {
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Skinconcern], error: %v", err))
 	}
 
+	//concerns := []model.Skinconcern{
+	//	{ID: 1, Name: model.ConcernRosacea},
+	//	{ID: 2, Name: model.ConcernHyperpigmentation},
+	//	{ID: 3, Name: model.ConcernMelasma},
+	//	{ID: 4, Name: model.ConcernCysticAcne},
+	//	{ID: 5, Name: model.ConcernAcne},
+	//	{ID: 6, Name: model.ConcernXerosis},
+	//	{ID: 7, Name: model.ConcernDryness},
+	//	{ID: 8, Name: model.ConcernOiliness},
+	//	{ID: 9, Name: model.ConcernUnevenSkinTone},
+	//	{ID: 10, Name: model.ConcernSignsOfAging},
+	//	{ID: 11, Name: model.ConcernFineLines},
+	//	{ID: 12, Name: model.ConcernWrinkles},
+	//	{ID: 13, Name: model.ConcernDarkSpots},
+	//	{ID: 14, Name: model.ConcernLostOfElasticityFirmness},
+	//	{ID: 15, Name: model.ConcernVisiblePores},
+	//	{ID: 16, Name: model.ConcernCloggedPoresBlackheads},
+	//	{ID: 17, Name: model.ConcernRedness},
+	//	{ID: 18, Name: model.ConcernDullness},
+	//	{ID: 19, Name: model.ConcernDamagedSkin},
+	//	{ID: 20, Name: model.ConcernUnevenTexture},
+	//	{ID: 21, Name: model.ConcernEczema},
+	//	{ID: 22, Name: model.ConcernPsoriasis},
+	//	{ID: 23, Name: model.ConcernDermatitis},
+	//	{ID: 24, Name: model.ConcernSunburnedSkin},
+	//	{ID: 25, Name: model.ConcernDarkCircles},
+	//	{ID: 26, Name: model.ConcernBlemishes},
+	//	{ID: 27, Name: model.ConcernSensitiveSkin},
+	//	{ID: 28, Name: model.ConcernNone},
+	//}
 	concerns := []model.Skinconcern{
-		{ID: 1, Name: model.ConcernRosacea},
-		{ID: 2, Name: model.ConcernHyperpigmentation},
-		{ID: 3, Name: model.ConcernMelasma},
-		{ID: 4, Name: model.ConcernCysticAcne},
-		{ID: 5, Name: model.ConcernAcne},
-		{ID: 6, Name: model.ConcernXerosis},
-		{ID: 7, Name: model.ConcernDryness},
-		{ID: 8, Name: model.ConcernOiliness},
-		{ID: 9, Name: model.ConcernUnevenSkinTone},
-		{ID: 10, Name: model.ConcernSignsOfAging},
-		{ID: 11, Name: model.ConcernFineLines},
-		{ID: 12, Name: model.ConcernWrinkles},
-		{ID: 13, Name: model.ConcernDarkSpots},
-		{ID: 14, Name: model.ConcernLostOfElasticityFirmness},
-		{ID: 15, Name: model.ConcernVisiblePores},
-		{ID: 16, Name: model.ConcernCloggedPoresBlackheads},
-		{ID: 17, Name: model.ConcernRedness},
-		{ID: 18, Name: model.ConcernDullness},
-		{ID: 19, Name: model.ConcernDamagedSkin},
-		{ID: 20, Name: model.ConcernUnevenTexture},
-		{ID: 21, Name: model.ConcernEczema},
-		{ID: 22, Name: model.ConcernPsoriasis},
-		{ID: 23, Name: model.ConcernDermatitis},
-		{ID: 24, Name: model.ConcernSunburnedSkin},
-		{ID: 25, Name: model.ConcernDarkCircles},
-		{ID: 26, Name: model.ConcernBlemishes},
-		{ID: 27, Name: model.ConcernSensitiveSkin},
-		{ID: 28, Name: model.ConcernNone},
+		{ID: 1, Name: model.ConcernAcne},
+		{ID: 2, Name: model.ConcernDryness_Dehydration},
+		{ID: 3, Name: model.ConcernHyperpigmentation_UnevenSkinTone},
+		{ID: 4, Name: model.ConcernOiliness_Shine},
+		{ID: 5, Name: model.ConcernFine_lines_Wrinkles},
+		{ID: 6, Name: model.ConcernLoss_of_Elasticity_firmness},
+		{ID: 7, Name: model.ConcernVisible_pores_Uneven_texture},
+		{ID: 8, Name: model.ConcernClogged_pores_blackheads},
+		{ID: 9, Name: model.ConcernDullness},
+		{ID: 10, Name: model.ConcernDark_circles},
+		{ID: 11, Name: model.ConcernBlemishes},
+		{ID: 12, Name: model.ConcernNone},
+		{ID: 13, Name: model.ConcernRosacea},
 	}
 
 	if res := db.Create(concerns); res.Error != nil {
