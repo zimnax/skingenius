@@ -73,7 +73,10 @@ func (gc *GeniusController) SubmitQuizV2(ctx *fiber.Ctx) error {
 	fmt.Println("Benefits: ", a8Benefits)
 	fmt.Println("********************  Answers  ******************** \n\n ")
 
-	top3 := engine.FindBestProducts_RatingStrategy(gc.geniusData, ctx.Context(),
+	//top3 := engine.FindBestProducts_RatingStrategy(gc.geniusData, ctx.Context(),
+	//	a1SkinType, a2SkinSensitivity, a3Acne, a5Preference,
+	//	a6Allergy, a7Concerns, a4Age, a8Benefits)
+	top3 := engine.FindBestProducts_matchBestStrategy(gc.geniusData, ctx.Context(),
 		a1SkinType, a2SkinSensitivity, a3Acne, a5Preference,
 		a6Allergy, a7Concerns, a4Age, a8Benefits)
 
