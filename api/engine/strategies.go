@@ -211,26 +211,66 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 	skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer,
 		q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 
-	mergedIngredientsList := mergeIngredientsWithScores(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng)
-	fmt.Println(fmt.Sprintf("merged ingredients: %v", len(mergedIngredientsList)))
+	//mergedIngredientsList := mergeIngredientsWithScores(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng)
+	//fmt.Println(fmt.Sprintf("merged ingredients: %v", len(mergedIngredientsList)))
+	//
+	//fmt.Println(fmt.Sprintf("-->> skintypeIng: %v", getIngredientsNames(skintypeIng)))
+	//fmt.Println(fmt.Sprintf("-->> skinSensIng: %v", getIngredientsNames(skinSensIng)))
+	//fmt.Println(fmt.Sprintf("-->> acneIng: %v", getIngredientsNames(acneIng)))
+	//fmt.Println(fmt.Sprintf("-->> prefIng: %v", getIngredientsNames(prefIng)))
+	//fmt.Println(fmt.Sprintf("-->> allergiesIng: %v", getIngredientsNames(allergiesIng)))
+	//fmt.Println(fmt.Sprintf("-->> skinConcernIng: %v", getIngredientsNames(skinConcernIng)))
+	//fmt.Println(fmt.Sprintf("-->> ageIng: %v", getIngredientsNames(ageIng)))
+	//fmt.Println(fmt.Sprintf("-->> benefitsIng: %v", getIngredientsNames(benefitsIng)))
 
-	fmt.Println(fmt.Sprintf("-->> skintypeIng: %v", getIngredientsNames(skintypeIng)))
-	fmt.Println(fmt.Sprintf("-->> skinSensIng: %v", getIngredientsNames(skinSensIng)))
-	fmt.Println(fmt.Sprintf("-->> acneIng: %v", getIngredientsNames(acneIng)))
-	fmt.Println(fmt.Sprintf("-->> prefIng: %v", getIngredientsNames(prefIng)))
-	fmt.Println(fmt.Sprintf("-->> allergiesIng: %v", getIngredientsNames(allergiesIng)))
-	fmt.Println(fmt.Sprintf("-->> skinConcernIng: %v", getIngredientsNames(skinConcernIng)))
-	fmt.Println(fmt.Sprintf("-->> ageIng: %v", getIngredientsNames(ageIng)))
-	fmt.Println(fmt.Sprintf("-->> benefitsIng: %v", getIngredientsNames(benefitsIng)))
+	fmt.Println(benefitsIng)
+	//iNames := mergeIngredientsWithScores(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng)// TODO add benefitsIng
+	uniqueIng := uniqueIngredientsNamesMap(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng) // TODO add benefitsIng after table population
+	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(uniqueIng)))
+	//fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", uniqueIng))
+	//for name, score := range uniqueIng {
+	//	fmt.Println(fmt.Sprintf("name: %s, score: %f", name, score))
+	//}
 
-	iNames := mergeIngredientsWithScores(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng)
-	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", len(iNames)))
-	fmt.Println(fmt.Sprintf("unuqie ingredients: %#v", iNames))
+	allProducts, err := dbClient.FindAllProducts(ctx)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("FindAllProducts error: %v", err))
+	}
+
+	fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
+
+	scoredProducts := matchProductsAndIngredients(uniqueIng, allProducts)
+
+	sortedProducts := sortProductsByScore(scoredProducts)
+
+	var top3Products []model.Product
+	for name, score := range sortedProducts {
+		topProduct, findTopErr := dbClient.FindProductByName(context.Background(), name)
+		if findTopErr != nil {
+			fmt.Println(fmt.Sprintf("Unable to find top product by name: %s, err: %v", name, findTopErr))
+		}
+
+		topProduct.Score = score
+		top3Products = append(top3Products, *topProduct)
+	}
+
+	//for _, topProductName := range top3 {
+	//	topProduct, findTopErr := dbClient.FindProductByName(context.Background(), topProductName)
+	//	if findTopErr != nil {
+	//		fmt.Println(fmt.Sprintf("Unable to find top product by name: %s, err: %v", topProductName, findTopErr))
+	//	}
+	//	topProduct.Score = productScoreMap[topProductName]
+	//	top3Products = append(top3Products, *topProduct)
+	//}
 
 	//ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), iNames, uint(3)) // len(iNames)
 	//fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
 	//fmt.Println(fmt.Sprintf("Products: %+v", ps))
 	//fmt.Println(err)
 
-	return nil
+	for _, product := range top3Products {
+		fmt.Println(fmt.Sprintf("Product: %s, Score: %f", product.Name, product.Score))
+	}
+
+	return top3Products
 }

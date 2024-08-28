@@ -31,8 +31,6 @@ func main() {
 	}
 	time.Sleep(100 * time.Millisecond)
 
-	//return
-
 	ctx := context.Background()
 
 	//answers := xlsx.ReadAnswers("admin/input.xlsx")
@@ -64,8 +62,8 @@ func main() {
 	//top3 := engine.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 	//fmt.Println(fmt.Sprintf("TOP 3: %+v", top3))
 
-	storeIngredients(ctx, dbClient, "admin/resources/algorithm_NEW_test.csv")
-	//storeProducts(ctx, dbClient, "admin/products_master.csv")
+	//storeIngredients(ctx, dbClient, "admin/resources/algorithm_NEW.csv")
+	storeProducts(ctx, dbClient, "admin/resources/products_master.csv")
 
 	// ---------------  Inventory page
 
