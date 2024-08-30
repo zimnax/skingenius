@@ -19,12 +19,15 @@ import (
 
 /*
 TRUNCATE TABLE ingredients  RESTART IDENTITY CASCADE;
+
+DROP SCHEMA public CASCADE;
+CREATE SCHEMA public;
 */
 func main() {
 	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
 	fmt.Println("Skingenious 2024")
 
-	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true) // REMOTE
+	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
