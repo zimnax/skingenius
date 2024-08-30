@@ -30,3 +30,12 @@ func Test_FindBestProducts_matchBestStrategy(t *testing.T) {
 
 	fmt.Println(fmt.Sprintf("products len:: %v", len(top3)))
 }
+
+//found 50 products from db
+//Product: hyaluronic acid moisturizer, Score: 29.000000
+//Product: moisturizing oat & calendula miracle face cream, Score: 28.800000
+//Product: perfect facial hydrating cream, Score: 25.200000
+
+//Product: moisturizing oat & calendula miracle face cream, Score: 288.000000
+//Product: perfect facial hydrating cream, Score: 252.000000
+//Product: hyaluronic acid moisturizer, Score: 290.000000

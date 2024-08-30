@@ -241,18 +241,23 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 
 	scoredProducts := matchProductsAndIngredients(uniqueIng, allProducts)
 
-	sortedProducts := sortProductsByScore(scoredProducts)
+	sortedProducts := sortProductsByScoreTop3(scoredProducts)
 
 	var top3Products []model.Product
-	for name, score := range sortedProducts {
-		topProduct, findTopErr := dbClient.FindProductByName(context.Background(), name)
-		if findTopErr != nil {
-			fmt.Println(fmt.Sprintf("Unable to find top product by name: %s, err: %v", name, findTopErr))
-		}
 
-		topProduct.Score = score
-		top3Products = append(top3Products, *topProduct)
+	var top3Names []string
+	for name, _ := range sortedProducts {
+		top3Names = append(top3Names, name)
 	}
+	//for name, score := range sortedProducts {
+	//	topProduct, findTopErr := dbClient.FindProductByName(context.Background(), name)
+	//	if findTopErr != nil {
+	//		fmt.Println(fmt.Sprintf("Unable to find top product by name: %s, err: %v", name, findTopErr))
+	//	}
+	//
+	//	topProduct.Score = score
+	//	top3Products = append(top3Products, *topProduct)
+	//}
 
 	//for _, topProductName := range top3 {
 	//	topProduct, findTopErr := dbClient.FindProductByName(context.Background(), topProductName)
@@ -263,10 +268,10 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 	//	top3Products = append(top3Products, *topProduct)
 	//}
 
-	//ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), iNames, uint(3)) // len(iNames)
-	//fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
-	//fmt.Println(fmt.Sprintf("Products: %+v", ps))
-	//fmt.Println(err)
+	ps, err := dbClient.FindAllProductsWithIngredients(context.Background(), top3Names, uint(3)) // len(iNames)
+	fmt.Println(fmt.Sprintf("Products #%d", len(ps)))
+	fmt.Println(fmt.Sprintf("Products: %+v", ps))
+	fmt.Println(err)
 
 	for _, product := range top3Products {
 		fmt.Println(fmt.Sprintf("Product: %s, Score: %f", product.Name, product.Score))

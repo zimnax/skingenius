@@ -86,15 +86,15 @@ func matchProductsAndIngredients(ingredients map[string]float64, allProducts []m
 			if _, ok := ingredients[productIngredient.Name]; ok {
 				switch productIngredientPlace {
 				case 0:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*6
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*60
 				case 1:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*5
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*50
 				case 2:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*4
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*40
 				case 3:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*3
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*30
 				case 4:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*2
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*20
 				default:
 					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]
 				}
@@ -105,7 +105,7 @@ func matchProductsAndIngredients(ingredients map[string]float64, allProducts []m
 	return productScores
 }
 
-func sortProductsByScore(products map[string]float64) map[string]float64 {
+func sortProductsByScoreTop3(products map[string]float64) map[string]float64 {
 	type kv struct {
 		Key   string
 		Value float64
