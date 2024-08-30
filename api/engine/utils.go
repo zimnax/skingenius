@@ -86,20 +86,21 @@ func matchProductsAndIngredients(ingredients map[string]float64, allProducts []m
 			if _, ok := ingredients[productIngredient.Name]; ok {
 				switch productIngredientPlace {
 				case 0:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*60
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*6
 				case 1:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*50
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*5
 				case 2:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*40
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*4
 				case 3:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*30
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*3
 				case 4:
-					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*20
+					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]*2
 				default:
 					productScores[product.Name] = productScores[product.Name] + ingredients[productIngredient.Name]
 				}
 			}
 		}
+		productScores[product.Name] = productScores[product.Name] / float64(len(product.Ingredients))
 	}
 
 	return productScores
