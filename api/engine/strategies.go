@@ -240,8 +240,10 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 	fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
 
 	scoredProducts := matchProductsAndIngredients(uniqueIng, allProducts)
+	fmt.Println(fmt.Sprintf("scored products: %#v", scoredProducts))
 
 	sortedProducts := sortProductsByScoreTop3(scoredProducts)
+	fmt.Println(fmt.Sprintf("sorted products: %#v", sortedProducts))
 
 	var top3Products []model.Product
 	for name, score := range sortedProducts {
@@ -249,6 +251,7 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 		if findTopErr != nil {
 			fmt.Println(fmt.Sprintf("Unable to find top product by name: %s, err: %v", name, findTopErr))
 		}
+		fmt.Println(fmt.Sprintf("Found Top Product from list: %s, Score: %f, INFREDIENTS: %v", topProduct.Name, score, topProduct.Ingredients))
 
 		topProduct.Score = score
 		top3Products = append(top3Products, *topProduct)
