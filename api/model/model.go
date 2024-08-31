@@ -1,5 +1,7 @@
 package model
 
+const ScalingRepresentation = 97
+
 type QuizAnswers struct {
 	SkinType           string   `json:"skintype"`
 	SkinSensitivity    string   `json:"skinsensitivity"`

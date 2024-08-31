@@ -29,6 +29,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 		if i >= 1 { // skip headers
 			productName := strings.ToLower(record[ProductName])
 
+			// next product from ingredient csv table
 			if currentProduct.Name != productName {
 				fmt.Println(fmt.Sprintf("Creating a new product: %s", productName))
 
@@ -62,13 +63,21 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 				first = false
 			}
 
+			// continue with same product from table, add ingredient to the product
+			var ingredient *model.Ingredient
+			var err error
 			ingredientNameToFind := strings.ToLower(record[ProductIngredientName])
-			ingredient, err := dbClient.FindIngredientByName(ctx, ingredientNameToFind)
+
+			ingredient, err = dbClient.FindIngredientByName(ctx, ingredientNameToFind)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s]", ingredientNameToFind))
-				fmt.Println(err)
-				continue
+				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s], trying to find by alias", ingredientNameToFind))
+				ingredient, err = dbClient.FindIngredientByAlias(ctx, ingredientNameToFind)
+				if err != nil {
+					fmt.Println(fmt.Sprintf("failed to find igredient by alias [%s], error: %v", ingredientNameToFind, err))
+					continue
+				}
 			}
+
 			currentProduct.Ingredients = append(currentProduct.Ingredients, *ingredient)
 			fmt.Println(fmt.Sprintf("%d - product %s : added ingredient %s", i, currentProduct.Name, ingredient.Name))
 		}
@@ -92,7 +101,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 	allAllergies, err := dbClient.GetAllAllergies(ctx)
 	allSkinconcerns, err := dbClient.GetAllSkinconcerns(ctx)
 	allAges, err := dbClient.GetAllAge(ctx)
-	//allBenefits, err := dbClient.GetAllBenefits(ctx)
+	allBenefits, err := dbClient.GetAllBenefits(ctx)
 
 	records := readCsvFile(filepath)
 	for i, record := range records {
@@ -108,7 +117,12 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			ctx, iallergies := assignAllergyScore(ctx, record, allAllergies)
 			ctx, iskinConcerns := assignSkinConcernScore(ctx, record, allSkinconcerns)
 			ctx, iages := assignAgeScore(ctx, record, allAges)
-			//ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
+			ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
+
+			aliases := strings.Split(record[Aliases], ",")
+			for n, alias := range aliases {
+				aliases[n] = strings.TrimSpace(alias)
+			}
 
 			ingredient := model.Ingredient{
 				Name: strings.ToLower(record[IngredientName]),
@@ -116,7 +130,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 				//PubchemId: record[PubChemCID],
 				//CasNumber: record[CASNumber],
 				ECNumber: "",
-				Synonyms: strings.Split(record[Aliases], ","),
+				Synonyms: aliases,
 
 				Preferences:       ipref,
 				Skintypes:         iskintype,
@@ -125,7 +139,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 				Allergies:         iallergies,
 				Skinconcerns:      iskinConcerns,
 				Ages:              iages,
-				//Benefits:          ibenefits,
+				Benefits:          ibenefits,
 			}
 
 			dbClient.SaveIngredient(ctx, &ingredient)

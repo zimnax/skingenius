@@ -430,13 +430,13 @@ func (ip *IngredientAge) BeforeCreate(db *gorm.DB) error {
 type IngredientBenefit struct {
 	IngredientID uint `gorm:"primaryKey"`
 	BenefitID    uint `gorm:"primaryKey"`
-	Score        int
+	Score        float64
 }
 
 func (ip *IngredientBenefit) BeforeCreate(db *gorm.DB) error {
 	logger.New().Debug(context.Background(), "Before create IngredientBenefit")
 
-	if customValue, ok := db.Statement.Context.Value(BenefitsCtxKey(ip.BenefitID)).(int); ok {
+	if customValue, ok := db.Statement.Context.Value(BenefitsCtxKey(ip.BenefitID)).(float64); ok {
 		ip.Score = customValue
 	}
 	return nil

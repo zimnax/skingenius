@@ -2,10 +2,13 @@ package engine
 
 import (
 	"fmt"
+	"math"
 	"skingenius/database/model"
+	globalModel "skingenius/model"
 	"sort"
 )
 
+// merge scores of same ingredient if occurs in multiple answers
 func mergeIngredientsWithScores(ingredients ...[]model.Ingredient) map[string]float64 {
 	imap := make(map[string]float64)
 
@@ -57,6 +60,8 @@ func FindTop3Products(products map[string]int) []string {
 	return keys[:3]
 }
 
+// 1. Merge scores of same ingredients if occurs in multiple answers
+// 2. Find ingredients what are common in all answers
 func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]float64 {
 	countMap := make(map[string]int)
 	scoreMap := make(map[string]float64)
@@ -132,9 +137,18 @@ func sortProductsByScoreTop3(products map[string]float64) map[string]float64 {
 		return map[string]float64{}
 	}
 
+	// score adjustments to ScalingRepresentation value being #1 in recommendations
+	scalingFactor := globalModel.ScalingRepresentation / sortedPairs[0].Value
+
 	return map[string]float64{
-		sortedPairs[0].Key: sortedPairs[0].Value,
-		sortedPairs[1].Key: sortedPairs[1].Value,
-		sortedPairs[2].Key: sortedPairs[2].Value,
+		sortedPairs[0].Key: roundToFirstDecimal(sortedPairs[0].Value * scalingFactor),
+		sortedPairs[1].Key: roundToFirstDecimal(sortedPairs[1].Value * scalingFactor),
+		sortedPairs[2].Key: roundToFirstDecimal(sortedPairs[2].Value * scalingFactor),
 	}
+}
+
+func roundToFirstDecimal(value float64) float64 {
+	const places = 1
+	pow := math.Pow(10, float64(places))
+	return math.Round(value*pow) / pow
 }

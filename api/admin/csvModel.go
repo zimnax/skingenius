@@ -186,6 +186,37 @@ const (
 
 	Blemishes
 	Blemishes_Description
+
+	Moisturizing
+	Nourishing
+	Hydrating
+	Exfoliating
+	Calming
+	Soothing
+	UVBarrier
+	Healing
+	Smoothing
+	ReducesAcne
+	ReducesBlemishes
+	ReducesWrinkles
+	ImprovesSymptomsOfEczema
+	ImprovesSymptomsOfPsoriasis
+	ImprovesSymptomsOfDermatitis
+	Brightening
+	ImprovesSkinTone
+	ReducesInflammation
+	MinimizesPores
+	AntiAging
+	Firming
+	Detoxifying
+	Balancing
+	ReducesRedness
+	Clarifying
+	AntiBacterial
+	StimulatesCollagenProduction
+	ReducesFineLines
+	AntioxidantProtection
+	SkinBarrierProtection
 )
 
 const (
