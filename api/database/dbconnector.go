@@ -11,6 +11,7 @@ type Connector interface {
 	//FilerHardParameters(context.Context, string, string, string) ([]string, error)
 	SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error
 	FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error)
+	FindIngredientByAlias(ctx context.Context, alias string) (*model.Ingredient, error)
 	//SavePreference(ctx context.Context, preference *model.Preference) error
 
 	SaveProduct(ctx context.Context, product *model.Product) error

@@ -27,7 +27,7 @@ func main() {
 	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
 	fmt.Println("Skingenious 2024")
 
-	dbClient, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true) // REMOTE
+	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true) // REMOTE
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -65,8 +65,8 @@ func main() {
 	//top3 := engine.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 	//fmt.Println(fmt.Sprintf("TOP 3: %+v", top3))
 
-	//top3storeIngredients(ctx, dbClient, "admin/resources/algorithm_NEW.csv")
-	storeProducts(ctx, dbClient, "admin/resources/products_master.csv")
+	storeIngredients(ctx, dbClient, "admin/resources/Algorithm_NEW_withBenefits.csv")
+	//storeProducts(ctx, dbClient, "admin/resources/products_master.csv")
 
 	// ---------------  Inventory page
 

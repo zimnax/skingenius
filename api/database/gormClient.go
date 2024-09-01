@@ -21,6 +21,12 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) FindIngredientByAlias(ctx context.Context, alias string) (*model.Ingredient, error) {
+	var ingredient model.Ingredient
+	err := g.db.Where("? = any (synonyms)", alias).First(&ingredient).Error
+	return &ingredient, err
+}
+
 func (g GormConnector) GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error) {
 	var uq model.UserQuiz
 	//err := g.db.WithContext(ctx).Find(&uq, userId).Error
