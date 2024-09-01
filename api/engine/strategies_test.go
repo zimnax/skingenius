@@ -10,7 +10,7 @@ import (
 )
 
 func Test_FindBestProducts_matchBestStrategy(t *testing.T) {
-	db, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	db, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -21,7 +21,7 @@ func Test_FindBestProducts_matchBestStrategy(t *testing.T) {
 	q3AcneBreakoutsAnswer := "occasionally"
 	q4PreferencesAnswer := []string{"vegetarian", "vegan"}
 	q5AllergiesAnswer := []string{"nuts", "latex"}
-	q6SkinConcernAnswer := []string{"rosacea", "hyperpigmentation_unevenskintone"}
+	q6SkinConcernAnswer := []string{"acne", "hyperpigmentation_unevenskintone"}
 	q7AgeAnswer := 20
 	q8BenefitsAnswer := []string{"moisturizing", "nourishing"}
 
@@ -39,3 +39,18 @@ func Test_FindBestProducts_matchBestStrategy(t *testing.T) {
 //Product: moisturizing oat & calendula miracle face cream, Score: 288.000000
 //Product: perfect facial hydrating cream, Score: 252.000000
 //Product: hyaluronic acid moisturizer, Score: 290.000000
+
+/*
+
+Skin type:  normal
+Sensitivity:  never
+Acne:  veryfrequently
+Age:  20
+Preference:  [paleo]
+Allergy:  [artificial_fragrance]
+Concerns:  []
+Benefits:  [improves_skin_tone]
+
+
+gives scores 0
+*/

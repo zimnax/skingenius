@@ -299,5 +299,6 @@ func (gc *GeniusController) GetQuiz(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusInternalServerError).SendString("failed to get quiz")
 	}
 
+	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return quiz: %#v", quiz))
 	return ctx.Status(http.StatusAccepted).JSON(quiz)
 }

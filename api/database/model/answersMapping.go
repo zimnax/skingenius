@@ -65,9 +65,9 @@ var SkinConcernsMapping = map[string]SkinconcernValue{
 	"Visible pores":               ConcernVisible_pores_Uneven_texture,
 	"Clogged pores, blackheads":   ConcernClogged_pores_blackheads,
 	"Dullness":                    ConcernDullness,
+	"Dark circles":                ConcernDark_circles,
 	"Blemishes":                   ConcernBlemishes,
 	"No Concerns":                 ConcernNone,
-
 
 	//"Rosacea":                     ConcernRosacea,
 	//"Hyperpigmentation":           ConcernHyperpigmentation,

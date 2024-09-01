@@ -65,7 +65,7 @@ func main() {
 	//top3 := engine.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 	//fmt.Println(fmt.Sprintf("TOP 3: %+v", top3))
 
-	//storeIngredients(ctx, dbClient, "admin/resources/algorithm_NEW.csv")
+	//top3storeIngredients(ctx, dbClient, "admin/resources/algorithm_NEW.csv")
 	storeProducts(ctx, dbClient, "admin/resources/products_master.csv")
 
 	// ---------------  Inventory page
