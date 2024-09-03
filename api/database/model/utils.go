@@ -26,6 +26,10 @@ func SkinconcernCtxKey(concernId uint) string {
 	return fmt.Sprintf("skinconcern_score_%d", concernId)
 }
 
+func SkinconcernDescCtxKey(concernId uint) string {
+	return fmt.Sprintf("skinconcern_description_%d", concernId)
+}
+
 func AgeCtxKey(ageId uint) string {
 	return fmt.Sprintf("age_score_%d", ageId)
 }

@@ -214,33 +214,57 @@ func assignSkinConcernScore(ctx context.Context, record []string, allSkinconcern
 	iconcerns := allSkinconcern
 	for _, concern := range iconcerns {
 		var score float64
+		var description string
 		var err error
 
 		switch concern.Name {
 		case model.ConcernAcne:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Acne]), 32)
+			description = strings.TrimSpace(record[Acne_Description])
+
 		case model.ConcernRosacea:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Rosacea]), 32)
+			description = strings.TrimSpace(record[RosaceaDescription])
+
 		case model.ConcernHyperpigmentation_UnevenSkinTone:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Hyperpigmentation_UnevenSkin_tone]), 32)
+			description = strings.TrimSpace(record[Hyperpigmentation_UnevenSkin_tone_Description])
+
 		case model.ConcernDryness_Dehydration:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dryness_Dehydration]), 32)
+			description = strings.TrimSpace(record[Dryness_Dehydration_Description])
+
 		case model.ConcernOiliness_Shine:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Oiliness_Shine]), 32)
+			description = strings.TrimSpace(record[Oiliness_Shine_Description])
+
 		case model.ConcernFine_lines_Wrinkles:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Fine_lines_Wrinkles]), 32)
+			description = strings.TrimSpace(record[Fine_lines_Wrinkles_Description])
+
 		case model.ConcernLoss_of_Elasticity_firmness:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Loss_of_Elasticity_firmness]), 32)
+			description = strings.TrimSpace(record[Loss_of_Elasticity_firmness_Description])
+
 		case model.ConcernVisible_pores_Uneven_texture:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Visible_pores_Uneven_texture]), 32)
+			description = strings.TrimSpace(record[Visible_pores_Uneven_texture_Description])
+
 		case model.ConcernClogged_pores_blackheads:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Clogged_pores_blackheads]), 32)
+			description = strings.TrimSpace(record[Clogged_pores_blackheads_Description])
+
 		case model.ConcernDullness:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dullness]), 32)
+			description = strings.TrimSpace(record[Dullness_Description])
+
 		case model.ConcernDark_circles:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dark_circles]), 32)
+			description = strings.TrimSpace(record[Dark_circles_Description])
+
 		case model.ConcernBlemishes:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Blemishes]), 32)
+			description = strings.TrimSpace(record[Blemishes_Description])
 		}
 
 		if err != nil {
@@ -250,6 +274,7 @@ func assignSkinConcernScore(ctx context.Context, record []string, allSkinconcern
 		//Conce	rnNone                             SkinconcernValue = "no_concern"
 
 		ctx = context.WithValue(ctx, model.SkinconcernCtxKey(concern.ID), score)
+		ctx = context.WithValue(ctx, model.SkinconcernDescCtxKey(concern.ID), description)
 	}
 
 	return ctx, iconcerns
@@ -410,4 +435,13 @@ func uniqueIngredientsNamesList(ingredients ...[]model.Ingredient) []string {
 	}
 
 	return result
+}
+
+func skinConcernByName(allConcerns []model.Skinconcern, name model.SkinconcernValue) *model.Skinconcern {
+	for _, concern := range allConcerns {
+		if concern.Name == name {
+			return &concern
+		}
+	}
+	return nil
 }

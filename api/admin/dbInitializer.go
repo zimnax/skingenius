@@ -110,6 +110,12 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			fmt.Println(record)
 			ctx := context.WithValue(context.Background(), "key", "val")
 
+			fmt.Println(fmt.Sprintf("Processing ingredient [%s]", record[IngredientName]))
+			if ing, findErr := dbClient.FindIngredientByName(ctx, strings.ToLower(record[IngredientName])); findErr == nil {
+				fmt.Println(fmt.Sprintf("Ingredient [%s] already exists, ingredient: [%v]", record[IngredientName], ing))
+				continue
+			}
+
 			ctx, ipref := assignPreferencesScore(ctx, record, allPreferences)
 			ctx, iskintype := assignSkintypeScore(ctx, record, allskintypes)
 			ctx, iskinSens := assignSkinSensitivityScore(ctx, record, allskinsensetivities)

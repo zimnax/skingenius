@@ -399,6 +399,7 @@ type IngredientSkinconcern struct {
 	IngredientID  uint    `gorm:"primaryKey"`
 	SkinconcernID uint    `gorm:"primaryKey"`
 	Score         float64 `gorm:"type:decimal(4,2);"`
+	Description   string
 }
 
 func (ip *IngredientSkinconcern) BeforeCreate(db *gorm.DB) error {
@@ -407,6 +408,11 @@ func (ip *IngredientSkinconcern) BeforeCreate(db *gorm.DB) error {
 	if customValue, ok := db.Statement.Context.Value(SkinconcernCtxKey(ip.SkinconcernID)).(float64); ok {
 		ip.Score = customValue
 	}
+
+	if customValue, ok := db.Statement.Context.Value(SkinconcernDescCtxKey(ip.SkinconcernID)).(string); ok {
+		ip.Description = customValue
+	}
+
 	return nil
 }
 
