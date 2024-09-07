@@ -67,7 +67,7 @@ func (g GormConnector) SaveQuiz(ctx context.Context, quiz model.UserQuiz) error 
 func (g GormConnector) FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error) {
 	var products []model.Product
 	// .Preload("Ingredients.Skinconcerns").
-	err := g.db.WithContext(ctx).Where("products.id IN (?)", ids).Find(&products).Error
+	err := g.db.WithContext(ctx).Preload("Ingredients").Where("products.id IN (?)", ids).Find(&products).Error
 
 	return products, err
 }

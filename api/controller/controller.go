@@ -233,9 +233,10 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 			fmt.Sprintf("failed to get user quiz, err: %+v", err))
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get user quiz, err: %v", err))
 	}
+	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("found skin quiz %v for user %s", userQuiz, userId))
 
 	if userQuiz.SkinConcern[0] != "" {
-		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("fetching Ingredients description for user skin concern: %s", userQuiz.SkinConcern[0]))
+		logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("fetching Ingredients description for user skin concern: %s", userQuiz.SkinConcern[0]))
 
 		for _, product := range fullProducts {
 			desc, fetchDescErr := gc.geniusData.GetSkinConcernDescriptionByIngredients(ctx.Context(), database.GetIngredientsName(product.Ingredients), userQuiz.SkinConcern[0])
@@ -244,6 +245,8 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 					fmt.Sprintf("failed to get skin concern description, fetchDescErr: %+v", fetchDescErr))
 				return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get skin concern description, err: %v", fetchDescErr))
 			}
+
+			logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("found %d ingredient description for concern %s", len(desc), userQuiz.SkinConcern[0]))
 
 			for _, description := range desc {
 				for _, ingredient := range product.Ingredients {
@@ -256,7 +259,9 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 	}
 
 	fmt.Println(fmt.Sprintf("full products len %d by userId %s", len(fullProducts), userId))
-	fmt.Println(fmt.Sprintf("full products with scores %d by userId %s", fullProducts, userId))
+	for _, product := range fullProducts {
+		fmt.Println(fmt.Sprintf("full product %s with scores %f by userId %s", product.Name, product.Score, userId))
+	}
 
 	return ctx.Status(http.StatusOK).JSON(fullProducts)
 }

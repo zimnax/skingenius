@@ -247,7 +247,7 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 	fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
 
 	scoredProducts := matchProductsAndIngredients(uniqueIng, allProducts)
-	fmt.Println(fmt.Sprintf("scored products: %#v", scoredProducts))
+	//fmt.Println(fmt.Sprintf("scored products: %#v", scoredProducts))
 
 	sortedProducts := sortProductsByScoreTop3(scoredProducts)
 	fmt.Println(fmt.Sprintf("sorted products: %#v", sortedProducts))
