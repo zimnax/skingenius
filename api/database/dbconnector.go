@@ -41,8 +41,8 @@ type Connector interface {
 
 	SetupJoinTables() error
 
-	SaveRecommendations(context.Context, string, []int32) error
-	GetRecommendations(context.Context, string) ([]int32, error)
+	SaveRecommendations(context.Context, []model.UserRecommendations) error
+	GetRecommendations(context.Context, string) ([]model.UserRecommendations, error)
 
 	SaveQuiz(ctx context.Context, quiz model.UserQuiz) error
 	GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error)

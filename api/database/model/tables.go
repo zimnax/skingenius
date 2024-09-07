@@ -10,8 +10,10 @@ import (
 )
 
 type UserRecommendations struct {
-	UserId              string        `gorm:"primaryKey"`
-	RecommendedProducts pq.Int32Array `gorm:"type:integer[]"`
+	UserId    string `gorm:"primaryKey"`
+	ProductId int
+	Score     float64 `gorm:"type:decimal(4,2);"`
+	//RecommendedProducts pq.Int32Array `gorm:"type:integer[]"`
 }
 
 type UserQuiz struct {

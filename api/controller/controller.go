@@ -175,7 +175,16 @@ func (gc *GeniusController) SaveRecommendation(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to unmarshall saveRecommendations req, err: %v", err))
 	}
 
-	err := gc.geniusData.SaveRecommendations(ctx.Context(), userId, recommendedProducts.ProductIds)
+	var rs []dbmodel.UserRecommendations
+	for _, p := range recommendedProducts.Products {
+		rs = append(rs, dbmodel.UserRecommendations{
+			UserId:    userId,
+			ProductId: p.Id,
+			Score:     p.Score,
+		})
+	}
+
+	err := gc.geniusData.SaveRecommendations(ctx.Context(), rs)
 	if err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
 			fmt.Sprintf("failed to save user recommendations, err: %+v", err))

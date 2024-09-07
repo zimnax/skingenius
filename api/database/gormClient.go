@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/lib/pq"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"skingenius/database/model"
@@ -48,21 +47,20 @@ func (g GormConnector) FindProductsByIds(ctx context.Context, ids []int32) ([]mo
 	return products, err
 }
 
-func (g GormConnector) GetRecommendations(ctx context.Context, s string) ([]int32, error) {
-	var ur model.UserRecommendations
+func (g GormConnector) GetRecommendations(ctx context.Context, s string) ([]model.UserRecommendations, error) {
+	var ur []model.UserRecommendations
 
-	err := g.db.WithContext(ctx).Select("user_recommendations.user_id, user_recommendations.recommended_products").
-		Table("user_recommendations").
-		Where("user_recommendations.user_id = ?", s).Find(&ur).Error
+	//err := g.db.WithContext(ctx).Select("user_recommendations.user_id, user_recommendations.recommended_products").
+	//	Table("user_recommendations").
+	//	Where("user_recommendations.user_id = ?", s).Find(&ur).Error
 
-	return ur.RecommendedProducts, err
+	err := g.db.Where("user_recommendations.user_id = ?", s).Find(&ur).Error
+
+	return ur, err
 }
 
-func (g GormConnector) SaveRecommendations(ctx context.Context, userId string, pIds []int32) error {
-	return g.db.WithContext(ctx).Create(model.UserRecommendations{
-		UserId:              userId,
-		RecommendedProducts: pq.Int32Array(pIds),
-	}).Error
+func (g GormConnector) SaveRecommendations(ctx context.Context, ur []model.UserRecommendations) error {
+	return g.db.WithContext(ctx).Create(ur).Error
 }
 
 func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, error) {
