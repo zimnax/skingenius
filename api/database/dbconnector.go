@@ -13,6 +13,7 @@ type Connector interface {
 	FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error)
 	FindIngredientByAlias(ctx context.Context, alias string) (*model.Ingredient, error)
 	//SavePreference(ctx context.Context, preference *model.Preference) error
+	GetSkinConcernDescriptionByIngredients(ctx context.Context, ingredients []string, concern string) ([]model.SkinconcernToIngredientDescription, error)
 
 	SaveProduct(ctx context.Context, product *model.Product) error
 	FindAllProducts(ctx context.Context) ([]model.Product, error)

@@ -199,23 +199,64 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 	userId := ctx.Params("id")
 	fmt.Println(fmt.Sprintf("userID: %s", userId))
 
-	pIds, err := gc.geniusData.GetRecommendations(ctx.Context(), userId)
+	savedRecommendation, err := gc.geniusData.GetRecommendations(ctx.Context(), userId)
 	if err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
 			fmt.Sprintf("failed to get user recommendations, err: %+v", err))
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get user recommendations, err: %v", err))
 	}
 
-	fmt.Println(fmt.Sprintf("product ids %v by userId %s", pIds, userId))
+	var recIds []int32
+	for _, recommendations := range savedRecommendation {
+		recIds = append(recIds, int32(recommendations.ProductId))
+	}
 
-	fullProducts, err := gc.geniusData.FindProductsByIds(ctx.Context(), pIds)
+	fmt.Println(fmt.Sprintf("product ids %v by userId %s", recIds, userId))
+	fullProducts, err := gc.geniusData.FindProductsByIds(ctx.Context(), recIds)
 	if err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
 			fmt.Sprintf("failed to get full Products recommendations, err: %+v", err))
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get full product recommendations, err: %v", err))
 	}
 
-	fmt.Println(fmt.Sprintf("full products let %d by userId %s", len(fullProducts), userId))
+	for _, product := range fullProducts {
+		for i, recommendations := range savedRecommendation {
+			if product.ID == uint(recommendations.ProductId) {
+				product.Score = savedRecommendation[i].Score
+			}
+		}
+	}
+
+	userQuiz, err := gc.geniusData.GetQuiz(ctx.Context(), userId)
+	if err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+
+			fmt.Sprintf("failed to get user quiz, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get user quiz, err: %v", err))
+	}
+
+	if userQuiz.SkinConcern[0] != "" {
+		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("fetching Ingredients description for user skin concern: %s", userQuiz.SkinConcern[0]))
+
+		for _, product := range fullProducts {
+			desc, fetchDescErr := gc.geniusData.GetSkinConcernDescriptionByIngredients(ctx.Context(), database.GetIngredientsName(product.Ingredients), userQuiz.SkinConcern[0])
+			if fetchDescErr != nil {
+				logger.New().Error(ctx.Context(), packageLogPrefix+
+					fmt.Sprintf("failed to get skin concern description, fetchDescErr: %+v", fetchDescErr))
+				return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get skin concern description, err: %v", fetchDescErr))
+			}
+
+			for _, description := range desc {
+				for _, ingredient := range product.Ingredients {
+					if ingredient.Name == description.Ingredientname {
+						ingredient.ConcernDescription = description.Description
+					}
+				}
+			}
+		}
+	}
+
+	fmt.Println(fmt.Sprintf("full products len %d by userId %s", len(fullProducts), userId))
+	fmt.Println(fmt.Sprintf("full products with scores %d by userId %s", fullProducts, userId))
 
 	return ctx.Status(http.StatusOK).JSON(fullProducts)
 }

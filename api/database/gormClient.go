@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"skingenius/database/model"
 	"skingenius/logger"
 	"strings"
@@ -18,6 +19,29 @@ sudo service postgresql restart
 
 type GormConnector struct {
 	db *gorm.DB
+}
+
+/*
+returns the description of the skin concern for the given ingredients and concern
+*/
+func (g GormConnector) GetSkinConcernDescriptionByIngredients(ctx context.Context, ingredients []string, concern string) ([]model.SkinconcernToIngredientDescription, error) {
+	/*
+		SELECT ingredients.name as ingredient, skinconcerns.name as concern, ingredient_skinconcerns.description
+		FROM ingredients
+		INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id
+		INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id
+		where ingredients.name in ('algae extract','glycerin') AND skinconcerns.name in ('oiliness_shine', 'dark_circles','fine_lines_wrinkles','loss_of_elasticity_firmness')
+	*/
+
+	var cd []model.SkinconcernToIngredientDescription
+
+	err := g.db.Select("ingredients.name as ingredientname, skinconcerns.name as concern, ingredient_skinconcerns.description").
+		Table("ingredients").
+		Joins("INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id").
+		Joins("INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id").
+		Where("ingredients.name IN (?) AND skinconcerns.name = ?", ingredients, concern).Find(&cd).Error
+
+	return cd, err
 }
 
 func (g GormConnector) FindIngredientByAlias(ctx context.Context, alias string) (*model.Ingredient, error) {
@@ -42,7 +66,8 @@ func (g GormConnector) SaveQuiz(ctx context.Context, quiz model.UserQuiz) error 
 
 func (g GormConnector) FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error) {
 	var products []model.Product
-	err := g.db.WithContext(ctx).Preload("Ingredients").Where("products.id IN (?)", ids).Find(&products).Error
+	// .Preload("Ingredients.Skinconcerns").
+	err := g.db.WithContext(ctx).Where("products.id IN (?)", ids).Find(&products).Error
 
 	return products, err
 }
@@ -60,7 +85,13 @@ func (g GormConnector) GetRecommendations(ctx context.Context, s string) ([]mode
 }
 
 func (g GormConnector) SaveRecommendations(ctx context.Context, ur []model.UserRecommendations) error {
-	return g.db.WithContext(ctx).Create(ur).Error
+	//return g.db.WithContext(ctx).Create(ur).Error
+	err := g.db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "user_id"}, {Name: "product_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"score"}),
+	}).Create(&ur).Error
+
+	return err
 }
 
 func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, error) {
@@ -529,6 +560,7 @@ func automigrate(db *gorm.DB) error {
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
 	}
 
+	db.Migrator().DropTable(&model.UserRecommendations{})
 	if err = db.AutoMigrate(&model.UserRecommendations{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))

@@ -56,3 +56,63 @@ func Test_FindExistingIngredient(t *testing.T) {
 		t.Fatalf("error should be nil")
 	}
 }
+
+/*
+intention of this test is to check is the ingredients are being retrieved with skinconcerns
+*/
+func TestFindProductsByIds(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	ps, err := db.FindProductsByIds(context.Background(), []int32{5})
+
+	fmt.Println(err)
+	fmt.Println(fmt.Sprintf("products len:: %d", len(ps)))
+	fmt.Println(fmt.Sprintf("ps[0].Ingredients: %#v", ps[0].Ingredients))
+}
+
+func Test_GetSkinconcernDescriptionByIngredients(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	ing, err := db.GetSkinConcernDescriptionByIngredients(context.Background(), []string{"algae extract", "glycerin"}, "oiliness_shine")
+
+	fmt.Println(err)
+	fmt.Println(fmt.Sprintf("ingredient:: %#v", ing))
+}
+
+func TestGormConnector_SaveRecommendations(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	ur := []model.UserRecommendations{
+		{UserId: "1", ProductId: 11, Score: 11.1},
+		{UserId: "1", ProductId: 22, Score: 22.2},
+		{UserId: "1", ProductId: 33, Score: 33.3},
+	}
+
+	err = db.SaveRecommendations(context.Background(), ur)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec, err := db.GetRecommendations(context.Background(), "1")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(rec) != 3 {
+		t.Fatalf("expected 3 recommendations, got %d", len(rec))
+	}
+
+	fmt.Println(rec)
+}

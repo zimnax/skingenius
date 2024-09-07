@@ -10,8 +10,8 @@ import (
 )
 
 type UserRecommendations struct {
-	UserId    string `gorm:"primaryKey"`
-	ProductId int
+	UserId    string  `gorm:"primaryKey"`
+	ProductId int     `gorm:"primaryKey"`
 	Score     float64 `gorm:"type:decimal(4,2);"`
 	//RecommendedProducts pq.Int32Array `gorm:"type:integer[]"`
 }
@@ -55,7 +55,14 @@ type Ingredient struct {
 	Ages              []Age             `gorm:"many2many:ingredient_ages;"`
 	Benefits          []Benefit         `gorm:"many2many:ingredient_benefits;"`
 
-	Score float64
+	Score              float64
+	ConcernDescription string `sql:"-"`
+}
+
+type SkinconcernToIngredientDescription struct {
+	Ingredientname string
+	Concern        string
+	Description    string
 }
 
 type Allergy struct {
