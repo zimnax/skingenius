@@ -211,7 +211,7 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 	skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng := findIngredientsByQuestion(dbClient, ctx, q1SkinTypeAnswer, q2SkinSensitivityAnswer, q3AcneBreakoutsAnswer,
 		q4PreferencesAnswer, q5AllergiesAnswer, q6SkinConcernAnswer, q7AgeAnswer, q8BenefitsAnswer)
 
-	debugShowIngredientsQueryResult(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng)
+	//debugShowIngredientsQueryResult(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng)
 
 	/*
 		1. Ignoring concerns or benefits ingredients according to use quiz answer

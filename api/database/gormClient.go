@@ -21,6 +21,13 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) FindIngredientByINCIName(ctx context.Context, inci string) (*model.Ingredient, error) {
+	var ingredient model.Ingredient
+	err := g.db.WithContext(ctx).Where("inci_name = ?", inci).First(&ingredient).Error
+
+	return &ingredient, err
+}
+
 /*
 returns the description of the skin concern for the given ingredients and concern
 */
@@ -560,7 +567,6 @@ func automigrate(db *gorm.DB) error {
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
 	}
 
-	db.Migrator().DropTable(&model.UserRecommendations{})
 	if err = db.AutoMigrate(&model.UserRecommendations{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [UserRecommendations], error: %v", err))

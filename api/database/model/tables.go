@@ -44,6 +44,7 @@ type Ingredient struct {
 	PubchemId         string
 	CasNumber         string
 	ECNumber          string
+	INCIName          string
 	Type              string
 	Synonyms          pq.StringArray    `gorm:"type:text[]"`
 	Skintypes         []Skintype        `gorm:"many2many:ingredient_skintypes;"`

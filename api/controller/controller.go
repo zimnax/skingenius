@@ -208,6 +208,7 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 
 	var recIds []int32
 	for _, recommendations := range savedRecommendation {
+		fmt.Println(fmt.Sprintf("saved recommended product: %#v", recommendations))
 		recIds = append(recIds, int32(recommendations.ProductId))
 	}
 
@@ -219,10 +220,15 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get full product recommendations, err: %v", err))
 	}
 
-	for _, product := range fullProducts {
+	for j, product := range fullProducts {
 		for i, recommendations := range savedRecommendation {
 			if product.ID == uint(recommendations.ProductId) {
-				product.Score = savedRecommendation[i].Score
+
+				// if score present, setting it
+				if savedRecommendation[i].Score > 0 {
+					fmt.Println(fmt.Sprintf("setting score %f for product %s", savedRecommendation[i].Score, product.Name))
+					fullProducts[j].Score = savedRecommendation[i].Score
+				}
 			}
 		}
 	}
@@ -246,12 +252,20 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 				return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to get skin concern description, err: %v", fetchDescErr))
 			}
 
-			logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("found %d ingredient description for concern %s", len(desc), userQuiz.SkinConcern[0]))
+			logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("product [%s], "+
+				"found %d ingredient description for concern %s", product.Name, len(desc), userQuiz.SkinConcern[0]))
+
+			fmt.Println(fmt.Sprintf("product [%s], descriptions: %#v", product.Name, desc))
 
 			for _, description := range desc {
-				for _, ingredient := range product.Ingredients {
+				for i, ingredient := range product.Ingredients {
 					if ingredient.Name == description.Ingredientname {
-						ingredient.ConcernDescription = description.Description
+
+						// if description exist, setting it
+						if description.Description != "" {
+							fmt.Println(fmt.Sprintf("product [%s], ingredient [%s] setting ConcernDescription [%s]", product.Name, ingredient.Name, description.Description))
+							product.Ingredients[i].ConcernDescription = description.Description
+						}
 					}
 				}
 			}

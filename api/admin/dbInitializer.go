@@ -67,6 +67,8 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 			var ingredient *model.Ingredient
 			var err error
 			ingredientNameToFind := strings.ToLower(record[ProductIngredientName])
+			ingredientNameToFind = strings.ReplaceAll(ingredientNameToFind, "*", "")
+			ingredientNameToFind = strings.TrimSpace(ingredientNameToFind)
 
 			ingredient, err = dbClient.FindIngredientByName(ctx, ingredientNameToFind)
 			if err != nil {
@@ -74,7 +76,13 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 				ingredient, err = dbClient.FindIngredientByAlias(ctx, ingredientNameToFind)
 				if err != nil {
 					fmt.Println(fmt.Sprintf("failed to find igredient by alias [%s], error: %v", ingredientNameToFind, err))
-					continue
+					ingredient, err = dbClient.FindIngredientByINCIName(ctx, ingredientNameToFind)
+					if err != nil {
+						fmt.Println(fmt.Sprintf("failed to find igredient by INCI name [%s], error: %v", ingredientNameToFind, err))
+
+						fmt.Println(fmt.Sprintf("FATAL, no ingredient with name [%s]", ingredientNameToFind))
+						continue
+					}
 				}
 			}
 
@@ -127,15 +135,17 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 
 			aliases := strings.Split(record[Aliases], ",")
 			for n, alias := range aliases {
-				aliases[n] = strings.TrimSpace(alias)
+				aliases[n] = strings.ToLower(strings.TrimSpace(alias))
 			}
 
+			name := strings.ReplaceAll(strings.TrimSpace(strings.ToLower(record[IngredientName])), "*", "")
 			ingredient := model.Ingredient{
-				Name: strings.ToLower(record[IngredientName]),
+				Name: name,
 				Type: strings.ToLower(record[Active_Inactive]),
 				//PubchemId: record[PubChemCID],
 				//CasNumber: record[CASNumber],
 				ECNumber: "",
+				INCIName: record[INCIName],
 				Synonyms: aliases,
 
 				Preferences:       ipref,

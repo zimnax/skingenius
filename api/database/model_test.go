@@ -75,7 +75,7 @@ func TestFindProductsByIds(t *testing.T) {
 }
 
 func Test_GetSkinconcernDescriptionByIngredients(t *testing.T) {
-	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	db, err := NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -115,4 +115,19 @@ func TestGormConnector_SaveRecommendations(t *testing.T) {
 	}
 
 	fmt.Println(rec)
+}
+
+func TestGormConnector_FindIngredientByINCIName(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	i, err := db.FindIngredientByINCIName(context.Background(), "3-O-Ethyl Ascorbic Acid")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(i)
 }
