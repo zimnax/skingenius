@@ -241,7 +241,7 @@ func (gc *GeniusController) GetRecommendation(ctx *fiber.Ctx) error {
 	}
 	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("found skin quiz %v for user %s", userQuiz, userId))
 
-	if userQuiz.SkinConcern[0] != "" {
+	if len(userQuiz.SkinConcern) > 0 && userQuiz.SkinConcern[0] != "" {
 		logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("fetching Ingredients description for user skin concern: %s", userQuiz.SkinConcern[0]))
 
 		for _, product := range fullProducts {
