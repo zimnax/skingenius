@@ -61,12 +61,19 @@ func FindTop3Products(products map[string]int) []string {
 }
 
 // 1. Merge scores of same ingredients if occurs in multiple answers
-// 2. Find ingredients what are common in all answers
+// 2. Find ingredients what are common in all answers. If answer array is empty, ignoring it in merging
 func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]float64 {
 	countMap := make(map[string]int)
 	scoreMap := make(map[string]float64)
 
+	var ingredientArrays int
+
 	for _, answerIngredients := range ingredients {
+
+		if len(answerIngredients) > 0 { // skip empty arrays in no Allergies, No concerns, no Benefits ets...
+			ingredientArrays++
+		}
+
 		for _, ingredient := range answerIngredients {
 			countMap[ingredient.Name]++
 			scoreMap[ingredient.Name] = scoreMap[ingredient.Name] + ingredient.Score
@@ -76,7 +83,7 @@ func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]flo
 	// Find strings that appear in all slices (count == len(ingredients))
 	result := make(map[string]float64)
 	for str, count := range countMap {
-		if count == len(ingredients) {
+		if count == ingredientArrays {
 			result[str] = scoreMap[str]
 		}
 	}
@@ -105,9 +112,11 @@ func matchProductsAndIngredients(ingredients map[string]float64, allProducts []m
 				}
 			}
 		}
+
+		//fmt.Println(fmt.Sprintf("-> %f , %f, %v", productScores[product.Name], float64(len(product.Ingredients)), productScores[product.Name]/float64(len(product.Ingredients))))
+
 		productScores[product.Name] = productScores[product.Name] / float64(len(product.Ingredients))
 	}
-
 	return productScores
 }
 
@@ -138,7 +147,11 @@ func sortProductsByScoreTop3(products map[string]float64) map[string]float64 {
 	}
 
 	// score adjustments to ScalingRepresentation value being #1 in recommendations
-	scalingFactor := globalModel.ScalingRepresentation / sortedPairs[0].Value
+	maxScore := sortedPairs[0].Value
+	if maxScore == 0 {
+		maxScore = 1 // inf NAN issue fix
+	}
+	scalingFactor := globalModel.ScalingRepresentation / maxScore
 
 	return map[string]float64{
 		sortedPairs[0].Key: roundToFirstDecimal(sortedPairs[0].Value * scalingFactor),
