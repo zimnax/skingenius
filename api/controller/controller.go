@@ -36,50 +36,44 @@ func (gc *GeniusController) SubmitQuizV2(ctx *fiber.Ctx) error {
 
 	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("userAnswers: %+v", userAnswers))
 
-	a1SkinType := dbmodel.SkinTypeMapping[userAnswers.SkinType]
-	a2SkinSensitivity := dbmodel.SensitivityMapping[userAnswers.SkinSensitivity]
-	a3Acne := dbmodel.AcneProneMapping[userAnswers.AcneBreakouts]
-	a4Age := dbmodel.AgeMapping[userAnswers.Age]
+	//a1SkinType := dbmodel.SkinTypeMapping[userAnswers.SkinType]
+	//a2SkinSensitivity := dbmodel.SensitivityMapping[userAnswers.SkinSensitivity]
+	//a3Acne := dbmodel.AcneProneMapping[userAnswers.AcneBreakouts]
+	//a4Age := dbmodel.AgeMapping[userAnswers.Age]
+	//
+	//var a5Preference []string
+	//for _, preference := range userAnswers.ProductPreferences {
+	//	a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
+	//}
+	//
+	//var a6Allergy []string
+	//
+	//for _, allergen := range userAnswers.FreeFromAllergens {
+	//	a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
+	//}
+	//
+	//var a7Concerns []string
+	//for _, concern := range userAnswers.SkinConcern {
+	//	a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
+	//}
+	//
+	//var a8Benefits []string
+	//for _, benefit := range userAnswers.ProductBenefit {
+	//	a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
+	//}
+	//
+	//fmt.Println("\n\n ********************  Answers V2 ********************")
+	//fmt.Println("Skin type: ", a1SkinType)
+	//fmt.Println("Sensitivity: ", a2SkinSensitivity)
+	//fmt.Println("Acne: ", a3Acne)
+	//fmt.Println("Age: ", a4Age)
+	//fmt.Println("Preference: ", a5Preference)
+	//fmt.Println("Allergy: ", a6Allergy)
+	//fmt.Println("Concerns: ", a7Concerns)
+	//fmt.Println("Benefits: ", a8Benefits)
+	//fmt.Println("********************  Answers  ******************** \n\n ")
 
-	var a5Preference []string
-	for _, preference := range userAnswers.ProductPreferences {
-		a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
-	}
-
-	var a6Allergy []string
-
-	for _, allergen := range userAnswers.FreeFromAllergens {
-		a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
-	}
-
-	var a7Concerns []string
-	for _, concern := range userAnswers.SkinConcern {
-		a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
-	}
-
-	var a8Benefits []string
-	for _, benefit := range userAnswers.ProductBenefit {
-		a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
-	}
-
-	fmt.Println("\n\n ********************  Answers V2 ********************")
-	fmt.Println("Skin type: ", a1SkinType)
-	fmt.Println("Sensitivity: ", a2SkinSensitivity)
-	fmt.Println("Acne: ", a3Acne)
-	fmt.Println("Age: ", a4Age)
-	fmt.Println("Preference: ", a5Preference)
-	fmt.Println("Allergy: ", a6Allergy)
-	fmt.Println("Concerns: ", a7Concerns)
-	fmt.Println("Benefits: ", a8Benefits)
-	fmt.Println("********************  Answers  ******************** \n\n ")
-
-	//top3 := engine.FindBestProducts_RatingStrategy(gc.geniusData, ctx.Context(),
-	//	a1SkinType, a2SkinSensitivity, a3Acne, a5Preference,
-	//	a6Allergy, a7Concerns, a4Age, a8Benefits)
-	top3 := engine.FindBestProducts_matchBestStrategy(gc.geniusData, ctx.Context(),
-		a1SkinType, a2SkinSensitivity, a3Acne, a5Preference,
-		a6Allergy, a7Concerns, a4Age, a8Benefits)
-
+	top3 := engine.FindBestProducts_matchBestStrategy(gc.geniusData, ctx.Context(), quizAnswersToDbModel(userAnswers))
 	fmt.Println(fmt.Sprintf("top 3: %#v", len(top3)))
 
 	for _, topP := range top3 {
@@ -94,72 +88,73 @@ func (gc *GeniusController) SubmitQuizV2(ctx *fiber.Ctx) error {
 	return err
 }
 
-func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
-	logger.New().Info(ctx.Context(), packageLogPrefix+"SubmitQuiz route")
-
-	userAnswers := model.QuizAnswers{}
-	if err := ctx.BodyParser(&userAnswers); err != nil {
-		logger.New().Error(ctx.Context(), packageLogPrefix+
-			fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", err))
-		return ctx.SendString(fmt.Sprintf("failed to unmarshall userAnswers req, err: %v", err))
-	}
-
-	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("userAnswers: %+v", userAnswers))
-
-	a1SkinType := dbmodel.SkinTypeMapping[userAnswers.SkinType]
-	a2SkinSensitivity := dbmodel.SensitivityMapping[userAnswers.SkinSensitivity]
-	a3Acne := dbmodel.AcneProneMapping[userAnswers.AcneBreakouts]
-	a4Age := dbmodel.AgeMapping[userAnswers.Age]
-
-	var a5Preference []string
-	for _, preference := range userAnswers.ProductPreferences {
-		a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
-	}
-
-	var a6Allergy []string
-
-	for _, allergen := range userAnswers.FreeFromAllergens {
-		a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
-	}
-
-	var a7Concerns []string
-	for _, concern := range userAnswers.SkinConcern {
-		a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
-	}
-
-	var a8Benefits []string
-	for _, benefit := range userAnswers.ProductBenefit {
-		a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
-	}
-
-	fmt.Println("\n\n ********************  Answers  ********************")
-	fmt.Println("Skin type: ", a1SkinType)
-	fmt.Println("Sensitivity: ", a2SkinSensitivity)
-	fmt.Println("Acne: ", a3Acne)
-	fmt.Println("Age: ", a4Age)
-	fmt.Println("Preference: ", a5Preference)
-	fmt.Println("Allergy: ", a6Allergy)
-	fmt.Println("Concerns: ", a7Concerns)
-	fmt.Println("Benefits: ", a8Benefits)
-	fmt.Println("********************  Answers  ******************** \n\n ")
-
-	top3 := engine.FindBestProducts_RatingStrategy(gc.geniusData, ctx.Context(),
-		a1SkinType, a2SkinSensitivity, a3Acne, a5Preference,
-		a6Allergy, a7Concerns, a4Age, a8Benefits)
-
-	fmt.Println(fmt.Sprintf("top 3: %#v", len(top3)))
-
-	for _, topP := range top3 {
-		topP.Ingredients = nil
-	}
-
-	err := ctx.JSON(top3)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to marshall top3 req, err: %+v", err))
-	}
-
-	return err
-}
+// DEPRECATED
+//func (gc *GeniusController) SubmitQuiz(ctx *fiber.Ctx) error {
+//	logger.New().Info(ctx.Context(), packageLogPrefix+"SubmitQuiz route")
+//
+//	userAnswers := model.QuizAnswers{}
+//	if err := ctx.BodyParser(&userAnswers); err != nil {
+//		logger.New().Error(ctx.Context(), packageLogPrefix+
+//			fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", err))
+//		return ctx.SendString(fmt.Sprintf("failed to unmarshall userAnswers req, err: %v", err))
+//	}
+//
+//	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("userAnswers: %+v", userAnswers))
+//
+//	a1SkinType := dbmodel.SkinTypeMapping[userAnswers.SkinType]
+//	a2SkinSensitivity := dbmodel.SensitivityMapping[userAnswers.SkinSensitivity]
+//	a3Acne := dbmodel.AcneProneMapping[userAnswers.AcneBreakouts]
+//	a4Age := dbmodel.AgeMapping[userAnswers.Age]
+//
+//	var a5Preference []string
+//	for _, preference := range userAnswers.ProductPreferences {
+//		a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
+//	}
+//
+//	var a6Allergy []string
+//
+//	for _, allergen := range userAnswers.FreeFromAllergens {
+//		a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
+//	}
+//
+//	var a7Concerns []string
+//	for _, concern := range userAnswers.SkinConcern {
+//		a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
+//	}
+//
+//	var a8Benefits []string
+//	for _, benefit := range userAnswers.ProductBenefit {
+//		a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
+//	}
+//
+//	fmt.Println("\n\n ********************  Answers  ********************")
+//	fmt.Println("Skin type: ", a1SkinType)
+//	fmt.Println("Sensitivity: ", a2SkinSensitivity)
+//	fmt.Println("Acne: ", a3Acne)
+//	fmt.Println("Age: ", a4Age)
+//	fmt.Println("Preference: ", a5Preference)
+//	fmt.Println("Allergy: ", a6Allergy)
+//	fmt.Println("Concerns: ", a7Concerns)
+//	fmt.Println("Benefits: ", a8Benefits)
+//	fmt.Println("********************  Answers  ******************** \n\n ")
+//
+//	top3 := engine.FindBestProducts_RatingStrategy(gc.geniusData, ctx.Context(),
+//		a1SkinType, a2SkinSensitivity, a3Acne, a5Preference,
+//		a6Allergy, a7Concerns, a4Age, a8Benefits)
+//
+//	fmt.Println(fmt.Sprintf("top 3: %#v", len(top3)))
+//
+//	for _, topP := range top3 {
+//		topP.Ingredients = nil
+//	}
+//
+//	err := ctx.JSON(top3)
+//	if err != nil {
+//		fmt.Println(fmt.Sprintf("failed to marshall top3 req, err: %+v", err))
+//	}
+//
+//	return err
+//}
 
 func (gc *GeniusController) SaveRecommendation(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveRecommendation route")
@@ -286,8 +281,10 @@ func (gc *GeniusController) SaveQuiz(ctx *fiber.Ctx) error {
 	userId := ctx.Params("id")
 	fmt.Println(fmt.Sprintf("userID: %s", userId))
 
+	var err error
+
 	userAnswers := model.QuizAnswers{}
-	if err := ctx.BodyParser(&userAnswers); err != nil {
+	if err = ctx.BodyParser(&userAnswers); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
 			fmt.Sprintf("failed to unmarshall save quiz req, err: %+v", err))
 		return ctx.SendString(fmt.Sprintf("failed to unmarshall save quiz req, err: %v", err))
@@ -295,55 +292,89 @@ func (gc *GeniusController) SaveQuiz(ctx *fiber.Ctx) error {
 
 	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("userAnswers: %+v", userAnswers))
 
-	// todo: extract into func -----------------------------------------------------------------------------------------
-	a1SkinType := dbmodel.SkinTypeMapping[userAnswers.SkinType]
-	a2SkinSensitivity := dbmodel.SensitivityMapping[userAnswers.SkinSensitivity]
-	a3Acne := dbmodel.AcneProneMapping[userAnswers.AcneBreakouts]
-	a4Age := dbmodel.AgeMapping[userAnswers.Age]
+	qa := quizAnswersToDbModel(userAnswers)
 
-	var a5Preference []string
-	for _, preference := range userAnswers.ProductPreferences {
-		a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
+	_, err = gc.geniusData.GetQuiz(ctx.Context(), userId)
+	if err == nil {
+		logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("found quiz for user %s, updating it with NEW recommendations", userId))
+
+		// User quiz already exist, update quiz flow + running algorithm to find NEW best matches
+
+		top3 := engine.FindBestProducts_matchBestStrategy(gc.geniusData, ctx.Context(), quizAnswersToDbModel(userAnswers))
+		fmt.Println(fmt.Sprintf("NEW TOP 3 after updating quiz: %#v", len(top3)))
+
+		// after we found new top 3, saving it into recomendation table
+
+		var rs []dbmodel.UserRecommendations
+		for _, p := range top3 {
+			rs = append(rs, dbmodel.UserRecommendations{
+				UserId:    userId,
+				ProductId: int(p.ID),
+				Score:     p.Score,
+			})
+		}
+
+		if err = gc.geniusData.SaveRecommendations(ctx.Context(), rs); err != nil {
+			logger.New().Error(ctx.Context(), packageLogPrefix+
+				fmt.Sprintf("failed to save user recommendations, err: %+v", err))
+			return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to save user recommendations, err: %v", err))
+		}
+		logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("saved NEW user recommendations for user %s", userId))
+
+		//return ctx.Status(http.StatusCreated).JSON(nil)
 	}
 
-	var a6Allergy []string
+	// User does not exist, saving qiz first time without running the algorithm
 
-	for _, allergen := range userAnswers.FreeFromAllergens {
-		a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
-	}
+	//// todo: extract into func -----------------------------------------------------------------------------------------
+	//a1SkinType := dbmodel.SkinTypeMapping[userAnswers.SkinType]
+	//a2SkinSensitivity := dbmodel.SensitivityMapping[userAnswers.SkinSensitivity]
+	//a3Acne := dbmodel.AcneProneMapping[userAnswers.AcneBreakouts]
+	//a4Age := dbmodel.AgeMapping[userAnswers.Age]
+	//
+	//var a5Preference []string
+	//for _, preference := range userAnswers.ProductPreferences {
+	//	a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
+	//}
+	//
+	//var a6Allergy []string
+	//
+	//for _, allergen := range userAnswers.FreeFromAllergens {
+	//	a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
+	//}
+	//
+	//var a7Concerns []string
+	//for _, concern := range userAnswers.SkinConcern {
+	//	a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
+	//}
+	//
+	//var a8Benefits []string
+	//for _, benefit := range userAnswers.ProductBenefit {
+	//	a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
+	//}
+	//
+	//fmt.Println("\n\n ********************  Answers  ********************")
+	//fmt.Println("Skin type: ", a1SkinType)
+	//fmt.Println("Sensitivity: ", a2SkinSensitivity)
+	//fmt.Println("Acne: ", a3Acne)
+	//fmt.Println("Age: ", a4Age)
+	//fmt.Println("Preference: ", a5Preference)
+	//fmt.Println("Allergy: ", a6Allergy)
+	//fmt.Println("Concerns: ", a7Concerns)
+	//fmt.Println("Benefits: ", a8Benefits)
+	//fmt.Println("********************  Answers  ******************** \n\n ")
+	////todo: ------------------------------------------------------------------------------------------------------------
 
-	var a7Concerns []string
-	for _, concern := range userAnswers.SkinConcern {
-		a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
-	}
-
-	var a8Benefits []string
-	for _, benefit := range userAnswers.ProductBenefit {
-		a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
-	}
-
-	fmt.Println("\n\n ********************  Answers  ********************")
-	fmt.Println("Skin type: ", a1SkinType)
-	fmt.Println("Sensitivity: ", a2SkinSensitivity)
-	fmt.Println("Acne: ", a3Acne)
-	fmt.Println("Age: ", a4Age)
-	fmt.Println("Preference: ", a5Preference)
-	fmt.Println("Allergy: ", a6Allergy)
-	fmt.Println("Concerns: ", a7Concerns)
-	fmt.Println("Benefits: ", a8Benefits)
-	fmt.Println("********************  Answers  ******************** \n\n ")
-	//todo: ------------------------------------------------------------------------------------------------------------
-
-	err := gc.geniusData.SaveQuiz(ctx.Context(), dbmodel.UserQuiz{
+	err = gc.geniusData.SaveQuiz(ctx.Context(), dbmodel.UserQuiz{
 		UserId:             userId,
-		SkinType:           a1SkinType,
-		SkinSensitivity:    a2SkinSensitivity,
-		AcneBreakouts:      a3Acne,
-		ProductPreferences: a5Preference,
-		FreeFromAllergens:  a6Allergy,
-		SkinConcern:        a7Concerns,
-		Age:                a4Age,
-		ProductBenefit:     a8Benefits,
+		SkinType:           qa.SkinType,
+		SkinSensitivity:    qa.SkinSensitivity,
+		AcneBreakouts:      qa.AcneProne,
+		ProductPreferences: qa.Preferences,
+		FreeFromAllergens:  qa.Allergies,
+		SkinConcern:        qa.Concerns,
+		Age:                qa.Age,
+		ProductBenefit:     qa.Benefits,
 	})
 
 	if err != nil {
@@ -351,6 +382,7 @@ func (gc *GeniusController) SaveQuiz(ctx *fiber.Ctx) error {
 			fmt.Sprintf("failed to save user quiz, err: %+v", err))
 		return ctx.Status(http.StatusInternalServerError).SendString("failed to save quiz")
 	}
+	logger.New().Info(ctx.Context(), packageLogPrefix+fmt.Sprintf("saved quiz for user %s", userId))
 
 	return ctx.Status(http.StatusAccepted).JSON(nil)
 }

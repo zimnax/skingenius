@@ -9,6 +9,17 @@ import (
 	"skingenius/logger"
 )
 
+type QuizIngredients struct {
+	SkinTypeIng           []Ingredient
+	SkinSensitivityIng    []Ingredient
+	AcneBreakoutsIng      []Ingredient
+	ProductPreferencesIng []Ingredient
+	FreeFromAllergensIng  []Ingredient
+	SkinConcernIng        []Ingredient
+	AgeIng                []Ingredient
+	ProductBenefitIng     []Ingredient
+}
+
 type UserRecommendations struct {
 	UserId    string  `gorm:"primaryKey"`
 	ProductId int     `gorm:"primaryKey"`

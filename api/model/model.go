@@ -13,6 +13,17 @@ type QuizAnswers struct {
 	ProductBenefit     []string `json:"benefits"`
 }
 
+type DBAnswerModel struct {
+	SkinType        string
+	SkinSensitivity string
+	AcneProne       string
+	Age             int
+	Preferences     []string
+	Allergies       []string
+	Concerns        []string
+	Benefits        []string
+}
+
 type SaveRecommendationsReq struct {
 	Products []Recommendation `json:"recommendations"`
 }
