@@ -101,6 +101,11 @@ func (g GormConnector) SaveRecommendations(ctx context.Context, ur []model.UserR
 	return err
 }
 
+func (g GormConnector) DeleteRecommendations(ctx context.Context, userId string) error {
+	return g.db.Where("user_id = ?", userId).Delete(&model.UserRecommendations{}).Error
+	//return g.db.Delete(&model.UserRecommendations{}, userId).Error
+}
+
 func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, error) {
 	var products []model.Product
 	if err := g.db.Preload("Ingredients").Find(&products).Error; err != nil {

@@ -314,6 +314,13 @@ func (gc *GeniusController) SaveQuiz(ctx *fiber.Ctx) error {
 			})
 		}
 
+		if err = gc.geniusData.DeleteRecommendations(ctx.Context(), userId); err != nil {
+			logger.New().Error(ctx.Context(), packageLogPrefix+
+				fmt.Sprintf("failed to delete user recommendations, err: %+v", err))
+			return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to delete user recommendations, err: %v", err))
+
+		}
+
 		if err = gc.geniusData.SaveRecommendations(ctx.Context(), rs); err != nil {
 			logger.New().Error(ctx.Context(), packageLogPrefix+
 				fmt.Sprintf("failed to save user recommendations, err: %+v", err))
