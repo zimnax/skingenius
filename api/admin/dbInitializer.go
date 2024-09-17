@@ -125,17 +125,8 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			logger.New().Info(context.Background(), packageLogPrefix+fmt.Sprintf("Processing ingredient [%s]", name))
 
 			dbIngredient, findErr := dbClient.FindIngredientByName(context.Background(), name)
-			//dbIngredient:= model.Ingredient{}
-
 			fmt.Println(fmt.Sprintf("Ingredient [%s] found: %v", name, dbIngredient))
 			fmt.Println(fmt.Sprintf("Ingredient [%s] found error: %v", name, findErr))
-
-			//if dbIngredient.Name != "3-o-ethyl ascorbic acid" {
-			//	continue
-			//}
-			//if dbIngredient.Name != "1, 2-hexanediol 1" {
-			//	continue
-			//}
 
 			if findErr == nil && !updateExisting {
 				fmt.Println(fmt.Sprintf("Ingredient [%s] already exists, upadeExisting:%t ingredient: [%v]", name, updateExisting, dbIngredient))
@@ -158,7 +149,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 
 			// in case if  ingredient does not exist, dbClient would return empty object
 			if dbIngredient.Name != "" {
-				//logger.New().Info(ctx, packageLogPrefix+fmt.Sprintf("Found existing ingredient [%s], doing update", name))
+				logger.New().Info(context.Background(), packageLogPrefix+fmt.Sprintf("Found existing ingredient [%s], doing update", name))
 			}
 
 			dbIngredient.Name = name
