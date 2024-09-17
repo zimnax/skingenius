@@ -57,6 +57,84 @@ func Test_FindExistingIngredient(t *testing.T) {
 	}
 }
 
+func Test_SaveExistingIngredient(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	i := model.Ingredient{Name: "testIngredient", INCIName: "inciName_1"}
+
+	if saveErr := db.SaveIngredient(context.Background(), &i); saveErr != nil {
+		t.Fatalf("failed to save ingredient, error:%v", saveErr)
+	}
+
+	i.INCIName = "inciName_2"
+	if saveErr := db.SaveIngredient(context.Background(), &i); saveErr != nil {
+		t.Fatalf("failed to save ingredient, error:%v", saveErr)
+	}
+
+	ing, findErr := db.FindIngredientByName(context.Background(), "testIngredient")
+	if ing != nil {
+		fmt.Println(fmt.Sprintf("ingredient:: %v", ing))
+	}
+
+	if findErr != nil {
+		t.Fatalf("error should be nil")
+	}
+
+	if ing.INCIName != "inciName_2" {
+		t.Fatalf("inci name should be updated")
+	}
+
+	if deleteErr := db.DeleteIngredientByName(context.Background(), "testIngredient"); deleteErr != nil {
+		t.Fatalf("failed to delete ingredient, err: %v", deleteErr)
+	}
+
+	removedIng, findErrAfterDelete := db.FindIngredientByName(context.Background(), "testIngredient")
+	if removedIng.Name != "" {
+		t.Fatalf("ingredient should be nil, current: %v", removedIng)
+	}
+
+	if findErrAfterDelete == nil {
+		t.Fatalf("error should not be nil")
+	}
+}
+
+func Test_SaveIngredient_LowConcentrationTest(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	i := model.Ingredient{Name: "testIngredient", Concentrations: "0.5-10%", EffectiveAtLowConcentration: model.EffectiveYes}
+
+	if saveErr := db.SaveIngredient(context.Background(), &i); saveErr != nil {
+		t.Fatalf("failed to save ingredient, error:%v", saveErr)
+	}
+
+	ing, findErr := db.FindIngredientByName(context.Background(), "testIngredient")
+	if ing != nil {
+		fmt.Println(fmt.Sprintf("ingredient:: %v", ing))
+	}
+
+	if findErr != nil {
+		t.Fatalf("error should be nil")
+	}
+
+	if ing.EffectiveAtLowConcentration != model.EffectiveYes {
+		t.Fatal("EffectiveAtLowConcentration should be Yes")
+	}
+
+	if ing.Concentrations != "0.5-10%" {
+		t.Fatal("EffectiveAtLowConcentration should be 0.5-10%")
+	}
+
+	fmt.Println(fmt.Sprintf("ingredient:: %v", ing))
+}
+
 /*
 intention of this test is to check is the ingredients are being retrieved with skinconcerns
 */

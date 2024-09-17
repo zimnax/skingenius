@@ -415,8 +415,14 @@ func (g GormConnector) SetupJoinTables() error {
 //}
 
 func (g GormConnector) SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error {
-	db := g.db.WithContext(ctx).Save(ingredient)
-	return db.Error
+	return g.db.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "id"}},
+		UpdateAll: true,
+	}).Create(&ingredient).Error
+}
+
+func (g GormConnector) DeleteIngredientByName(ctx context.Context, name string) error {
+	return g.db.Where("name = ?", name).Delete(&model.Ingredient{}).Error
 }
 
 func (g GormConnector) GetAllIngredients(ctx context.Context) ([]model.Ingredient, error) {

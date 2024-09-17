@@ -445,3 +445,37 @@ func skinConcernByName(allConcerns []model.Skinconcern, name model.SkinconcernVa
 	}
 	return nil
 }
+
+//func assignEffectiveness(e string) string {
+//	var effectiveness model.ConcentrationEffectiveness
+//
+//	switch strings.ToLower(e) {
+//	case string(model.EffectiveYes):
+//		effectiveness = model.EffectiveYes
+//	case string(model.EffectiveNo):
+//		effectiveness = model.EffectiveNo
+//	case string(model.EffectiveModerate):
+//		effectiveness = model.EffectiveModerate
+//	default:
+//		effectiveness = model.EffectiveUnknown
+//	}
+//
+//	return string(effectiveness)
+//}
+
+func assignEffectiveness(e string) model.ConcentrationEffectiveness {
+	var effectiveness model.ConcentrationEffectiveness
+
+	switch strings.ToLower(e) {
+	case string(model.EffectiveYes):
+		effectiveness = model.EffectiveYes
+	case string(model.EffectiveNo):
+		effectiveness = model.EffectiveNo
+	case string(model.EffectiveModerate):
+		effectiveness = model.EffectiveModerate
+	default:
+		effectiveness = model.EffectiveUnknown
+	}
+
+	return effectiveness
+}

@@ -8,13 +8,12 @@ import (
 const dbname = "skingenius_new"
 
 type Connector interface {
-	//FilerHardParameters(context.Context, string, string, string) ([]string, error)
 	SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error
 	FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error)
 	FindIngredientByAlias(ctx context.Context, alias string) (*model.Ingredient, error)
 	FindIngredientByINCIName(ctx context.Context, inci string) (*model.Ingredient, error)
-	//SavePreference(ctx context.Context, preference *model.Preference) error
 	GetSkinConcernDescriptionByIngredients(ctx context.Context, ingredients []string, concern string) ([]model.SkinconcernToIngredientDescription, error)
+	DeleteIngredientByName(ctx context.Context, name string) error
 
 	SaveProduct(ctx context.Context, product *model.Product) error
 	FindAllProducts(ctx context.Context) ([]model.Product, error)

@@ -65,16 +65,19 @@ func FindTop3Products(products map[string]int) []string {
 func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]float64 {
 	countMap := make(map[string]int)
 	scoreMap := make(map[string]float64)
+	uniqueFullIngredients := make(map[string]model.Ingredient)
 
 	var ingredientArrays int
 
 	for _, answerIngredients := range ingredients {
 
-		if len(answerIngredients) > 0 { // skip empty arrays in no Allergies, No concerns, no Benefits ets...
+		if len(answerIngredients) > 0 { // skip empty arrays if no Allergies, no Concerns, no Benefits etc...
 			ingredientArrays++
 		}
 
 		for _, ingredient := range answerIngredients {
+			uniqueFullIngredients[ingredient.Name] = ingredient // collect all ingredients (we need only unique ones, can be optimized later)
+
 			countMap[ingredient.Name]++
 			scoreMap[ingredient.Name] = scoreMap[ingredient.Name] + ingredient.Score
 		}
@@ -88,9 +91,31 @@ func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]flo
 		}
 	}
 
+	// If ingredient has effective at low concentration YES: *1, moderate effective *0,5, no * 0
+	for _, fullIngredient := range uniqueFullIngredients {
+		if _, ok := result[fullIngredient.Name]; ok {
+			switch fullIngredient.EffectiveAtLowConcentration {
+			case model.EffectiveYes:
+				result[fullIngredient.Name] = result[fullIngredient.Name] * float64(1)
+			case model.EffectiveModerate:
+				result[fullIngredient.Name] = result[fullIngredient.Name] * float64(0.5)
+			case model.EffectiveNo:
+				result[fullIngredient.Name] = result[fullIngredient.Name] * float64(0)
+			}
+		}
+	}
+
 	return result
 }
 
+/*
+*
+If ingredient is in the product:
+
+1. add the score to the product
+2. multiply the score by 6 if the ingredient is the first in the product, 5 if the second, 4 if the third, 3 if the fourth, 2 if the fifth, 1 if the sixth
+3. divide by the number of ingredients in the product
+*/
 func matchProductsAndIngredients(ingredients map[string]float64, allProducts []model.Product) map[string]float64 {
 	productScores := make(map[string]float64)
 	for productIngredientPlace, product := range allProducts {

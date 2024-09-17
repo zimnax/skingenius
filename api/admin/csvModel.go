@@ -217,6 +217,8 @@ const (
 	ReducesFineLines
 	AntioxidantProtection
 	SkinBarrierProtection
+	Concentrations
+	Effective_at_low_concentrations
 )
 
 const (

@@ -9,9 +9,12 @@ import (
 	"skingenius/admin/image"
 	"skingenius/database"
 	"skingenius/database/model"
+	"skingenius/logger"
 	"strings"
 	"time"
 )
+
+const packageLogPrefix = "admin: "
 
 func storeProducts(ctx context.Context, dbClient database.Connector, filepath string) {
 	records := readCsvFile(filepath)
@@ -94,7 +97,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 	fmt.Println(fmt.Sprintf("Missing images: %#v ", missingImages))
 }
 
-func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string) {
+func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string, updateExisting bool) {
 	var err error
 
 	if err = dbClient.SetupJoinTables(); err != nil {
@@ -118,9 +121,24 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			fmt.Println(record)
 			ctx := context.WithValue(context.Background(), "key", "val")
 
-			fmt.Println(fmt.Sprintf("Processing ingredient [%s]", record[IngredientName]))
-			if ing, findErr := dbClient.FindIngredientByName(ctx, strings.ToLower(record[IngredientName])); findErr == nil {
-				fmt.Println(fmt.Sprintf("Ingredient [%s] already exists, ingredient: [%v]", record[IngredientName], ing))
+			name := strings.ReplaceAll(strings.TrimSpace(strings.ToLower(record[IngredientName])), "*", "")
+			logger.New().Info(context.Background(), packageLogPrefix+fmt.Sprintf("Processing ingredient [%s]", name))
+
+			dbIngredient, findErr := dbClient.FindIngredientByName(context.Background(), name)
+			//dbIngredient:= model.Ingredient{}
+
+			fmt.Println(fmt.Sprintf("Ingredient [%s] found: %v", name, dbIngredient))
+			fmt.Println(fmt.Sprintf("Ingredient [%s] found error: %v", name, findErr))
+
+			//if dbIngredient.Name != "3-o-ethyl ascorbic acid" {
+			//	continue
+			//}
+			//if dbIngredient.Name != "1, 2-hexanediol 1" {
+			//	continue
+			//}
+
+			if findErr == nil && !updateExisting {
+				fmt.Println(fmt.Sprintf("Ingredient [%s] already exists, upadeExisting:%t ingredient: [%v]", name, updateExisting, dbIngredient))
 				continue
 			}
 
@@ -138,28 +156,51 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 				aliases[n] = strings.ToLower(strings.TrimSpace(alias))
 			}
 
-			name := strings.ReplaceAll(strings.TrimSpace(strings.ToLower(record[IngredientName])), "*", "")
-			ingredient := model.Ingredient{
-				Name: name,
-				Type: strings.ToLower(record[Active_Inactive]),
-				//PubchemId: record[PubChemCID],
-				//CasNumber: record[CASNumber],
-				ECNumber: "",
-				INCIName: record[INCIName],
-				Synonyms: aliases,
-
-				Preferences:       ipref,
-				Skintypes:         iskintype,
-				Skinsensitivities: iskinSens,
-				Acnebreakouts:     iacneBreakouts,
-				Allergies:         iallergies,
-				Skinconcerns:      iskinConcerns,
-				Ages:              iages,
-				Benefits:          ibenefits,
+			// in case if  ingredient does not exist, dbClient would return empty object
+			if dbIngredient.Name != "" {
+				//logger.New().Info(ctx, packageLogPrefix+fmt.Sprintf("Found existing ingredient [%s], doing update", name))
 			}
 
-			dbClient.SaveIngredient(ctx, &ingredient)
-			fmt.Println(fmt.Sprintf("Ingredient [%s] saved", ingredient.Name))
+			dbIngredient.Name = name
+			dbIngredient.Type = strings.ToLower(record[Active_Inactive])
+			//PubchemId: record[PubChemCID],
+			//CasNumber: record[CASNumber],
+			dbIngredient.ECNumber = ""
+			dbIngredient.INCIName = record[INCIName]
+			dbIngredient.Synonyms = aliases
+			dbIngredient.Concentrations = record[Concentrations]
+			dbIngredient.EffectiveAtLowConcentration = assignEffectiveness(record[Effective_at_low_concentrations])
+
+			dbIngredient.Preferences = ipref
+			dbIngredient.Skintypes = iskintype
+			dbIngredient.Skinsensitivities = iskinSens
+			dbIngredient.Acnebreakouts = iacneBreakouts
+			dbIngredient.Allergies = iallergies
+			dbIngredient.Skinconcerns = iskinConcerns
+			dbIngredient.Ages = iages
+			dbIngredient.Benefits = ibenefits
+
+			//ingredient := model.Ingredient{
+			//	Name: name,
+			//	Type: strings.ToLower(record[Active_Inactive]),
+			//	//PubchemId: record[PubChemCID],
+			//	//CasNumber: record[CASNumber],
+			//	ECNumber: "",
+			//	INCIName: record[INCIName],
+			//	Synonyms: aliases,
+			//
+			//	Preferences:       ipref,
+			//	Skintypes:         iskintype,
+			//	Skinsensitivities: iskinSens,
+			//	Acnebreakouts:     iacneBreakouts,
+			//	Allergies:         iallergies,
+			//	Skinconcerns:      iskinConcerns,
+			//	Ages:              iages,
+			//	Benefits:          ibenefits,
+			//}
+
+			dbClient.SaveIngredient(ctx, dbIngredient)
+			fmt.Println(fmt.Sprintf("Ingredient [%s] saved or updated", dbIngredient.Name))
 			time.Sleep(200 * time.Millisecond)
 		}
 	}

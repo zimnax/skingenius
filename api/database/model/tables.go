@@ -50,26 +50,49 @@ type Product struct {
 }
 
 type Ingredient struct {
-	ID                uint `gorm:"primaryKey;autoIncrement"`
-	Name              string
-	PubchemId         string
-	CasNumber         string
-	ECNumber          string
-	INCIName          string
-	Type              string
-	Synonyms          pq.StringArray    `gorm:"type:text[]"`
-	Skintypes         []Skintype        `gorm:"many2many:ingredient_skintypes;"`
-	Skinsensitivities []Skinsensitivity `gorm:"many2many:ingredient_skinsensitivities;"`
-	Acnebreakouts     []Acnebreakout    `gorm:"many2many:ingredient_acnebreakouts;"`
-	Preferences       []Preference      `gorm:"many2many:ingredient_preferences;"`
-	Allergies         []Allergy         `gorm:"many2many:ingredient_allergies;"`
-	Skinconcerns      []Skinconcern     `gorm:"many2many:ingredient_skinconcerns;"`
-	Ages              []Age             `gorm:"many2many:ingredient_ages;"`
-	Benefits          []Benefit         `gorm:"many2many:ingredient_benefits;"`
+	ID                          uint `gorm:"primaryKey;autoIncrement"`
+	Name                        string
+	PubchemId                   string
+	CasNumber                   string
+	ECNumber                    string
+	INCIName                    string
+	Type                        string
+	Synonyms                    pq.StringArray    `gorm:"type:text[]"`
+	Skintypes                   []Skintype        `gorm:"many2many:ingredient_skintypes;"`
+	Skinsensitivities           []Skinsensitivity `gorm:"many2many:ingredient_skinsensitivities;"`
+	Acnebreakouts               []Acnebreakout    `gorm:"many2many:ingredient_acnebreakouts;"`
+	Preferences                 []Preference      `gorm:"many2many:ingredient_preferences;"`
+	Allergies                   []Allergy         `gorm:"many2many:ingredient_allergies;"`
+	Skinconcerns                []Skinconcern     `gorm:"many2many:ingredient_skinconcerns;"`
+	Ages                        []Age             `gorm:"many2many:ingredient_ages;"`
+	Benefits                    []Benefit         `gorm:"many2many:ingredient_benefits;"`
+	Concentrations              string
+	EffectiveAtLowConcentration ConcentrationEffectiveness
 
 	Score              float64
 	ConcernDescription string `sql:"-"`
 }
+
+//type IngredientScoreEffectiveness struct {
+//	Score         float64
+//	Effectiveness ConcentrationEffectiveness
+//}
+//
+//func (ise IngredientScoreEffectiveness) AddScoreAndEff(score float64, effectiveness ConcentrationEffectiveness) IngredientScoreEffectiveness {
+//	ise.Score = ise.Score + score
+//	ise.Effectiveness = effectiveness
+//
+//	return ise
+//}
+
+type ConcentrationEffectiveness string
+
+const (
+	EffectiveYes      ConcentrationEffectiveness = "yes"
+	EffectiveNo       ConcentrationEffectiveness = "no"
+	EffectiveModerate ConcentrationEffectiveness = "moderately effective"
+	EffectiveUnknown  ConcentrationEffectiveness = "unknown"
+)
 
 type SkinconcernToIngredientDescription struct {
 	Ingredientname string
@@ -449,7 +472,7 @@ func (ip *IngredientAge) BeforeCreate(db *gorm.DB) error {
 	if customValue, ok := db.Statement.Context.Value(AgeCtxKey(ip.AgeID)).(bool); ok {
 		ip.Score = customValue
 	} else {
-		fmt.Println(fmt.Sprintf("ERROR"))
+		fmt.Println(fmt.Sprintf("ERROR, failed to get Age value from context by key: %s", AgeCtxKey(ip.AgeID)))
 	}
 	return nil
 }
