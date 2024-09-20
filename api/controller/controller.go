@@ -410,3 +410,19 @@ func (gc *GeniusController) GetQuiz(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return quiz: %#v", quiz))
 	return ctx.Status(http.StatusAccepted).JSON(quiz)
 }
+
+func (gc *GeniusController) Search(ctx *fiber.Ctx) error {
+	logger.New().Info(ctx.Context(), packageLogPrefix+"Search route")
+
+	searchReq := ctx.Params("request")
+	logger.New().Debug(ctx.Context(), fmt.Sprintf(packageLogPrefix+"searching for: %#v", searchReq))
+
+	searchRes, err := gc.geniusData.LiveSearch(ctx.Context(), searchReq)
+	if err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to search, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString("failed to execute search")
+	}
+
+	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return search results: %#v", searchRes))
+	return ctx.Status(http.StatusOK).JSON(searchRes)
+}

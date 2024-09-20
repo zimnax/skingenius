@@ -209,3 +209,18 @@ func TestGormConnector_FindIngredientByINCIName(t *testing.T) {
 
 	fmt.Println(i)
 }
+
+func Test_FuzzySearchWithLike(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	products, err := db.LiveSearch(context.Background(), "mois")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(products)
+}

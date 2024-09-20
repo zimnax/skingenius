@@ -48,4 +48,6 @@ type Connector interface {
 
 	SaveQuiz(ctx context.Context, quiz model.UserQuiz) error
 	GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error)
+
+	LiveSearch(ctx context.Context, search string) ([]model.Product, error)
 }

@@ -21,6 +21,16 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) LiveSearch(ctx context.Context, search string) ([]model.Product, error) {
+	//select name, brand from products where name LIKE '%bra%' OR brand LIKE '%bra%'
+	//select name, brand from products where ts @@ websearch_to_tsquery('english', 'aesop');
+	var ps []model.Product
+
+	err := g.db.Select("products.name, products.brand").
+		Where("name ILIKE ?", fmt.Sprintf("%%%s%%", search)).Or("brand ILIKE ?", fmt.Sprintf("%%%s%%", search)).Limit(10).Find(&ps).Error
+	return ps, err
+}
+
 func (g GormConnector) FindIngredientByINCIName(ctx context.Context, inci string) (*model.Ingredient, error) {
 	var ingredient model.Ingredient
 	err := g.db.WithContext(ctx).Where("inci_name = ?", inci).First(&ingredient).Error
@@ -523,7 +533,6 @@ func NewGormClient(host string, port int, user, password string, migrate bool) (
 		if migrationErr := automigrate(db); migrationErr != nil {
 			return nil, migrationErr
 		}
-
 	}
 
 	return &GormConnector{db: db}, nil
@@ -587,6 +596,26 @@ func automigrate(db *gorm.DB) error {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [UserQuiz], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [UserQuiz], error: %v", err))
 	}
+
+	/*
+			LIVE SEARCH
+
+			alter table products ADD column ts tsvector
+			generated always as (
+			to_tsvector('english', products.name) || ' ' ||
+			to_tsvector('english', products.brand)
+			) STORED;
+
+			create index ts_idx on products using GIN (ts);
+			select name, brand from products where ts @@ websearch_to_tsquery('english', 'hydr');
+
+
+		CREATE EXTENSION pg_trgm // check if needed
+
+
+		select name, brand from products where name LIKE '%bra%' OR brand LIKE '%bra%'
+
+	*/
 
 	logger.New().Info(context.Background(), "Auto-migration finished successfully")
 	return nil
