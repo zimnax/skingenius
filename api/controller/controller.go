@@ -432,7 +432,7 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 
 	userId := ctx.Params("id")
 	logger.New().Debug(ctx.Context(), packageLogPrefix+"userID: %s", userId)
-	logger.New().Debug(ctx.Context(), packageLogPrefix+"req body: %s", string(ctx.Body())))
+	logger.New().Debug(ctx.Context(), packageLogPrefix+"req body: %s", string(ctx.Body()))
 
 	routine := model.UserRoutine{}
 	if err := ctx.BodyParser(&routine); err != nil {
@@ -462,7 +462,6 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"saved user routine: [%s]", userId))
 	return ctx.Status(http.StatusOK).JSON(nil)
 }
-
 
 func (gc *GeniusController) GetUserRoutine(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), packageLogPrefix+"GetUserRoutine route")
