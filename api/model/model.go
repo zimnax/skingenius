@@ -31,3 +31,11 @@ type Recommendation struct {
 	Id    int     `json:"id"`
 	Score float64 `json:"score"`
 }
+
+type UserRoutine struct {
+	Products    []int32
+	TimeOfDay   string
+	TimesPerDay int
+	HowLong     string
+	Note        string
+}

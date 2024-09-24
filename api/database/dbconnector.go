@@ -20,6 +20,7 @@ type Connector interface {
 	FindProductByName(ctx context.Context, name string) (*model.Product, error)
 	FindAllProductsWithIngredients(ctx context.Context, ingredients []string, accuracy uint) ([]model.Product, error)
 	FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error)
+	DeleteProductByName(ctx context.Context, name string) error
 
 	GetAllIngredients(context.Context) ([]model.Ingredient, error)
 	GetAllSkintypes(context.Context) ([]model.Skintype, error)
@@ -50,4 +51,8 @@ type Connector interface {
 	GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error)
 
 	LiveSearch(ctx context.Context, search string) ([]model.Product, error)
+
+	SaveUserRoutine(ctx context.Context, routine model.UserRoutine) error
+	GetUserRoutine(ctx context.Context, userId string) (model.UserRoutine, error)
+	DeleteUserRoutine(ctx context.Context, userId string) error
 }

@@ -9,6 +9,20 @@ import (
 	"skingenius/logger"
 )
 
+type UserRoutine struct {
+	UserId      string    `gorm:"primaryKey"`
+	Products    []Product `gorm:"many2many:user_routine_products;"`
+	TimeOfDay   string
+	TimesPerDay int
+	HowLong     string
+	Note        string
+}
+
+//func (u *UserRoutine) BeforeDelete(tx *gorm.DB) (err error) {
+//	fmt.Println(fmt.Sprintf("Before delete UserRoutine, userid:[%s] ", u.UserId))
+//	return tx.Exec("DELETE FROM user_routine_products WHERE user_routine_user_id = ?", u.UserId).Error
+//}
+
 type QuizIngredients struct {
 	SkinTypeIng           []Ingredient
 	SkinSensitivityIng    []Ingredient

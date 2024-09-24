@@ -224,3 +224,88 @@ func Test_FuzzySearchWithLike(t *testing.T) {
 
 	fmt.Println(products)
 }
+
+func Test_SaveUserRoutine(t *testing.T) {
+	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	ps := []model.Product{
+		{Name: "product01"},
+		{Name: "product02"},
+		{Name: "product03"},
+		{Name: "product04"},
+	}
+
+	var savedProducts []model.Product
+
+	for _, p := range ps {
+		if err := db.SaveProduct(context.Background(), &p); err != nil {
+			t.Fatal(err)
+		}
+
+		dbProduct, err := db.FindProductByName(context.Background(), p.Name)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		savedProducts = append(savedProducts, *dbProduct)
+	}
+
+	defer func() {
+		if delErr := db.DeleteUserRoutine(context.Background(), "1"); delErr != nil {
+			t.Fatal(delErr)
+		}
+
+		for _, p := range ps {
+			if err := db.DeleteProductByName(context.Background(), p.Name); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}()
+
+	// start of the test
+
+	r := model.UserRoutine{
+		UserId:      "1",
+		Products:    savedProducts[:2],
+		TimeOfDay:   "Day",
+		TimesPerDay: 1,
+		HowLong:     "1 month",
+		Note:        "user note",
+	}
+
+	for _, product := range r.Products {
+		fmt.Println(fmt.Sprintf("product to save first batch: %#v", product))
+	}
+
+	err = db.SaveUserRoutine(context.Background(), r)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ur, err := db.GetUserRoutine(context.Background(), "1")
+	if len(ur.Products) != 2 {
+		t.Fatalf("expected 2 products, got %d", len(ur.Products))
+	}
+
+	ur.Products = savedProducts[2:]
+
+	for _, product := range ur.Products {
+		fmt.Println(fmt.Sprintf("product to save second batch: %#v", product))
+	}
+
+	err = db.SaveUserRoutine(context.Background(), ur)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ur2, err := db.GetUserRoutine(context.Background(), "1")
+	if len(ur2.Products) != 2 {
+		t.Fatalf("expected 2 products, got %d, %#v", len(ur2.Products), ur2.Products)
+	}
+
+	fmt.Println(fmt.Sprintf("user routine: %#v", ur2))
+}
