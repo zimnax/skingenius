@@ -14,6 +14,7 @@ func GeniusRoutes(a *fiber.App, gc *controller.GeniusController) {
 	route.Get("/user/:id/recommendation", gc.GetRecommendation)
 
 	route.Post("/user/:id/routine", gc.SaveUserRoutine)
+	route.Get("/user/:id/routine", gc.GetUserRoutine)
 
 	route.Post("/user/:id/quiz", gc.SaveQuiz)
 	route.Get("/user/:id/quiz", gc.GetQuiz)

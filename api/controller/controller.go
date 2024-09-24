@@ -462,3 +462,20 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"saved user routine: [%s]", userId))
 	return ctx.Status(http.StatusOK).JSON(nil)
 }
+
+
+func (gc *GeniusController) GetUserRoutine(ctx *fiber.Ctx) error {
+	logger.New().Info(ctx.Context(), packageLogPrefix+"GetUserRoutine route")
+
+	userId := ctx.Params("id")
+	logger.New().Debug(ctx.Context(), packageLogPrefix+"userID: %s", userId)
+
+	routine, err := gc.geniusData.GetUserRoutine(ctx.Context(), userId)
+	if err != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to get user routine, err: %+v", err))
+		return ctx.Status(http.StatusInternalServerError).SendString("failed to get user routine")
+	}
+
+	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return user routine: %#v", routine))
+	return ctx.Status(http.StatusOK).JSON(routine)
+}
