@@ -70,7 +70,7 @@ func (g GormConnector) LiveSearch(ctx context.Context, search string) ([]model.P
 	//select name, brand from products where ts @@ websearch_to_tsquery('english', 'aesop');
 	var ps []model.Product
 
-	err := g.db.Select("products.id, products.name, products.brand, product.image").
+	err := g.db.Select("products.id, products.name, products.brand, products.image").
 		Where("name ILIKE ?", fmt.Sprintf("%%%s%%", search)).Or("brand ILIKE ?", fmt.Sprintf("%%%s%%", search)).Limit(10).Find(&ps).Error
 	return ps, err
 }
