@@ -13,7 +13,7 @@ type UserRoutine struct {
 	UserId      string    `gorm:"primaryKey"`
 	Products    []Product `gorm:"many2many:user_routine_products;"`
 	TimeOfDay   string
-	TimesPerDay int
+	TimesPerDay string
 	HowLong     string
 	Note        string
 }

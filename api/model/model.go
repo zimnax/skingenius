@@ -35,7 +35,7 @@ type Recommendation struct {
 type UserRoutine struct {
 	Products    []int32
 	TimeOfDay   string
-	TimesPerDay int
+	TimesPerDay string
 	HowLong     string
 	Note        string
 }

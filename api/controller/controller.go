@@ -423,7 +423,7 @@ func (gc *GeniusController) Search(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusInternalServerError).SendString("failed to execute search")
 	}
 
-	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return search results: %#v", searchRes))
+	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return search results: %d", len(searchRes)))
 	return ctx.Status(http.StatusOK).JSON(searchRes)
 }
 
@@ -431,13 +431,13 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveUserRoutine route")
 
 	userId := ctx.Params("id")
-	logger.New().Debug(ctx.Context(), packageLogPrefix+"userID: %s", userId)
-	logger.New().Debug(ctx.Context(), packageLogPrefix+"req body: %s", string(ctx.Body()))
+	logger.New().Info(ctx.Context(), packageLogPrefix+"userID: %s", userId)
+	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveUserRoutine req body: %s", string(ctx.Body()))
 
 	routine := model.UserRoutine{}
 	if err := ctx.BodyParser(&routine); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
-			fmt.Sprintf("failed to unmarshall save routine req, err: %+v", err))
+			fmt.Sprintf("failed to unmarshall save routine req [%s] err: %+v", ctx.Body(), err))
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to unmarshall save routine req, err: %v", err))
 	}
 
