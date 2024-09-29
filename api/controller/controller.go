@@ -437,7 +437,7 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 	routine := model.UserRoutine{}
 	if err := ctx.BodyParser(&routine); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
-			fmt.Sprintf("failed to unmarshall save routine req [%s] err: %+v", ctx.Body(), err))
+			fmt.Sprintf("failed to unmarshall save routine \nreq [%s] \nerr: %+v", string(ctx.Body()), err))
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to unmarshall save routine req, err: %v", err))
 	}
 
