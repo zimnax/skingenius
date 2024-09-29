@@ -434,6 +434,8 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), packageLogPrefix+"userID: %s", userId)
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveUserRoutine req body: %s", string(ctx.Body()))
 
+	fmt.Println("Raw request body:", string(ctx.Body()))
+
 	routine := model.UserRoutine{}
 	if err := ctx.BodyParser(&routine); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
