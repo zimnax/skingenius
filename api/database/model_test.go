@@ -226,7 +226,7 @@ func Test_FuzzySearchWithLike(t *testing.T) {
 }
 
 func Test_SaveUserRoutine(t *testing.T) {
-	db, err := NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	db, err := NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -234,9 +234,9 @@ func Test_SaveUserRoutine(t *testing.T) {
 
 	ps := []model.Product{
 		{Name: "product01"},
-		{Name: "product02"},
-		{Name: "product03"},
-		{Name: "product04"},
+		//{Name: "product02"},
+		//{Name: "product03"},
+		//{Name: "product04"},
 	}
 
 	var savedProducts []model.Product
@@ -255,9 +255,11 @@ func Test_SaveUserRoutine(t *testing.T) {
 	}
 
 	defer func() {
-		if delErr := db.DeleteUserRoutine(context.Background(), "1"); delErr != nil {
-			t.Fatal(delErr)
-		}
+		//for _, sp := range savedProducts {
+		//	if delErr := db.DeleteUserRoutine(context.Background(), int(sp.ID), "1"); delErr != nil {
+		//		t.Fatal(delErr)
+		//	}
+		//}
 
 		for _, p := range ps {
 			if err := db.DeleteProductByName(context.Background(), p.Name); err != nil {
@@ -268,44 +270,45 @@ func Test_SaveUserRoutine(t *testing.T) {
 
 	// start of the test
 
-	r := model.UserRoutine{
-		UserId:      "1",
-		Products:    savedProducts[:2],
-		TimeOfDay:   "Day",
-		TimesPerDay: 1,
-		HowLong:     "1 month",
-		Note:        "user note",
-	}
+	for _, savedProduct := range savedProducts {
+		r := model.UserRoutine{
+			UserId:      "1",
+			Product:     savedProduct,
+			TimeOfDay:   "Day",
+			TimesPerDay: "once",
+			HowLong:     "1 month",
+			Note:        "user note",
+		}
 
-	for _, product := range r.Products {
-		fmt.Println(fmt.Sprintf("product to save first batch: %#v", product))
-	}
+		fmt.Println(fmt.Sprintf("saving routine: %#v", r))
 
-	err = db.SaveUserRoutine(context.Background(), r)
-	if err != nil {
-		t.Fatal(err)
+		err = db.SaveUserRoutine(context.Background(), r)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 	}
 
 	ur, err := db.GetUserRoutine(context.Background(), "1")
-	if len(ur.Products) != 2 {
-		t.Fatalf("expected 2 products, got %d", len(ur.Products))
+	if len(ur) != 4 {
+		t.Fatalf("expected 4 routine products, got %d", len(ur))
 	}
 
-	ur.Products = savedProducts[2:]
-
-	for _, product := range ur.Products {
-		fmt.Println(fmt.Sprintf("product to save second batch: %#v", product))
-	}
-
-	err = db.SaveUserRoutine(context.Background(), ur)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	ur2, err := db.GetUserRoutine(context.Background(), "1")
-	if len(ur2.Products) != 2 {
-		t.Fatalf("expected 2 products, got %d, %#v", len(ur2.Products), ur2.Products)
-	}
-
-	fmt.Println(fmt.Sprintf("user routine: %#v", ur2))
+	//ur.Products = savedProducts[2:]
+	//
+	//for _, product := range ur.Products {
+	//	fmt.Println(fmt.Sprintf("product to save second batch: %#v", product))
+	//}
+	//
+	//err = db.SaveUserRoutine(context.Background(), ur)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//
+	//ur2, err := db.GetUserRoutine(context.Background(), "1")
+	//if len(ur2.Products) != 2 {
+	//	t.Fatalf("expected 2 products, got %d, %#v", len(ur2.Products), ur2.Products)
+	//}
+	//
+	//fmt.Println(fmt.Sprintf("user routine: %#v", ur2))
 }

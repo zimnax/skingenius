@@ -10,8 +10,9 @@ import (
 )
 
 type UserRoutine struct {
-	UserId      string    `gorm:"primaryKey"`
-	Products    []Product `gorm:"many2many:user_routine_products;"`
+	ID          uint `gorm:"primaryKey;autoIncrement"`
+	UserId      string
+	Product     Product `gorm:"many2many:user_routine_products;"`
 	TimeOfDay   string
 	TimesPerDay string
 	HowLong     string

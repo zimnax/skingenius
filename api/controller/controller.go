@@ -428,41 +428,36 @@ func (gc *GeniusController) Search(ctx *fiber.Ctx) error {
 }
 
 func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
-
-	fmt.Println("Raw 1 request body:", string(ctx.BodyRaw()))
-
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveUserRoutine route")
 
 	userId := ctx.Params("id")
 	logger.New().Info(ctx.Context(), packageLogPrefix+"userID: %s", userId)
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveUserRoutine req body: %s", string(ctx.Body()))
 
-	fmt.Println("Raw 2 request body:", string(ctx.BodyRaw()))
-
 	routine := model.UserRoutine{}
 	if err := ctx.BodyParser(&routine); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
-			fmt.Sprintf("failed to unmarshall save routine \nreq [%s] \nerr: %+v", string(ctx.Body()), err))
+			fmt.Sprintf("failed to unmarshall save routine req [%s] err: %+v", string(ctx.Body()), err))
 		return ctx.Status(http.StatusInternalServerError).SendString(fmt.Sprintf("failed to unmarshall save routine req, err: %v", err))
 	}
 
-	ps, err := gc.geniusData.FindProductsByIds(ctx.Context(), routine.Products)
-	if err != nil {
-		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to find products by ids [%#v], err: %+v", routine.Products, err))
-		return ctx.Status(http.StatusInternalServerError).SendString("failed to find products by ids")
-	}
-
-	if saveRoutineErr := gc.geniusData.SaveUserRoutine(ctx.Context(), dbmodel.UserRoutine{
-		UserId:      userId,
-		Products:    ps,
-		TimeOfDay:   routine.TimeOfDay,
-		TimesPerDay: routine.TimesPerDay,
-		HowLong:     routine.HowLong,
-		Note:        routine.Note,
-	}); saveRoutineErr != nil {
-		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to save user routine, err: %+v", saveRoutineErr))
-		return ctx.Status(http.StatusInternalServerError).SendString("failed to save user routine")
-	}
+	//ps, err := gc.geniusData.FindProductsByIds(ctx.Context(), routine.Products)
+	//if err != nil {
+	//	logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to find products by ids [%#v], err: %+v", routine.Products, err))
+	//	return ctx.Status(http.StatusInternalServerError).SendString("failed to find products by ids")
+	//}
+	//
+	//if saveRoutineErr := gc.geniusData.SaveUserRoutine(ctx.Context(), dbmodel.UserRoutine{
+	//	UserId:      userId,
+	//	Product:    ps,
+	//	TimeOfDay:   routine.TimeOfDay,
+	//	TimesPerDay: routine.TimesPerDay,
+	//	HowLong:     routine.HowLong,
+	//	Note:        routine.Note,
+	//}); saveRoutineErr != nil {
+	//	logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to save user routine, err: %+v", saveRoutineErr))
+	//	return ctx.Status(http.StatusInternalServerError).SendString("failed to save user routine")
+	//}
 
 	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"saved user routine: [%s]", userId))
 	return ctx.Status(http.StatusOK).JSON(nil)

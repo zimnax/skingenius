@@ -53,6 +53,6 @@ type Connector interface {
 	LiveSearch(ctx context.Context, search string) ([]model.Product, error)
 
 	SaveUserRoutine(ctx context.Context, routine model.UserRoutine) error
-	GetUserRoutine(ctx context.Context, userId string) (model.UserRoutine, error)
-	DeleteUserRoutine(ctx context.Context, userId string) error
+	GetUserRoutine(ctx context.Context, userId string) ([]model.UserRoutine, error)
+	DeleteUserRoutine(ctx context.Context, productId int, userId string) error
 }

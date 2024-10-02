@@ -20,49 +20,48 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
-func (g GormConnector) DeleteUserRoutine(ctx context.Context, userId string) error {
-	err := g.db.Transaction(func(tx *gorm.DB) error {
-		// do some database operations in the transaction (use 'tx' from this point, not 'db')
-		if err := tx.Exec("DELETE FROM user_routine_products WHERE user_routine_user_id = ?", userId).Error; err != nil {
-			// return any error will rollback
-			return err
-		}
+func (g GormConnector) DeleteUserRoutine(ctx context.Context, productId int, userId string) error {
+	//err := g.db.Transaction(func(tx *gorm.DB) error {
+	//	// do some database operations in the transaction (use 'tx' from this point, not 'db')
+	//	if err := tx.Exec("DELETE FROM user_routine_products WHERE user_routine_user_id = ?", userId).Error; err != nil {
+	//		// return any error will rollback
+	//		return err
+	//	}
+	//
+	//	if err := tx.Where("user_id = ?", userId).Delete(&model.UserRoutine{}).Error; err != nil {
+	//		return err
+	//	}
+	//	// return nil will commit the whole transaction
+	//	return nil
+	//})
 
-		if err := tx.Where("user_id = ?", userId).Delete(&model.UserRoutine{}).Error; err != nil {
-			return err
-		}
-		// return nil will commit the whole transaction
-		return nil
-	})
-
-	return err
+	return g.db.Where("product.id = ? AND user_id = ?", productId, userId).Delete(&model.UserRoutine{}).Error
 }
 
-func (g GormConnector) GetUserRoutine(ctx context.Context, userId string) (model.UserRoutine, error) {
-	var ur model.UserRoutine
+func (g GormConnector) GetUserRoutine(ctx context.Context, userId string) ([]model.UserRoutine, error) {
+	var ur []model.UserRoutine
 
 	err := g.db.WithContext(ctx).Preload("Products").Where("user_id = ?", userId).First(&ur).Error
 	return ur, err
 }
 
 func (g GormConnector) SaveUserRoutine(ctx context.Context, routine model.UserRoutine) error {
-	products := routine.Products
-
-	err := g.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.WithContext(ctx).Model(&routine).Association("Products").Clear(); err != nil {
-			return err
-		}
-
-		routine.Products = products
-
-		return tx.WithContext(ctx).Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "user_id"}},
-			UpdateAll: true,
-		}).Create(&routine).Error
-
-	})
-
-	return err
+	//products := routine.Products
+	//
+	//err := g.db.Transaction(func(tx *gorm.DB) error {
+	//	if err := tx.WithContext(ctx).Model(&routine).Association("Products").Clear(); err != nil {
+	//		return err
+	//	}
+	//
+	//	routine.Products = products
+	//
+	//	return tx.WithContext(ctx).Clauses(clause.OnConflict{
+	//		Columns:   []clause.Column{{Name: "user_id"}},
+	//		UpdateAll: true,
+	//	}).Create(&routine).Error
+	//
+	//})
+	return g.db.WithContext(ctx).Save(&routine).Error
 }
 
 func (g GormConnector) LiveSearch(ctx context.Context, search string) ([]model.Product, error) {
@@ -113,8 +112,23 @@ func (g GormConnector) FindIngredientByAlias(ctx context.Context, alias string) 
 
 func (g GormConnector) GetQuiz(ctx context.Context, userId string) (model.UserQuiz, error) {
 	var uq model.UserQuiz
-	//err := g.db.WithContext(ctx).Find(&uq, userId).Error
 	err := g.db.WithContext(ctx).Where("user_id = ?", userId).First(&uq).Error
+
+	// replace skinconcern db value with user-friendly descriptions
+	dbConcerns := uq.SkinConcern
+	uq.SkinConcern = []string{}
+
+	for _, s := range dbConcerns {
+		uq.SkinConcern = append(uq.SkinConcern, model.SkinConcernToUserFriendlyDescription[s]...)
+	}
+
+	// replace benefits db value with user-friendly descriptions
+
+	dbbenefits := uq.ProductBenefit
+	uq.ProductBenefit = []string{}
+	for _, dbbenefit := range dbbenefits {
+		uq.ProductBenefit = append(uq.ProductBenefit, model.BenefitsToUserFriendlyDescription[dbbenefit]...)
+	}
 
 	return uq, err
 }
