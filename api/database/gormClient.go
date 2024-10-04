@@ -20,7 +20,7 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
-func (g GormConnector) DeleteUserRoutine(ctx context.Context, productId int, userId string) error {
+func (g GormConnector) DeleteUserRoutine(ctx context.Context, userId string, productId int) error {
 	//err := g.db.Transaction(func(tx *gorm.DB) error {
 	//	// do some database operations in the transaction (use 'tx' from this point, not 'db')
 	//	if err := tx.Exec("DELETE FROM user_routine_products WHERE user_routine_user_id = ?", userId).Error; err != nil {
@@ -35,13 +35,45 @@ func (g GormConnector) DeleteUserRoutine(ctx context.Context, productId int, use
 	//	return nil
 	//})
 
-	return g.db.Where("product.id = ? AND user_id = ?", productId, userId).Delete(&model.UserRoutine{}).Error
+	//where := fmt.Sprintf("products.id = %d AND user_id = '%s'", productId, userId)
+	//return g.db.Exec("DELETE FROM user_routines WHERE id IN ( SELECT user_routines.id FROM user_routines INNER JOIN user_routine_products ON user_routines.id = user_routine_products.user_routine_id INNER JOIN products ON user_routine_products.product_id = products.id Where(" + where + "))").Error
+
+	//return g.db.Select("user_routines.id").
+	//	Joins("INNER JOIN user_routine_products ON user_routines.id = user_routine_products.user_routine_id").
+	//	Joins("INNER JOIN products ON user_routine_products.product_id = products.id").
+	//	Where("products.id = ? AND user_id = ?", productId, userId).Delete(&model.UserRoutine{}).Error
+
+	return g.db.WithContext(ctx).Where("user_id = ? AND product_id = ?", userId, productId).Delete(&model.UserRoutine{}).Error
 }
 
 func (g GormConnector) GetUserRoutine(ctx context.Context, userId string) ([]model.UserRoutine, error) {
 	var ur []model.UserRoutine
 
-	err := g.db.WithContext(ctx).Preload("Products").Where("user_id = ?", userId).First(&ur).Error
+	err := g.db.Transaction(func(tx *gorm.DB) error {
+
+		if err := g.db.WithContext(ctx).Where("user_id = ?", userId).Find(&ur).Error; err != nil {
+			return err
+		}
+
+		for i, routine := range ur {
+			var p model.Product
+			if err := g.db.WithContext(ctx).Where("id= ?", routine.ProductID).Find(&p).Error; err != nil {
+				return err
+			}
+			ur[i].Product = p
+		}
+
+		// return nil will commit the whole transaction
+		return nil
+	})
+
+	//err := g.db.WithContext(ctx).Where("user_id = ?", userId).Find(&ur).Error
+
+	//err := g.db.Select("*").
+	//	Table("user_routines").
+	//	Joins("INNER JOIN products ON user_routines.product_id = products.id").
+	//	Where("user_id = ?", userId).Find(&ur).Error
+
 	return ur, err
 }
 

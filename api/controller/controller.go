@@ -446,18 +446,18 @@ func (gc *GeniusController) SaveUserRoutine(ctx *fiber.Ctx) error {
 	//	logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to find products by ids [%#v], err: %+v", routine.Products, err))
 	//	return ctx.Status(http.StatusInternalServerError).SendString("failed to find products by ids")
 	//}
-	//
-	//if saveRoutineErr := gc.geniusData.SaveUserRoutine(ctx.Context(), dbmodel.UserRoutine{
-	//	UserId:      userId,
-	//	Product:    ps,
-	//	TimeOfDay:   routine.TimeOfDay,
-	//	TimesPerDay: routine.TimesPerDay,
-	//	HowLong:     routine.HowLong,
-	//	Note:        routine.Note,
-	//}); saveRoutineErr != nil {
-	//	logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to save user routine, err: %+v", saveRoutineErr))
-	//	return ctx.Status(http.StatusInternalServerError).SendString("failed to save user routine")
-	//}
+
+	if saveRoutineErr := gc.geniusData.SaveUserRoutine(ctx.Context(), dbmodel.UserRoutine{
+		UserId:      userId,
+		ProductID:   uint(routine.ProductId),
+		TimeOfDay:   routine.TimeOfDay,
+		TimesPerDay: routine.TimesPerDay,
+		HowLong:     routine.HowLong,
+		Note:        routine.Note,
+	}); saveRoutineErr != nil {
+		logger.New().Error(ctx.Context(), packageLogPrefix+fmt.Sprintf("failed to save user routine, err: %+v", saveRoutineErr))
+		return ctx.Status(http.StatusInternalServerError).SendString("failed to save user routine")
+	}
 
 	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"saved user routine: [%s]", userId))
 	return ctx.Status(http.StatusOK).JSON(nil)

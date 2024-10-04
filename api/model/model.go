@@ -33,7 +33,7 @@ type Recommendation struct {
 }
 
 type UserRoutine struct {
-	Products    []int32
+	ProductId   int
 	TimeOfDay   string
 	TimesPerDay string
 	HowLong     string

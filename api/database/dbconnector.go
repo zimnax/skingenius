@@ -54,5 +54,5 @@ type Connector interface {
 
 	SaveUserRoutine(ctx context.Context, routine model.UserRoutine) error
 	GetUserRoutine(ctx context.Context, userId string) ([]model.UserRoutine, error)
-	DeleteUserRoutine(ctx context.Context, productId int, userId string) error
+	DeleteUserRoutine(ctx context.Context, userId string, productId int) error
 }

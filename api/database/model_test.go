@@ -7,6 +7,7 @@ import (
 	"skingenius/config"
 	"skingenius/database/model"
 	"testing"
+	"time"
 )
 
 func Test_FindTop3ByIds(t *testing.T) {
@@ -226,7 +227,7 @@ func Test_FuzzySearchWithLike(t *testing.T) {
 }
 
 func Test_SaveUserRoutine(t *testing.T) {
-	db, err := NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	db, err := NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, true)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
@@ -234,13 +235,12 @@ func Test_SaveUserRoutine(t *testing.T) {
 
 	ps := []model.Product{
 		{Name: "product01"},
-		//{Name: "product02"},
+		{Name: "product02"},
 		//{Name: "product03"},
 		//{Name: "product04"},
 	}
 
 	var savedProducts []model.Product
-
 	for _, p := range ps {
 		if err := db.SaveProduct(context.Background(), &p); err != nil {
 			t.Fatal(err)
@@ -255,13 +255,15 @@ func Test_SaveUserRoutine(t *testing.T) {
 	}
 
 	defer func() {
-		//for _, sp := range savedProducts {
-		//	if delErr := db.DeleteUserRoutine(context.Background(), int(sp.ID), "1"); delErr != nil {
-		//		t.Fatal(delErr)
-		//	}
-		//}
+		for _, sp := range savedProducts {
+			fmt.Printf("Delete user routine by id: %d \n", sp.ID)
+			if delErr := db.DeleteUserRoutine(context.Background(), "1", int(sp.ID)); delErr != nil {
+				t.Fatalf("failed to remove userRoutine, error: %v ", delErr)
+			}
+		}
 
 		for _, p := range ps {
+			fmt.Println("running cleanup from product: ", p.Name)
 			if err := db.DeleteProductByName(context.Background(), p.Name); err != nil {
 				t.Fatal(err)
 			}
@@ -272,8 +274,9 @@ func Test_SaveUserRoutine(t *testing.T) {
 
 	for _, savedProduct := range savedProducts {
 		r := model.UserRoutine{
-			UserId:      "1",
-			Product:     savedProduct,
+			UserId:    "1",
+			ProductID: savedProduct.ID,
+			//Product:     savedProduct,
 			TimeOfDay:   "Day",
 			TimesPerDay: "once",
 			HowLong:     "1 month",
@@ -290,25 +293,37 @@ func Test_SaveUserRoutine(t *testing.T) {
 	}
 
 	ur, err := db.GetUserRoutine(context.Background(), "1")
-	if len(ur) != 4 {
-		t.Fatalf("expected 4 routine products, got %d", len(ur))
+	if len(ur) != 2 {
+		for _, routine := range ur {
+			fmt.Println(fmt.Sprintf("routine %#v", routine))
+		}
+
+		t.Fatalf("expected 2 routine products, got %d", len(ur))
 	}
 
-	//ur.Products = savedProducts[2:]
-	//
-	//for _, product := range ur.Products {
-	//	fmt.Println(fmt.Sprintf("product to save second batch: %#v", product))
-	//}
-	//
-	//err = db.SaveUserRoutine(context.Background(), ur)
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
-	//
-	//ur2, err := db.GetUserRoutine(context.Background(), "1")
-	//if len(ur2.Products) != 2 {
-	//	t.Fatalf("expected 2 products, got %d, %#v", len(ur2.Products), ur2.Products)
-	//}
-	//
-	//fmt.Println(fmt.Sprintf("user routine: %#v", ur2))
+	for _, routine := range ur {
+		fmt.Println(fmt.Sprintf("routine %#v", routine))
+	}
+
+	time.Sleep(4 * time.Second)
+
 }
+
+//ur.Products = savedProducts[2:]
+//
+//for _, product := range ur.Products {
+//	fmt.Println(fmt.Sprintf("product to save second batch: %#v", product))
+//}
+//
+//err = db.SaveUserRoutine(context.Background(), ur)
+//if err != nil {
+//	t.Fatal(err)
+//}
+//
+//ur2, err := db.GetUserRoutine(context.Background(), "1")
+//if len(ur2.Products) != 2 {
+//	t.Fatalf("expected 2 products, got %d, %#v", len(ur2.Products), ur2.Products)
+//}
+//
+//fmt.Println(fmt.Sprintf("user routine: %#v", ur2))
+//}
