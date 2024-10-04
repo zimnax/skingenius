@@ -475,6 +475,6 @@ func (gc *GeniusController) GetUserRoutine(ctx *fiber.Ctx) error {
 		return ctx.Status(http.StatusInternalServerError).SendString("failed to get user routine")
 	}
 
-	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return user routine: %#v", routine))
+	logger.New().Info(ctx.Context(), fmt.Sprintf(packageLogPrefix+"Return user routine: %d", len(routine)))
 	return ctx.Status(http.StatusOK).JSON(routine)
 }
