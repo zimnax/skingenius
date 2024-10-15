@@ -211,6 +211,24 @@ func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, er
 	return products, nil
 }
 
+func (g GormConnector) FindAllProductsHavingIngredients(ctx context.Context, ingredients []string) ([]model.Product, error) {
+	var products []model.Product
+	var err error
+
+	/*
+		SELECT p.name
+		FROM Products p
+		JOIN product_ingredient pi ON p.id = pi.product_id
+		JOIN Ingredients i ON pi.ingredient_id = i.id
+		GROUP BY p.id HAVING COUNT(DISTINCT CASE WHEN i.name IN ('Ing1','Ing2','Ing3','Ing4') AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)
+	*/
+
+	err = g.db.Raw("SELECT p.name FROM Products p JOIN product_ingredient pi ON p.id = pi.product_id JOIN Ingredients i ON pi.ingredient_id = i.id GROUP BY p.id"+
+		" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)", ingredients).Scan(&products).Error
+
+	return products, err
+}
+
 /* FIND ingredients count for each product
 
 SELECT products.id, products.name,  count(ingredients.id) as i_count  FROM public.products

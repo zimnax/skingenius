@@ -17,6 +17,7 @@ type Connector interface {
 
 	SaveProduct(ctx context.Context, product *model.Product) error
 	FindAllProducts(ctx context.Context) ([]model.Product, error)
+	FindAllProductsHavingIngredients(ctx context.Context, ingredients []string) ([]model.Product, error)
 	FindProductByName(ctx context.Context, name string) (*model.Product, error)
 	FindAllProductsWithIngredients(ctx context.Context, ingredients []string, accuracy uint) ([]model.Product, error)
 	FindProductsByIds(ctx context.Context, ids []int32) ([]model.Product, error)

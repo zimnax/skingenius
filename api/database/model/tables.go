@@ -61,8 +61,9 @@ type Product struct {
 	Brand       string
 	Link        string
 	Image       string
-	Score       float64      `sql:"-"`
-	Ingredients []Ingredient `gorm:"many2many:product_ingredient;"`
+	Score       float64        `sql:"-"`
+	Ingredients []Ingredient   `gorm:"many2many:product_ingredient;"`
+	Deleted     gorm.DeletedAt // db.Unscoped().Where("age = 20").Find(&users)
 }
 
 type Ingredient struct {

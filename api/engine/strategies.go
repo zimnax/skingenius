@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"skingenius/database"
 	dbmodel "skingenius/database/model"
+	"skingenius/logger"
 	"skingenius/model"
 )
 
@@ -211,7 +212,8 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 
 	quizIngredients, err := findIngredientsByQuestion(dbClient, ctx, quizAnswers)
 	if err != nil {
-		// TODO: do smth
+		logger.New().Error(ctx, fmt.Sprintf("Failed to findIngredientsByQuestion, error: %v", err))
+		return []dbmodel.Product{}
 	}
 
 	//debugShowIngredientsQueryResult(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng, benefitsIng)
@@ -236,7 +238,7 @@ func FindBestProducts_matchBestStrategy(dbClient database.Connector, ctx context
 		st.Score = st.Score * 0.3
 	}
 
-	//uniqueIng := uniqueIngredientsNamesMap(skintypeIng, skinSensIng, acneIng, prefIng, allergiesIng, skinConcernIng, ageIng)
+	// TODO: migrate to id(currently name) to score map
 	uniqueIng := uniqueIngredientsNamesMap(
 		quizIngredients.SkinTypeIng,
 		quizIngredients.SkinSensitivityIng,

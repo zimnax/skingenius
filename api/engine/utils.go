@@ -61,7 +61,7 @@ func FindTop3Products(products map[string]int) []string {
 }
 
 // 1. Merge scores of same ingredients if occurs in multiple answers
-// 2. Find ingredients what are common in all answers. If answer array is empty, ignoring it in merging
+// 2. Find ingredients what are common in all answers. If answer array is empty(no matching ingredients by answer), ignoring it in merging
 func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]float64 {
 	countMap := make(map[string]int)
 	scoreMap := make(map[string]float64)
@@ -145,7 +145,11 @@ func matchProductsAndIngredients(ingredients map[string]float64, allProducts []m
 	return productScores
 }
 
+// TODO Rename from top# to Top(N) - returning first 20 products
 func sortProductsByScoreTop3(products map[string]float64) map[string]float64 {
+
+	N := 20 // magic number - number of products to return and display at - SEE ALL PRODUCTS - page
+
 	type kv struct {
 		Key   string
 		Value float64
@@ -166,7 +170,7 @@ func sortProductsByScoreTop3(products map[string]float64) map[string]float64 {
 	//	fmt.Printf(">>  %s: %f\n", pair.Key, pair.Value)
 	//}
 
-	if len(sortedPairs) == 0 || len(sortedPairs) < 3 {
+	if len(sortedPairs) == 0 { //|| len(sortedPairs) < 3
 		fmt.Println(fmt.Sprintf("Not enogh products to return, total sorted products: %d", len(sortedPairs)))
 		return map[string]float64{}
 	}
@@ -178,11 +182,21 @@ func sortProductsByScoreTop3(products map[string]float64) map[string]float64 {
 	}
 	scalingFactor := globalModel.ScalingRepresentation / maxScore
 
-	return map[string]float64{
-		sortedPairs[0].Key: roundToFirstDecimal(sortedPairs[0].Value * scalingFactor),
-		sortedPairs[1].Key: roundToFirstDecimal(sortedPairs[1].Value * scalingFactor),
-		sortedPairs[2].Key: roundToFirstDecimal(sortedPairs[2].Value * scalingFactor),
+	mapToReturn := make(map[string]float64)
+	for i, _ := range sortedPairs {
+		if i == N {
+			break
+		}
+
+		mapToReturn[sortedPairs[i].Key] = roundToFirstDecimal(sortedPairs[i].Value * scalingFactor)
 	}
+
+	//return map[string]float64{
+	//	sortedPairs[0].Key: roundToFirstDecimal(sortedPairs[0].Value * scalingFactor),
+	//	sortedPairs[1].Key: roundToFirstDecimal(sortedPairs[1].Value * scalingFactor),
+	//	sortedPairs[2].Key: roundToFirstDecimal(sortedPairs[2].Value * scalingFactor),
+	//}
+	return mapToReturn
 }
 
 func roundToFirstDecimal(value float64) float64 {

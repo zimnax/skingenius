@@ -309,21 +309,55 @@ func Test_SaveUserRoutine(t *testing.T) {
 
 }
 
-//ur.Products = savedProducts[2:]
-//
-//for _, product := range ur.Products {
-//	fmt.Println(fmt.Sprintf("product to save second batch: %#v", product))
-//}
-//
-//err = db.SaveUserRoutine(context.Background(), ur)
-//if err != nil {
-//	t.Fatal(err)
-//}
-//
-//ur2, err := db.GetUserRoutine(context.Background(), "1")
-//if len(ur2.Products) != 2 {
-//	t.Fatalf("expected 2 products, got %d, %#v", len(ur2.Products), ur2.Products)
-//}
-//
-//fmt.Println(fmt.Sprintf("user routine: %#v", ur2))
-//}
+func Test_FindAllProductsHavingIngredients(t *testing.T) {
+	db, err := NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	ps := []model.Product{
+		{Name: "product01", Ingredients: []model.Ingredient{{Name: "Ing1"}, {Name: "Ing2"}, {Name: "Ing3"}, {Name: "Ing4"}, {Name: "Ing5"}}}, // has all ingredients + 1
+		{Name: "product02", Ingredients: []model.Ingredient{{Name: "Ing1"}, {Name: "Ing2"}, {Name: "Ing3"}, {Name: "Ing4"}}},                 // has all ingredients
+		{Name: "product002", Ingredients: []model.Ingredient{{Name: "Ing1"}, {Name: "Ing2"}, {Name: "Ing3"}, {Name: "Ing4"}}},                // has all ingredients
+		{Name: "product03", Ingredients: []model.Ingredient{{Name: "Ing2"}, {Name: "Ing3"}, {Name: "Ing4"}, {Name: "Ing5"}}},                 // missing 1
+		{Name: "product04", Ingredients: []model.Ingredient{{Name: "Ing1"}, {Name: "Ing3"}, {Name: "Ing4"}, {Name: "Ing5"}}},                 // missing 1
+	}
+
+	var savedProducts []model.Product
+	for _, p := range ps {
+		if err := db.SaveProduct(context.Background(), &p); err != nil {
+			t.Fatal(err)
+		}
+
+		dbProduct, err := db.FindProductByName(context.Background(), p.Name)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		savedProducts = append(savedProducts, *dbProduct)
+	}
+
+	defer func() {
+		for _, p := range ps {
+			fmt.Println("running cleanup from product: ", p.Name)
+			if err := db.DeleteProductByName(context.Background(), p.Name); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}()
+
+	productsWithCommonIngredients, err := db.FindAllProductsHavingIngredients(context.Background(), []string{"Ing1", "Ing2", "Ing3", "Ing4"})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, ingredient := range productsWithCommonIngredients {
+		fmt.Println(fmt.Sprintf("%#v", ingredient))
+	}
+
+	if len(productsWithCommonIngredients) != 2 {
+		t.Fatalf("Expecting 2, actual %d", len(productsWithCommonIngredients))
+	}
+}
