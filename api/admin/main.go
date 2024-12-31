@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -24,18 +23,18 @@ DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 */
 func main() {
-	//dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, false)
+	//dbClient, err := database.NewGormClient(config.LocalHost, config.Port, config.User, config.Password, false)
 	fmt.Println("Skingenious 2024")
 
-	dbClient, err := database.NewGormClient(config.Host, config.Port, config.User, config.Password, true) // REMOTE
+	_, err := database.NewGormClient(config.LocalHost, config.Port, config.User, config.Password, true, "prod")
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 	time.Sleep(100 * time.Millisecond)
 
-	ctx := context.Background()
-
+	//ctx := context.Background()
+	//
 	//answers := xlsx.ReadAnswers("admin/input.xlsx")
 	//
 	//a1SkinType := model.SkinTypeMapping[answers[0]]
@@ -62,11 +61,11 @@ func main() {
 	////	q1SkinTypeAnswer string, q2SkinSensitivityAnswer string, q3AcneBreakoutsAnswer string, q4PreferencesAnswer []string,
 	////	q5AllergiesAnswer []string, q6SkinConcernAnswer []string, q7AgeAnswer int, q8BenefitsAnswer []string) {
 
-	//top3 := engine.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
+	//top3 := controller.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 	//fmt.Println(fmt.Sprintf("TOP 3: %+v", top3))
 
 	storeIngredients(ctx, dbClient, "admin/resources/ingredients-09.07.24-release.csv", true)
-	//storeProducts(ctx, dbClient, "admin/resources/products-09.07.24-release.csv")
+	storeProducts(ctx, dbClient, "admin/resources/products-09.07.24-release.csv")
 
 	// ---------------  Inventory page
 

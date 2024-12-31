@@ -73,16 +73,17 @@ type Ingredient struct {
 	CasNumber                   string
 	ECNumber                    string
 	INCIName                    string
-	Type                        string
-	Synonyms                    pq.StringArray    `gorm:"type:text[]"`
-	Skintypes                   []Skintype        `gorm:"many2many:ingredient_skintypes;"`
-	Skinsensitivities           []Skinsensitivity `gorm:"many2many:ingredient_skinsensitivities;"`
-	Acnebreakouts               []Acnebreakout    `gorm:"many2many:ingredient_acnebreakouts;"`
-	Preferences                 []Preference      `gorm:"many2many:ingredient_preferences;"`
-	Allergies                   []Allergy         `gorm:"many2many:ingredient_allergies;"`
-	Skinconcerns                []Skinconcern     `gorm:"many2many:ingredient_skinconcerns;"`
-	Ages                        []Age             `gorm:"many2many:ingredient_ages;"`
-	Benefits                    []Benefit         `gorm:"many2many:ingredient_benefits;"`
+	Type                        string              // Active, Inactive
+	Roleinformulations          []Roleinformulation `gorm:"many2many:ingredient_roleinformulation;"`
+	Synonyms                    pq.StringArray      `gorm:"type:text[]"`
+	Skintypes                   []Skintype          `gorm:"many2many:ingredient_skintypes;"`
+	Skinsensitivities           []Skinsensitivity   `gorm:"many2many:ingredient_skinsensitivities;"`
+	Acnebreakouts               []Acnebreakout      `gorm:"many2many:ingredient_acnebreakouts;"`
+	Preferences                 []Preference        `gorm:"many2many:ingredient_preferences;"`
+	Allergies                   []Allergy           `gorm:"many2many:ingredient_allergies;"`
+	Skinconcerns                []Skinconcern       `gorm:"many2many:ingredient_skinconcerns;"`
+	Ages                        []Age               `gorm:"many2many:ingredient_ages;"`
+	Benefits                    []Benefit           `gorm:"many2many:ingredient_benefits;"`
 	Concentrations              string
 	EffectiveAtLowConcentration ConcentrationEffectiveness
 
@@ -133,6 +134,7 @@ const (
 	AllergyDye                 AllergyValue = "dye"
 	AllergyArtificialFragrance AllergyValue = "artificial_fragrance"
 	AllergyScent               AllergyValue = "scent"
+	AllergySeafood             AllergyValue = "seafood"
 	AllergyNone                AllergyValue = "no_allergy"
 )
 
@@ -279,6 +281,44 @@ func (s BenefitValue) Value() (driver.Value, error) {
 	return string(s), nil
 }
 
+// ---  Role in formulation
+type Roleinformulation struct {
+	ID   uint `gorm:"primaryKey"`
+	Name RoleInFormulationValue
+}
+
+type RoleInFormulationValue string
+
+const (
+	Active              RoleInFormulationValue = "active"
+	Antioxidant         RoleInFormulationValue = "antioxidant"
+	ChelatingAgent      RoleInFormulationValue = "chelating_agent"
+	Colorant            RoleInFormulationValue = "colorant"
+	Emollient           RoleInFormulationValue = "emollient"
+	Emulsifier          RoleInFormulationValue = "emulsifier"
+	Exfoliant           RoleInFormulationValue = "exfoliant"
+	Fragrance           RoleInFormulationValue = "fragrance"
+	Humectant           RoleInFormulationValue = "humectant"
+	Occlusive           RoleInFormulationValue = "occlusive"
+	PenetrationEnhancer RoleInFormulationValue = "penetration_enhancer"
+	Preservative        RoleInFormulationValue = "preservative"
+	Solvent             RoleInFormulationValue = "solvent"
+	Stabilizer          RoleInFormulationValue = "stabilizer"
+	Sunscreen           RoleInFormulationValue = "sunscreen"
+	TextureEnhancer     RoleInFormulationValue = "texture_enhancer"
+	Thickener           RoleInFormulationValue = "thickener"
+	PHAdjuster          RoleInFormulationValue = "pH_adjuster"
+)
+
+func (s *RoleInFormulationValue) Scan(value interface{}) error {
+	*s = RoleInFormulationValue(value.(string))
+	return nil
+}
+
+func (s RoleInFormulationValue) Value() (driver.Value, error) {
+	return string(s), nil
+}
+
 // ---  Skin type
 type Skintype struct {
 	ID   uint          `gorm:"primaryKey"`
@@ -368,6 +408,10 @@ const (
 	Vegetarian   IngredientPreferencesValue = "vegetarian"
 	Vegan        IngredientPreferencesValue = "vegan"
 	GlutenFree   IngredientPreferencesValue = "glutenfree"
+	ParabenFree  IngredientPreferencesValue = "parabenfree"
+	SulphateFree IngredientPreferencesValue = "sulphatefree"
+	SiliconFree  IngredientPreferencesValue = "siliconfree"
+	Unscented    IngredientPreferencesValue = "unscented"
 	NoPreference IngredientPreferencesValue = "no_preference"
 )
 
@@ -507,4 +551,9 @@ func (ip *IngredientBenefit) BeforeCreate(db *gorm.DB) error {
 		ip.Score = customValue
 	}
 	return nil
+}
+
+type IngredientRoleinformulation struct {
+	IngredientID        uint `gorm:"primaryKey"`
+	RoleinformulationID uint `gorm:"primaryKey"`
 }

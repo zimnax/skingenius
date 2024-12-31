@@ -20,6 +20,68 @@ type GormConnector struct {
 	db *gorm.DB
 }
 
+func (g GormConnector) DROPDB() error {
+	var dbName string
+	err := g.db.Raw("SELECT current_database()").Scan(&dbName).Error
+	if err != nil {
+		logger.New().Warn(context.Background(), fmt.Sprintf("failed to get database name: %v", err))
+		return err
+	}
+
+	if dbName != "skingenius_test" {
+		logger.New().Warn(context.Background(), "cannot drop database other than skingenius_test")
+		return fmt.Errorf("cannot drop database other than skingenius_test")
+	}
+
+	var tables []string
+	err = g.db.Raw("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'").Scan(&tables).Error
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(tables)
+
+	// Dynamically generate the DROP TABLE statements for all tables
+	for _, table := range tables {
+		if err = g.db.Exec("DROP TABLE IF EXISTS " + table + " CASCADE").Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func NewGormClient(host string, port int, user, password string, migrate bool, env string) (Connector, error) {
+
+	var database string
+
+	if env == "test" {
+		database = "skingenius_test"
+	} else {
+		database = dbname
+	}
+
+	dbInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, database)
+
+	logger.New().Info(context.Background(), fmt.Sprintf("DB config: %v", dbInfo))
+
+	db, err := gorm.Open(postgres.Open(dbInfo), &gorm.Config{})
+	if err != nil {
+		logger.New().Error(context.Background(), "error connecting to the database: ", err)
+		return nil, fmt.Errorf("error connecting to the database: %v", err)
+	}
+	logger.New().Info(context.Background(), "Connected to the database!")
+
+	if migrate {
+		if migrationErr := automigrate(db); migrationErr != nil {
+			return nil, migrationErr
+		}
+	}
+
+	return &GormConnector{db: db}, nil
+}
+
 func (g GormConnector) DeleteUserRoutine(ctx context.Context, userId string, productId int) error {
 	//err := g.db.Transaction(func(tx *gorm.DB) error {
 	//	// do some database operations in the transaction (use 'tx' from this point, not 'db')
@@ -215,16 +277,23 @@ func (g GormConnector) FindAllProductsHavingIngredients(ctx context.Context, ing
 	var products []model.Product
 	var err error
 
-	/*
-		SELECT p.name
-		FROM Products p
-		JOIN product_ingredient pi ON p.id = pi.product_id
-		JOIN Ingredients i ON pi.ingredient_id = i.id
-		GROUP BY p.id HAVING COUNT(DISTINCT CASE WHEN i.name IN ('Ing1','Ing2','Ing3','Ing4') AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)
-	*/
+	statement := g.db.Raw("SELECT p.name FROM Products p JOIN product_ingredient pi ON p.id = pi.product_id JOIN Ingredients i ON pi.ingredient_id = i.id GROUP BY p.id"+
+		" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)", ingredients)
+	//fmt.Println(statement.Statement.SQL.String())
 
-	err = g.db.Raw("SELECT p.name FROM Products p JOIN product_ingredient pi ON p.id = pi.product_id JOIN Ingredients i ON pi.ingredient_id = i.id GROUP BY p.id"+
-		" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)", ingredients).Scan(&products).Error
+	err = statement.Scan(&products).Error
+
+	// todo: more optimal as per gpt but does not work
+	//query := `
+	//SELECT p.id, p.name
+	//	FROM products p
+	//	JOIN product_ingredient pi ON p.id = pi.product_id
+	//	JOIN ingredients i ON pi.ingredient_id = i.id
+	//	WHERE i.name = ANY(ARRAY[?])
+	//	GROUP BY p.id, p.name
+	//	HAVING ARRAY_AGG(i.name) <@ ARRAY[?]
+	//	`
+	//err = g.db.Raw(query, pq.Array(ingredients), pq.Array(ingredients)).Scan(&products).Error
 
 	return products, err
 }
@@ -283,7 +352,8 @@ func (g GormConnector) FindProductByName(ctx context.Context, name string) (*mod
 
 func (g GormConnector) FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error) {
 	var ingredient model.Ingredient
-	err := g.db.Where("name = ?", name).First(&ingredient).Error
+	//err := g.db.Preload(clause.Associations).Where("name = ?", name).First(&ingredient).Error // To fetch all associations
+	err := g.db.Preload("Roleinformulations").Where("name = ?", name).First(&ingredient).Error
 	return &ingredient, err
 }
 
@@ -522,6 +592,10 @@ func (g GormConnector) SetupJoinTables() error {
 		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientBenefit], error: %v", err))
 	}
 
+	if err = g.db.SetupJoinTable(&model.Ingredient{}, "Roleinformulations", &model.IngredientRoleinformulation{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientRoleinformulation], error: %v", err))
+	}
+
 	return err
 }
 
@@ -622,26 +696,4 @@ func (g GormConnector) GetAllSkintypes(ctx context.Context) ([]model.Skintype, e
 	}
 
 	return skintypes, nil
-}
-
-func NewGormClient(host string, port int, user, password string, migrate bool) (Connector, error) {
-	dbInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-
-	logger.New().Info(context.Background(), fmt.Sprintf("DB config: %v", dbInfo))
-
-	db, err := gorm.Open(postgres.Open(dbInfo), &gorm.Config{})
-	if err != nil {
-		logger.New().Error(context.Background(), "error connecting to the database: ", err)
-		return nil, fmt.Errorf("error connecting to the database: %v", err)
-	}
-	logger.New().Info(context.Background(), "Connected to the database!")
-
-	if migrate {
-		if migrationErr := automigrate(db); migrationErr != nil {
-			return nil, migrationErr
-		}
-	}
-
-	return &GormConnector{db: db}, nil
 }

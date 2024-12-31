@@ -1,4 +1,4 @@
-package engine
+package controller
 
 import (
 	"fmt"
@@ -41,4 +41,40 @@ func Test_sortProductsByScoreTop3(t *testing.T) {
 	}
 
 	fmt.Println("actual", actual) // map[product1:32.3 product2:64.7 product3:97]
+}
+
+func Test_determineSkinSensitivity(t *testing.T) {
+
+	tests := []struct {
+		Input []string
+		Want  string
+	}{
+		{
+			Input: []string{"dry", "dry", "normal", "normal", "combination"},
+			Want:  "normal",
+		},
+		{
+			Input: []string{"dry", "dry", "combination", "oily", "combination"},
+			Want:  "combination", // Comb
+		},
+		{
+			Input: []string{"dry", "normal", "combination", "combination", "combination"},
+			Want:  "combination", // comb
+		},
+		{
+			Input: []string{"normal", "combination", "oily", "oily", "combination"},
+			Want:  "combination",
+		},
+		{
+			Input: []string{"normal", "combination", "oily", "oily", "oily"},
+			Want:  "oily",
+		},
+	}
+
+	for _, test := range tests {
+		actual := determineSkinSensitivity(test.Input)
+		if actual != test.Want {
+			t.Errorf("expected %s, actual %s", test.Want, actual)
+		}
+	}
 }

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"os"
+	"skingenius/api"
 	"skingenius/config"
 	"skingenius/controller"
 	"skingenius/database"
+	"skingenius/handler"
 	"skingenius/middleware"
-	"skingenius/routes"
 	"skingenius/utils"
 )
 
@@ -17,23 +18,20 @@ build on windows -  $Env:GOOS = "linux"; $Env:GOARCH = "amd64"; go build -o skin
 nohup ./skingv7 &
 */
 func main() {
-	db, err := database.NewGormClient(config.RemoteHost, config.Port, config.User, config.Password, false)
+	db, err := database.NewGormClient(config.LocalHost, config.Port, config.User, config.Password, false)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)
 	}
 
-	geniusController, err := controller.NewGeniusController(db)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("failed to create genius controller instance: %v", err))
-		os.Exit(1)
-	}
+	geniusController := controller.NewGeniusController(db)
+	geniusHandler := handler.NewGeniusHandler(geniusController)
 
 	app := fiber.New()
 	middleware.FiberMiddleware(app)
 
-	routes.GeniusRoutes(app, geniusController)
-	routes.NotFoundRoute(app)
+	api.GeniusRoutes(app, geniusHandler)
+	api.NotFoundRoute(app)
 
 	utils.StartServerWithGracefulShutdown(app)
 }

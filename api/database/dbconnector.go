@@ -5,7 +5,7 @@ import (
 	"skingenius/database/model"
 )
 
-const dbname = "skingenius_new"
+const dbname = "skingenius"
 
 type Connector interface {
 	SaveIngredient(ctx context.Context, ingredient *model.Ingredient) error
@@ -56,4 +56,6 @@ type Connector interface {
 	SaveUserRoutine(ctx context.Context, routine model.UserRoutine) error
 	GetUserRoutine(ctx context.Context, userId string) ([]model.UserRoutine, error)
 	DeleteUserRoutine(ctx context.Context, userId string, productId int) error
+
+	DROPDB() error
 }

@@ -46,6 +46,10 @@ func automigrate(db *gorm.DB) error {
 		return err
 	}
 
+	if err = migrateRoleInFormulation(db); err != nil {
+		return err
+	}
+
 	if err = db.AutoMigrate(&model.Ingredient{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
@@ -275,7 +279,8 @@ func migrateAllergy(db *gorm.DB) error {
 		{ID: 6, Name: model.AllergyDye},
 		{ID: 7, Name: model.AllergyArtificialFragrance},
 		{ID: 8, Name: model.AllergyScent},
-		{ID: 9, Name: model.AllergyNone},
+		{ID: 9, Name: model.AllergySeafood},
+		{ID: 10, Name: model.AllergyNone},
 	}
 
 	if res := db.Create(as); res.Error != nil {
@@ -292,7 +297,7 @@ func migratePreference(db *gorm.DB) error {
 
 	db.Debug().Exec(`
 	DO $$ BEGIN
-		CREATE TYPE ingredient_preference AS ENUM ('paleo', 'vegetarian', 'vegan', 'glutenfree');
+		CREATE TYPE ingredient_preference AS ENUM ('paleo', 'vegetarian', 'vegan', 'glutenfree','unscented', 'parabenfree', 'sulphatefree', 'siliconfree');
 	END $$;`)
 
 	if err = db.SetupJoinTable(&model.Ingredient{}, "Preferences", &model.IngredientPreference{}); err != nil {
@@ -310,6 +315,10 @@ func migratePreference(db *gorm.DB) error {
 		{ID: 2, Name: model.Vegetarian},
 		{ID: 3, Name: model.GlutenFree},
 		{ID: 4, Name: model.Paleo},
+		{ID: 5, Name: model.ParabenFree},
+		{ID: 6, Name: model.SulphateFree},
+		{ID: 7, Name: model.SiliconFree},
+		{ID: 8, Name: model.Unscented},
 	}
 
 	if res := db.Create(preferences); res.Error != nil {
@@ -425,6 +434,49 @@ func migrateSkinType(db *gorm.DB) error {
 	}
 
 	if res := db.Create(skinTypes); res.Error != nil {
+		if !strings.Contains(res.Error.Error(), "duplicate key") {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func migrateRoleInFormulation(db *gorm.DB) error {
+	var err error
+	
+	if err = db.SetupJoinTable(&model.Ingredient{}, "Roleinformulations", &model.IngredientRoleinformulation{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientRoleinformulation], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("SetupJoinTable failed for table [IngredientRoleinformulation], error: %v", err))
+	}
+
+	if err = db.AutoMigrate(&model.Roleinformulation{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Roleinformulation], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Roleinformulation], error: %v", err))
+	}
+
+	ages := []model.Roleinformulation{
+		{ID: 1, Name: model.Active},
+		{ID: 2, Name: model.Antioxidant},
+		{ID: 3, Name: model.ChelatingAgent},
+		{ID: 4, Name: model.Colorant},
+		{ID: 5, Name: model.Emollient},
+		{ID: 6, Name: model.Emulsifier},
+		{ID: 7, Name: model.Exfoliant},
+		{ID: 8, Name: model.Fragrance},
+		{ID: 9, Name: model.Humectant},
+		{ID: 10, Name: model.Occlusive},
+		{ID: 11, Name: model.PenetrationEnhancer},
+		{ID: 12, Name: model.Preservative},
+		{ID: 13, Name: model.Solvent},
+		{ID: 14, Name: model.Stabilizer},
+		{ID: 15, Name: model.Sunscreen},
+		{ID: 16, Name: model.TextureEnhancer},
+		{ID: 17, Name: model.Thickener},
+		{ID: 18, Name: model.PHAdjuster},
+	}
+
+	if res := db.Create(ages); res.Error != nil {
 		if !strings.Contains(res.Error.Error(), "duplicate key") {
 			return err
 		}
