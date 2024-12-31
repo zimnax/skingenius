@@ -353,7 +353,7 @@ func (g GormConnector) FindProductByName(ctx context.Context, name string) (*mod
 func (g GormConnector) FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error) {
 	var ingredient model.Ingredient
 	//err := g.db.Preload(clause.Associations).Where("name = ?", name).First(&ingredient).Error // To fetch all associations
-	err := g.db.Preload("Roleinformulations").Where("name = ?", name).First(&ingredient).Error
+	err := g.db.Preload("Roleinformulationsçç").Where("name = ?", name).First(&ingredient).Error
 	return &ingredient, err
 }
 
