@@ -102,16 +102,22 @@ package main
 
 const (
 	IngredientName = iota
-	Aliases
 	INCIName
-	Active_Inactive
+	Aliases
 	Allergen_Potential
-	Single_Compound
-	Components
 	Risk_of_irritation
 	Role_in_formulation
 	Note
+	Source
 	Comedogenic_Rating
+
+	Concentration_rinse_off
+	Concentration_leave_on
+	Concentration_sensitive
+
+	SideEffects
+	WorksWellWith
+
 	Normal
 	Dry
 	Oily
@@ -142,6 +148,11 @@ const (
 	Vegan
 	GlutenFree
 	Paleo
+	Unscented
+	ParabenFree
+	SulphateFree
+	SiliconFree
+
 	NutFree
 	SoyFree
 	LatexFree
@@ -150,6 +161,8 @@ const (
 	DyeFree
 	FragranceFree
 	ScentFree
+	SeafoodFree
+	DiaryFree
 
 	Rosacea
 	RosaceaDescription
@@ -189,36 +202,38 @@ const (
 
 	Moisturizing
 	Nourishing
-	Hydrating
+	//Hydrating
 	Exfoliating
-	Calming
 	Soothing
+	//Calming
 	UVBarrier
 	Healing
 	Smoothing
-	ReducesAcne
-	ReducesBlemishes
-	ReducesWrinkles
-	ImprovesSymptomsOfEczema
-	ImprovesSymptomsOfPsoriasis
-	ImprovesSymptomsOfDermatitis
+	//ReducesAcne
+	//ReducesBlemishes
+	//ReducesWrinkles
+	//ImprovesSymptomsOfEczema
+	//ImprovesSymptomsOfPsoriasis
+	//ImprovesSymptomsOfDermatitis
 	Brightening
-	ImprovesSkinTone
-	ReducesInflammation
+	//ImprovesSkinTone
+	//ReducesInflammation
 	MinimizesPores
-	AntiAging
+	//AntiAging
 	Firming
-	Detoxifying
-	Balancing
-	ReducesRedness
-	Clarifying
-	AntiBacterial
-	StimulatesCollagenProduction
-	ReducesFineLines
-	AntioxidantProtection
-	SkinBarrierProtection
+	//Detoxifying
+	//Balancing
+	//ReducesRedness
+	//Clarifying
+	//AntiBacterial
+	//StimulatesCollagenProduction
+	//ReducesFineLines
+	//AntioxidantProtection
+	//SkinBarrierProtection
+
 	Concentrations
 	Effective_at_low_concentrations
+	ScoreCoefficientForConcentration
 )
 
 const (
@@ -226,4 +241,7 @@ const (
 	ProductBrand
 	ProductName
 	ProductLink
+	ProductType
+	FormulationType
+	Price
 )

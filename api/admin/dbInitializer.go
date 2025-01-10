@@ -27,7 +27,9 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 	var missingImages []string
 
 	for i, record := range records {
-		//if record[ProductName] == "Perfect Facial Hydrating Cream" {
+		//if record[ProductName] != "Petitgrain Face Moisturizer" {
+		//	continue
+		//}
 
 		if i >= 1 { // skip headers
 			productName := strings.ToLower(record[ProductName])
@@ -74,6 +76,10 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 			ingredientNameToFind = strings.TrimSpace(ingredientNameToFind)
 
 			ingredient, err = dbClient.FindIngredientByName(ctx, ingredientNameToFind)
+
+			fmt.Println(fmt.Sprintf("Ingredient [%s] found: %v", ingredientNameToFind, ingredient))
+			fmt.Println(fmt.Sprintf("Ingredient [%s] found error: %v", ingredientNameToFind, err))
+
 			if err != nil {
 				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s], trying to find by alias", ingredientNameToFind))
 				ingredient, err = dbClient.FindIngredientByAlias(ctx, ingredientNameToFind)
@@ -142,10 +148,11 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			ctx, iages := assignAgeScore(ctx, record, allAges)
 			ctx, ibenefits := assignBenefitsScore(ctx, record, allBenefits)
 
-			aliases := strings.Split(record[Aliases], ",")
+			aliases := strings.Split(record[Aliases], ";")
 			for n, alias := range aliases {
 				aliases[n] = strings.ToLower(strings.TrimSpace(alias))
 			}
+			aliases = append(aliases, name) // Add ingredient name to aliases for search optimization
 
 			// in case if  ingredient does not exist, dbClient would return empty object
 			if dbIngredient.Name != "" {
@@ -153,13 +160,14 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			}
 
 			dbIngredient.Name = name
-			dbIngredient.Type = strings.ToLower(record[Active_Inactive])
+			//dbIngredient.Type = strings.ToLower(record[Active_Inactive])
 			//PubchemId: record[PubChemCID],
 			//CasNumber: record[CASNumber],
 			dbIngredient.ECNumber = ""
 			dbIngredient.INCIName = record[INCIName]
 			dbIngredient.Synonyms = aliases
-			dbIngredient.Concentrations = record[Concentrations]
+			dbIngredient.ConcentrationRinseOffMin, dbIngredient.ConcentrationRinseOffMax = parseConcentration(record[Concentrations])
+			dbIngredient.ConcentrationLeaveOnMin, dbIngredient.ConcentrationLeaveOnMax = parseConcentration(record[Concentrations])
 			dbIngredient.EffectiveAtLowConcentration = assignEffectiveness(record[Effective_at_low_concentrations])
 
 			dbIngredient.Preferences = ipref
@@ -170,25 +178,6 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			dbIngredient.Skinconcerns = iskinConcerns
 			dbIngredient.Ages = iages
 			dbIngredient.Benefits = ibenefits
-
-			//ingredient := model.Ingredient{
-			//	Name: name,
-			//	Type: strings.ToLower(record[Active_Inactive]),
-			//	//PubchemId: record[PubChemCID],
-			//	//CasNumber: record[CASNumber],
-			//	ECNumber: "",
-			//	INCIName: record[INCIName],
-			//	Synonyms: aliases,
-			//
-			//	Preferences:       ipref,
-			//	Skintypes:         iskintype,
-			//	Skinsensitivities: iskinSens,
-			//	Acnebreakouts:     iacneBreakouts,
-			//	Allergies:         iallergies,
-			//	Skinconcerns:      iskinConcerns,
-			//	Ages:              iages,
-			//	Benefits:          ibenefits,
-			//}
 
 			dbClient.SaveIngredient(ctx, dbIngredient)
 			fmt.Println(fmt.Sprintf("Ingredient [%s] saved or updated", dbIngredient.Name))

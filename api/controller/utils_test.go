@@ -15,7 +15,7 @@ func Test_UniqueIngredients(t *testing.T) {
 		{{Name: "name1", Score: 1}, {Name: "name222"}, {Name: "name3333"}},
 	}
 
-	actual := uniqueIngredientsNamesMap(is...)
+	actual, _ := uniqueIngredientsNamesMap(is...)
 	if len(actual) != 1 {
 		t.Fatalf("expected 1, actual %d", len(actual))
 	}
@@ -77,4 +77,50 @@ func Test_determineSkinSensitivity(t *testing.T) {
 			t.Errorf("expected %s, actual %s", test.Want, actual)
 		}
 	}
+}
+
+func Test_filterProductsWithIngredients(t *testing.T) {
+	products := []model.Product{
+		{
+			Name: "product1",
+			Ingredients: []model.Ingredient{
+				{Name: "ingredient1"},
+				{Name: "ingredient2"},
+			},
+		},
+
+		{
+			Name: "product2",
+			Ingredients: []model.Ingredient{
+				{Name: "ingredient2"},
+				{Name: "ingredient4"},
+			},
+		},
+		{
+			Name: "product3",
+			Ingredients: []model.Ingredient{
+				{Name: "ingredient5"},
+				{Name: "ingredient6"},
+			},
+		},
+		{
+			Name: "product4",
+			Ingredients: []model.Ingredient{
+				{Name: "ingredient2"},
+				{Name: "ingredient7"},
+			},
+		},
+	}
+
+	ingredients := []model.Ingredient{
+		{Name: "ingredient1"},
+		{Name: "ingredient2"},
+	}
+
+	actual := filterProductsWithIngredients(products, ingredients)
+	//if len(actual) != 0 {
+	//	t.Fatalf("expected 0, actual %d", len(actual))
+	//}
+
+	fmt.Println("actual len", len(actual))
 }

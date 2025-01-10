@@ -56,39 +56,48 @@ type UserQuiz struct {
 }
 
 type Product struct {
-	ID          uint `gorm:"primaryKey;autoIncrement"`
-	Name        string
-	Brand       string
-	Link        string
-	Image       string
-	Score       float64        `sql:"-"`
-	Ingredients []Ingredient   `gorm:"many2many:product_ingredient;"`
-	Deleted     gorm.DeletedAt // db.Unscoped().Where("age = 20").Find(&users)
+	ID              uint `gorm:"primaryKey;autoIncrement"`
+	Name            string
+	Brand           string
+	Link            string
+	Type            string
+	FormulationType string
+	Image           string
+	Price           float64
+	Score           float64        `sql:"-"`
+	Ingredients     []Ingredient   `gorm:"many2many:product_ingredient;"`
+	Deleted         gorm.DeletedAt // db.Unscoped().Where("age = 20").Find(&users)
 }
 
 type Ingredient struct {
-	ID                          uint `gorm:"primaryKey;autoIncrement"`
-	Name                        string
-	PubchemId                   string
-	CasNumber                   string
-	ECNumber                    string
-	INCIName                    string
-	Type                        string              // Active, Inactive
-	Roleinformulations          []Roleinformulation `gorm:"many2many:ingredient_roleinformulation;"`
-	Synonyms                    pq.StringArray      `gorm:"type:text[]"`
-	Skintypes                   []Skintype          `gorm:"many2many:ingredient_skintypes;"`
-	Skinsensitivities           []Skinsensitivity   `gorm:"many2many:ingredient_skinsensitivities;"`
-	Acnebreakouts               []Acnebreakout      `gorm:"many2many:ingredient_acnebreakouts;"`
-	Preferences                 []Preference        `gorm:"many2many:ingredient_preferences;"`
-	Allergies                   []Allergy           `gorm:"many2many:ingredient_allergies;"`
-	Skinconcerns                []Skinconcern       `gorm:"many2many:ingredient_skinconcerns;"`
-	Ages                        []Age               `gorm:"many2many:ingredient_ages;"`
-	Benefits                    []Benefit           `gorm:"many2many:ingredient_benefits;"`
-	Concentrations              string
+	ID        uint `gorm:"primaryKey;autoIncrement"`
+	Name      string
+	PubchemId string
+	CasNumber string
+	ECNumber  string
+	INCIName  string
+	//Type               string              // Active, Inactive
+	Roleinformulations []Roleinformulation `gorm:"many2many:ingredient_roleinformulations;"`
+	Synonyms           pq.StringArray      `gorm:"type:text[]"`
+	Skintypes          []Skintype          `gorm:"many2many:ingredient_skintypes;"`
+	Skinsensitivities  []Skinsensitivity   `gorm:"many2many:ingredient_skinsensitivities;"`
+	Acnebreakouts      []Acnebreakout      `gorm:"many2many:ingredient_acnebreakouts;"`
+	Preferences        []Preference        `gorm:"many2many:ingredient_preferences;"`
+	Allergies          []Allergy           `gorm:"many2many:ingredient_allergies;"`
+	Skinconcerns       []Skinconcern       `gorm:"many2many:ingredient_skinconcerns;"`
+	Ages               []Age               `gorm:"many2many:ingredient_ages;"`
+	Benefits           []Benefit           `gorm:"many2many:ingredient_benefits;"`
+
+	ConcentrationRinseOffMin float64
+	ConcentrationRinseOffMax float64
+
+	ConcentrationLeaveOnMin float64
+	ConcentrationLeaveOnMax float64
+
 	EffectiveAtLowConcentration ConcentrationEffectiveness
 
 	Score              float64
-	ConcernDescription string `sql:"-"`
+	ConcernDescription string `gorm:"-"`
 }
 
 //type IngredientScoreEffectiveness struct {

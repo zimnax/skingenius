@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm/clause"
 	"skingenius/database/model"
 	"skingenius/logger"
+	"strings"
 )
 
 /*
@@ -273,13 +274,49 @@ func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, er
 	return products, nil
 }
 
+/*
+returns products that have ALL the ingredients
+
+SELECT p.name AS product_name, ARRAY_AGG(i.name) AS ingredients
+FROM Products p
+JOIN product_ingredient pi ON p.id = pi.product_id
+JOIN Ingredients i ON pi.ingredient_id = i.id
+
+GROUP BY p.id HAVING COUNT(DISTINCT CASE
+WHEN i.name IN ('butter butyrospermum parkii (shea) butter','citrus aurantium (petigtain) oil','almond oil','jojoba')
+OR synonyms && ARRAY['butter butyrospermum parkii (shea) butter','citrus aurantium (petigtain) oil','prunus amygdalys dulcis (sweet almond oil)','simmondsia chinensis (jojoba) seed oil','glycerin']
+AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)
+
+- Return
+petitgrain face moisturizer
+botanical c facial serum
+*/
 func (g GormConnector) FindAllProductsHavingIngredients(ctx context.Context, ingredients []string) ([]model.Product, error) {
 	var products []model.Product
 	var err error
 
-	statement := g.db.Raw("SELECT p.name FROM Products p JOIN product_ingredient pi ON p.id = pi.product_id JOIN Ingredients i ON pi.ingredient_id = i.id GROUP BY p.id"+
-		" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)", ingredients)
-	//fmt.Println(statement.Statement.SQL.String())
+	//TODO FIX THIS SHIT or leave it? - some of the ingredient has ' single quote in name, this break the query. replacing single ' with double ''
+	for i, str := range ingredients {
+		ingredients[i] = strings.ReplaceAll(str, "'", `"`)
+	}
+
+	quotedIngredientValues := "'" + strings.Join(ingredients, "', '") + "'"
+	orStatement := fmt.Sprintf(" OR synonyms && ARRAY[%s] ", quotedIngredientValues) //" OR synonyms && ARRAY[?] "+
+	//inStatement := fmt.Sprintf(" HAVING COUNT(DISTINCT CASE WHEN i.name IN (%s) ", quotedIngredientValues) //" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) "+
+
+	statement := g.db.Raw(""+
+		" SELECT p.name AS product_name, ARRAY_AGG(i.name) AS ingredients "+
+		" FROM Products p "+
+		" JOIN product_ingredient pi ON p.id = pi.product_id "+
+		" JOIN Ingredients i ON pi.ingredient_id = i.id "+
+		" GROUP BY p.id"+
+		" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) "+
+		//inStatement+
+		orStatement+
+		//" OR synonyms && ARRAY[?] "+
+		" AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)", ingredients)
+
+	fmt.Println(statement.Statement.SQL.String())
 
 	err = statement.Scan(&products).Error
 
@@ -353,7 +390,7 @@ func (g GormConnector) FindProductByName(ctx context.Context, name string) (*mod
 func (g GormConnector) FindIngredientByName(ctx context.Context, name string) (*model.Ingredient, error) {
 	var ingredient model.Ingredient
 	//err := g.db.Preload(clause.Associations).Where("name = ?", name).First(&ingredient).Error // To fetch all associations
-	err := g.db.Preload("Roleinformulationsçç").Where("name = ?", name).First(&ingredient).Error
+	err := g.db.Preload("Roleinformulations").Where("name = ?", name).First(&ingredient).Error
 	return &ingredient, err
 }
 
@@ -401,6 +438,7 @@ func (g GormConnector) GetIngredientsBySkinconcerns(ctx context.Context, concern
 		Find(&ingredients).Error
 
 	return ingredients, err
+
 }
 
 func (g GormConnector) GetIngredientsByAllergies(ctx context.Context, allergies []string) ([]model.Ingredient, error) {

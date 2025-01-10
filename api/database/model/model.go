@@ -1,11 +1,13 @@
 package model
 
+const MoisturizerProductType = "moisturizer"
+
 type Concentration struct {
 	Min float64
 	Max float64
 }
 
-var concentrationMap = map[string]Concentration{
+var ConcentrationMap = map[string]Concentration{
 	"preservative": {0.01, 1},
 	//"active_vitamins":       {0.01, 2}, // Individual actives may vary, not explicitly added
 	//"active_minerals":       {0.0, 0.0}, // No range specified, default to 0

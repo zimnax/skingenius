@@ -318,12 +318,12 @@ func assignBenefitsScore(ctx context.Context, record []string, allBenefits []mod
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Moisturizing]), 32)
 		case model.BenefitNourishing:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Nourishing]), 32)
-		case model.BenefitHydrating:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Hydrating]), 32)
+		//case model.BenefitHydrating:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Hydrating]), 32)
 		case model.BenefitExfoliating:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Exfoliating]), 32)
-		case model.BenefitCalming:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Calming]), 32)
+		//case model.BenefitCalming:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Calming]), 32)
 		case model.BenefitSoothing:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Soothing]), 32)
 		case model.BenefitUVBarrier:
@@ -332,48 +332,48 @@ func assignBenefitsScore(ctx context.Context, record []string, allBenefits []mod
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Healing]), 32)
 		case model.BenefitSmoothing:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Smoothing]), 32)
-		case model.BenefitReducesAcne:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesAcne]), 32)
-		case model.BenefitReducesBlemishes:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesBlemishes]), 32)
-		case model.BenefitReducesWrinkles:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesWrinkles]), 32)
-		case model.BenefitImprovesSymptomsOfEczema:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfEczema]), 32)
-		case model.BenefitImprovesSymptomsOfPsoriasis:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfPsoriasis]), 32)
-		case model.BenefitImprovesSymptomsOfDermatitis:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfDermatitis]), 32)
+		//case model.BenefitReducesAcne:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesAcne]), 32)
+		//case model.BenefitReducesBlemishes:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesBlemishes]), 32)
+		//case model.BenefitReducesWrinkles:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesWrinkles]), 32)
+		//case model.BenefitImprovesSymptomsOfEczema:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfEczema]), 32)
+		//case model.BenefitImprovesSymptomsOfPsoriasis:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfPsoriasis]), 32)
+		//case model.BenefitImprovesSymptomsOfDermatitis:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfDermatitis]), 32)
 		case model.BenefitBrightening:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Brightening]), 32)
-		case model.BenefitImprovesSkinTone:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSkinTone]), 32)
-		case model.BenefitReducesInflammation:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesInflammation]), 32)
+		//case model.BenefitImprovesSkinTone:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSkinTone]), 32)
+		//case model.BenefitReducesInflammation:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesInflammation]), 32)
 		case model.BenefitMinimizesPores:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[MinimizesPores]), 32)
-		case model.BenefitAntiAging:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[AntiAging]), 32)
+		//case model.BenefitAntiAging:
+		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[AntiAging]), 32)
 		case model.BenefitFirming:
 			score, err = strconv.ParseFloat(strings.TrimSpace(record[Firming]), 32)
-		case model.BenefitDetoxifying:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Detoxifying]), 32)
-		case model.BenefitBalancing:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Balancing]), 32)
-		case model.BenefitReducesRedness:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesRedness]), 32)
-		case model.BenefitClarifying:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Clarifying]), 32)
-		case model.BenefitAntiBacterial:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[AntiBacterial]), 32)
-		case model.BenefitStimulatesCollagenProduction:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[StimulatesCollagenProduction]), 32)
-		case model.BenefitReducesFineLines:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesFineLines]), 32)
-		case model.BenefitAntioxidantProtection:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[AntioxidantProtection]), 32)
-		case model.BenefitSkinBarrierProtection:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[SkinBarrierProtection]), 32)
+			//case model.BenefitDetoxifying:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Detoxifying]), 32)
+			//case model.BenefitBalancing:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Balancing]), 32)
+			//case model.BenefitReducesRedness:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesRedness]), 32)
+			//case model.BenefitClarifying:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Clarifying]), 32)
+			//case model.BenefitAntiBacterial:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[AntiBacterial]), 32)
+			//case model.BenefitStimulatesCollagenProduction:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[StimulatesCollagenProduction]), 32)
+			//case model.BenefitReducesFineLines:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesFineLines]), 32)
+			//case model.BenefitAntioxidantProtection:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[AntioxidantProtection]), 32)
+			//case model.BenefitSkinBarrierProtection:
+			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[SkinBarrierProtection]), 32)
 		}
 
 		if err != nil {
@@ -478,4 +478,29 @@ func assignEffectiveness(e string) model.ConcentrationEffectiveness {
 	}
 
 	return effectiveness
+}
+
+// expected input format: "1-2%"
+func parseConcentration(c string) (float64, float64) {
+	var minС float64
+	var maxС float64
+
+	if c == "" {
+		return 0, 0
+	}
+
+	c = strings.ReplaceAll(c, "%", "")
+	c = strings.ReplaceAll(c, " ", "")
+
+	if strings.Contains(c, "-") {
+		c = strings.ReplaceAll(c, "-", " ")
+		s := strings.Split(c, " ")
+		minС, _ = strconv.ParseFloat(s[0], 64)
+		maxС, _ = strconv.ParseFloat(s[1], 64)
+	} else {
+		minС, _ = strconv.ParseFloat(c, 64)
+		maxС = minС
+	}
+
+	return minС, maxС
 }

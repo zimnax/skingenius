@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"math"
 	"skingenius/database/model"
+	"skingenius/logger"
 	globalModel "skingenius/model"
 	"sort"
 )
@@ -62,10 +64,11 @@ func FindTop3Products(products map[string]int) []string {
 
 // 1. Merge scores of same ingredients if occurs in multiple answers
 // 2. Find ingredients what are common in all answers. If answer array is empty(no matching ingredients by answer), ignoring it in merging
-func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]float64 {
+func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) (map[string]float64, []string) {
 	countMap := make(map[string]int)
 	scoreMap := make(map[string]float64)
 	uniqueFullIngredients := make(map[string]model.Ingredient)
+	var uniqueIngredientNames []string
 
 	var ingredientArrays int
 
@@ -88,6 +91,7 @@ func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]flo
 	for str, count := range countMap {
 		if count == ingredientArrays {
 			result[str] = scoreMap[str]
+			uniqueIngredientNames = append(uniqueIngredientNames, str)
 		}
 	}
 
@@ -105,7 +109,7 @@ func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) map[string]flo
 		}
 	}
 
-	return result
+	return result, uniqueIngredientNames
 }
 
 /*
@@ -237,12 +241,55 @@ func determineSkinSensitivity(answ []string) string {
 	return "normal" // todo
 }
 
-func calculateConcentrations(p model.Product) map[string]float64 {
-	concentrations := make(map[string]float64)
+func calculateConcentrations(p model.Product) map[string]string {
+	concentrations := make(map[string]string)
 
-	for _, i := range p.Ingredients {
-		concentrations[i.Name] = i.Concentration
+	for i, _ := range p.Ingredients {
+		concenrationByRole := model.ConcentrationMap[string(p.Ingredients[i].Roleinformulations[0].Name)] //TODO: assume role is the only one in the array
+
+		c := concenrationByRole.Min + (concenrationByRole.Max-concenrationByRole.Min)/float64(i)
+		logger.New().Info(context.Background(), fmt.Sprintf("Product %s - Ingredient %s calculated concentration: %f", p.Name, p.Ingredients[i].Name, c))
+		//logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", p.Ingredients[i].Name))
+
+		if p.Type == model.MoisturizerProductType {
+			if p.Ingredients[i].ConcentrationRinseOffMin < c && p.Ingredients[i].ConcentrationRinseOffMax > c {
+				logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", p.Ingredients[i].Name))
+			}
+		} else {
+			if p.Ingredients[i].ConcentrationLeaveOnMin < c && p.Ingredients[i].ConcentrationLeaveOnMax > c {
+				logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", p.Ingredients[i].Name))
+			}
+		}
+
+		//concentrations[i.Name] = i.EffectiveConcentrations // a+(b-a)/nT
 	}
 
 	return concentrations
+}
+
+func filterProductsWithIngredients(products []model.Product, ingredients []model.Ingredient) map[string]model.Product {
+	filteredProducts := make(map[string]model.Product)
+
+	for i, product := range products {
+		for _, ingredient := range ingredients {
+			for _, productIngredient := range product.Ingredients {
+				if productIngredient.Name == ingredient.Name || findStringInSlice(productIngredient.Name, ingredient.Synonyms) {
+					filteredProducts[products[i].Name] = products[i] // can be added multiple times if a few ingredients match but map makes it unique
+					logger.New().Info(context.Background(), fmt.Sprintf("Product [%s] has ingredient [%s]", product.Name, ingredient.Name))
+					// TODO: mark ingredient inside product if exists
+				}
+			}
+		}
+	}
+
+	return filteredProducts
+}
+
+func findStringInSlice(target string, slice []string) bool {
+	for _, s := range slice {
+		if s == target {
+			return true
+		}
+	}
+	return false
 }

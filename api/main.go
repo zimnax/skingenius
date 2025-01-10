@@ -18,7 +18,7 @@ build on windows -  $Env:GOOS = "linux"; $Env:GOARCH = "amd64"; go build -o skin
 nohup ./skingv7 &
 */
 func main() {
-	db, err := database.NewGormClient(config.LocalHost, config.Port, config.User, config.Password, false)
+	db, err := database.NewGormClient(config.LocalHost, config.Port, config.User, config.Password, false, "prod")
 	if err != nil {
 		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
 		os.Exit(1)

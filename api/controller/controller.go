@@ -49,6 +49,14 @@ func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.D
 		logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [skinSensitivity], error: %v", err))
 	}
 
+	// 4.
+	uniqueIng, uniqNames := uniqueIngredientsNamesMap(allergensIng, preferencesIng, skinSensitivityIng) // skinConcernIng
+	logger.New().Info(context.Background(), fmt.Sprintf("unique ingredients len: %v", len(uniqueIng)))
+
+	fmt.Println(fmt.Sprintf("unique ingredients: %v", uniqueIng))
+	allProducts, err := gc.geniusData.FindAllProductsHavingIngredients(ctx, uniqNames)
+	fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
+
 	for _, concern := range quizAnswers.Concerns {
 		// 4.
 		skinConcernIng, err := gc.geniusData.GetIngredientsBySkinconcerns(ctx, []string{concern})
@@ -56,8 +64,12 @@ func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.D
 			logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [skinConcern] [%s], error: %v", concern, err))
 		}
 
-		uniqueIng := uniqueIngredientsNamesMap(allergensIng, preferencesIng, skinSensitivityIng, skinConcernIng)
-		logger.New().Info(context.Background(), fmt.Sprintf("unique ingredients len: %v", len(uniqueIng)))
+		fmt.Println(fmt.Sprintf("skin concern ingredients: %v", len(skinConcernIng)))
+
+		concernProducts := filterProductsWithIngredients(allProducts, skinConcernIng)
+
+		fmt.Println(fmt.Sprintf("products with concern [%s]: %v", concern, len(concernProducts)))
+		fmt.Println(fmt.Sprintf("products with concern [%s]: %v", concern, len(concernProducts)))
 
 	}
 
