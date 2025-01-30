@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -277,48 +278,58 @@ func (g GormConnector) FindAllProducts(ctx context.Context) ([]model.Product, er
 /*
 returns products that have ALL the ingredients
 
-SELECT p.name AS product_name, ARRAY_AGG(i.name) AS ingredients
+ELECT p.name AS name, JSON_AGG(i) AS ingredientSynonyms
 FROM Products p
 JOIN product_ingredient pi ON p.id = pi.product_id
 JOIN Ingredients i ON pi.ingredient_id = i.id
-
-GROUP BY p.id HAVING COUNT(DISTINCT CASE
-WHEN i.name IN ('butter butyrospermum parkii (shea) butter','citrus aurantium (petigtain) oil','almond oil','jojoba')
-OR synonyms && ARRAY['butter butyrospermum parkii (shea) butter','citrus aurantium (petigtain) oil','prunus amygdalys dulcis (sweet almond oil)','simmondsia chinensis (jojoba) seed oil','glycerin']
+GROUP BY p.id HAVING COUNT(DISTINCT CASE WHEN synonyms && ARRAY['copernicia cerifera (carnauba) wax (cera)' ...]
 AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)
-
-- Return
-petitgrain face moisturizer
-botanical c facial serum
 */
 func (g GormConnector) FindAllProductsHavingIngredients(ctx context.Context, ingredients []string) ([]model.Product, error) {
 	var products []model.Product
 	var err error
 
-	//TODO FIX THIS SHIT or leave it? - some of the ingredient has ' single quote in name, this break the query. replacing single ' with double ''
+	//TODO FIX THIS SHIT or leave it?
+	//- some of the ingredient has ' single quote in name, this break the query. replacing single ' with double ''
 	for i, str := range ingredients {
 		ingredients[i] = strings.ReplaceAll(str, "'", `"`)
 	}
 
 	quotedIngredientValues := "'" + strings.Join(ingredients, "', '") + "'"
-	orStatement := fmt.Sprintf(" OR synonyms && ARRAY[%s] ", quotedIngredientValues) //" OR synonyms && ARRAY[?] "+
-	//inStatement := fmt.Sprintf(" HAVING COUNT(DISTINCT CASE WHEN i.name IN (%s) ", quotedIngredientValues) //" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) "+
+	whenStatement := fmt.Sprintf("synonyms && ARRAY[%s] ", quotedIngredientValues) //" OR synonyms && ARRAY[?] "+
 
-	statement := g.db.Raw(""+
-		" SELECT p.name AS product_name, ARRAY_AGG(i.name) AS ingredients "+
-		" FROM Products p "+
-		" JOIN product_ingredient pi ON p.id = pi.product_id "+
-		" JOIN Ingredients i ON pi.ingredient_id = i.id "+
-		" GROUP BY p.id"+
-		" HAVING COUNT(DISTINCT CASE WHEN i.name IN (?) "+
-		//inStatement+
-		orStatement+
-		//" OR synonyms && ARRAY[?] "+
-		" AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)", ingredients)
+	//statement := g.db.Raw("" +
+	//	" SELECT p.name AS name, JSON_AGG(i) AS jsoningredients " +
+	//	" FROM Products p " +
+	//	" JOIN product_ingredient pi ON p.id = pi.product_id " +
+	//	" JOIN Ingredients i ON pi.ingredient_id = i.id " +
+	//	" GROUP BY p.id" +
+	//	" HAVING COUNT(DISTINCT CASE WHEN " +
+	//	whenStatement +
+	//	" AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)")
 
-	fmt.Println(statement.Statement.SQL.String())
+	statement := g.db.Raw("" +
+		" SELECT p.name AS name, JSON_AGG(JSONB_SET(JSONB_SET(row_to_json(i)::JSONB, '{score}', TO_JSONB(COALESCE(isc.score, 0))),'{index}', TO_JSONB(pi.index))) AS jsoningredients" +
+		" FROM Products p " +
+		" JOIN product_ingredients pi ON p.id = pi.product_id " +
+		" JOIN Ingredients i ON pi.ingredient_id = i.id " +
+		" JOIN ingredient_skinconcerns isc ON i.id = isc.ingredient_id" +
+		" JOIN skinconcerns sc ON sc.id = isc.skinconcern_id" +
+		" WHERE sc.name = 'acne'" +
+		" GROUP BY p.id" +
+		" HAVING COUNT(DISTINCT CASE WHEN " +
+		whenStatement +
+		" AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)")
+
+	fmt.Println(fmt.Sprintf("STAT: %s ", statement.Statement.SQL.String()))
 
 	err = statement.Scan(&products).Error
+
+	for i, product := range products {
+		ingr := []model.Ingredient{}
+		err = json.Unmarshal([]byte(product.Jsoningredients), &ingr)
+		products[i].Ingredients = ingr
+	}
 
 	// todo: more optimal as per gpt but does not work
 	//query := `
@@ -362,7 +373,7 @@ func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingre
 
 	err := g.db.Select("products.id, products.name").
 		Table("products").
-		Joins("INNER JOIN product_ingredient ON products.id =product_ingredient.product_id").
+		Joins("INNER JOIN product_ingredient ON products.id =product_ingredient.product_id"). // TODO product_ingredient +s
 		Joins("INNER JOIN ingredients ON ingredients.id =product_ingredient.ingredient_id").
 		Where("ingredients.name IN (?)", ingredients).
 		Group("products.id, products.name").
@@ -373,7 +384,7 @@ func (g GormConnector) FindAllProductsWithIngredients(ctx context.Context, ingre
 }
 
 func (g GormConnector) SaveProduct(ctx context.Context, product *model.Product) error {
-	return g.db.WithContext(ctx).Create(product).Error
+	return g.db.WithContext(ctx).Omit("Jsoningredients").Create(product).Error
 }
 
 func (g GormConnector) DeleteProductByName(ctx context.Context, name string) error {
@@ -421,20 +432,22 @@ func (g GormConnector) GetIngredientsBySkinconcerns(ctx context.Context, concern
 	*/
 
 	/*
-		SELECT ingredients.id, ingredients.name, SUM(ingredient_skinconcerns.score)
+		SELECT ingredients.id, ingredients.name, ingredients.synonyms, SUM(ingredient_skinconcerns.score)
 		FROM public.ingredients
 		INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id
 		INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id
-		WHERE skinconcerns.name IN ('rosacea', 'hyperpigmentation_unevenskintone') AND ingredient_skinconcerns.score > 0
+		WHERE skinconcerns.name IN ('rosacea', 'hyperpigmentation_unevenskintone') AND ingredient_skinconcerns.score =1
 		GROUP BY ingredients.id
 	*/
 
-	err := g.db.Select("ingredients.id, ingredients.name, sum(ingredient_skinconcerns.score) as score").
+	//TODO: WARNING:sum(ingredient_skinconcerns.score) as score - return SUM of scores if ingredient occurs multiple times if len(concerns) MORE THEN 1
+	//err := g.db.Select("ingredients.id, ingredients.name, ingredients.synonyms, sum(ingredient_skinconcerns.score) as score").
+	err := g.db.Select("DISTINCT *").
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id").
 		Joins("INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id").
-		Where("skinconcerns.name IN (?)", concerns).
-		Group("ingredients.id").
+		Where("skinconcerns.name IN (?) AND ingredient_skinconcerns.score = 1", concerns).
+		//Group("ingredients.id,ingredient_skinconcerns.score").
 		Find(&ingredients).Error
 
 	return ingredients, err

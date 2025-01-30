@@ -65,8 +65,8 @@ func main() {
 	//top3 := controller.FindBestProducts_RatingStrategy(dbClient, ctx, a1SkinType, a2SkinSensitivity, a3Acne, []string{a5Preference}, []string{a6Allergy}, []string{a7Concerns}, a4Age, []string{a8Benefits})
 	//fmt.Println(fmt.Sprintf("TOP 3: %+v", top3))
 
-	//storeIngredients(ctx, dbClient, "admin/resources/ingredients-04.01.25.csv", true)
-	storeProducts(ctx, dbClient, "admin/resources/products-04.01.2025.csv")
+	//storeIngredients(ctx, dbClient, "admin/resources/ML Test - Ingredients.csv", true)
+	storeProducts(ctx, dbClient, "admin/resources/products_new_format.csv")
 
 	// ---------------  Inventory page
 

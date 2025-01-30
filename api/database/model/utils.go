@@ -38,6 +38,10 @@ func BenefitsCtxKey(benefitId uint) string {
 	return fmt.Sprintf("benefits_score_%d", benefitId)
 }
 
+func IngredientIndexCtxKey(ingredientId uint) string {
+	return fmt.Sprintf("ingredient_index_%d", ingredientId)
+}
+
 var SkinConcernToUserFriendlyDescription = map[string][]string{
 	string(ConcernAcne):                             []string{"Clear skin", "Reduced inflammation", "Consistent skin tone"},
 	string(ConcernRosacea):                          []string{"Reduced redness", "Even skin tone", "Healthy glow"},

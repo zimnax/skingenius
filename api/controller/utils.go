@@ -10,6 +10,8 @@ import (
 	"sort"
 )
 
+var marginErrors = []float64{17.03, 7.13, 3.86, 2.92, 2.15, 1.25, 1.03, 0.64, 0.61, 0.63, 0.68, 0.44, 0.42, 0.33, 0.32, 0.27, 0.33, 0.27, 0.31, 0.24, 0.11, 0.12}
+
 // merge scores of same ingredient if occurs in multiple answers
 func mergeIngredientsWithScores(ingredients ...[]model.Ingredient) map[string]float64 {
 	imap := make(map[string]float64)
@@ -267,29 +269,143 @@ func calculateConcentrations(p model.Product) map[string]string {
 	return concentrations
 }
 
+func validateConcentrations(product model.Product) model.Product {
+	//count := 0 // number of active ingredients from 1 product with concentrations in the range
+
+	for _, activeName := range product.ActiveIngredients {
+		c := product.Concentrations[activeName]
+		fmt.Println(fmt.Sprintf("product [%s] active ingredient [%s] concentration: %v", product.Name, activeName, c))
+
+		for j, productIngredient := range product.Ingredients {
+			if productIngredient.Name == activeName {
+
+				margin := 0.0
+				if productIngredient.Index < len(marginErrors)-1 {
+					margin = marginErrors[productIngredient.Index]
+				}
+
+				if product.Type == model.MoisturizerProductType {
+					if productIngredient.ConcentrationRinseOffMin-margin < c && productIngredient.ConcentrationRinseOffMax+margin > c {
+						logger.New().Debug(context.Background(), fmt.Sprintf("Ingredient [%s] effective concentration [%f] "+
+							"is in the range  [%f- %f]", productIngredient.Name, c, productIngredient.ConcentrationRinseOffMin, productIngredient.ConcentrationRinseOffMax))
+						//count++
+						continue
+					}
+					logger.New().Debug(context.Background(), fmt.Sprintf("Ingredient [%s] effective concentration [%f] is NOT in the "+
+						"range [%f- %f]", productIngredient.Name, c, productIngredient.ConcentrationRinseOffMin, productIngredient.ConcentrationRinseOffMax))
+					product.Ingredients[j].Score = 0.2
+					continue
+				} else {
+					if productIngredient.ConcentrationLeaveOnMin-margin < c && productIngredient.ConcentrationLeaveOnMax+margin > c {
+						logger.New().Debug(context.Background(), fmt.Sprintf("Ingredient [%s] effective concentration [%f] "+
+							"is in the range  [%f- %f]", productIngredient.Name, c, productIngredient.ConcentrationRinseOffMin, productIngredient.ConcentrationRinseOffMax))
+						//count++
+						continue
+					}
+					logger.New().Debug(context.Background(), fmt.Sprintf("Ingredient [%s] effective concentration [%f] is NOT in the "+
+						"range [%f- %f]", productIngredient.Name, c, productIngredient.ConcentrationRinseOffMin, productIngredient.ConcentrationRinseOffMax))
+					product.Ingredients[j].Score = 0.2
+
+					continue
+				}
+			}
+
+		}
+	}
+
+	//logger.New().Info(context.Background(), fmt.Sprintf("Product [%s] has %d/%d effective concentrations  in the range", product.Name, count, len(product.ActiveIngredients)))
+	//if count > 0 {
+	//	return true
+	//}
+	return product
+}
+
+func calculateWeightedAverageScore(p model.Product) float64 {
+	var sum float64
+	for _, passiveIngredient := range p.PassiveIngredients {
+		for _, ingredient := range p.Ingredients {
+
+			if passiveIngredient == ingredient.Name {
+				was := ingredient.Score * p.Concentrations[ingredient.Name]
+				logger.New().Debug(context.Background(), fmt.Sprintf("Product [%s] ingredient [%s] score: [%f], concentration: [%f], WAS: [%f]", p.Name, ingredient.Name, ingredient.Score, p.Concentrations[ingredient.Name], was))
+
+				sum = sum + was
+			}
+
+		}
+	}
+	return sum
+}
+
+//func validateConcentrations(concernProducts []model.Product) {
+//for i, product := range concernProducts {
+//	for _, ingredient := range product.ActiveIngredients {
+//		c := concernProducts[i].Concentrations[ingredient]
+//		fmt.Println(fmt.Sprintf("product [%s] ingredient [%s] concentration: %v", product.Name, ingredient, c))
+//		for _, productIngredient := range product.Ingredients {
+//			if productIngredient.Name == ingredient {
+//
+//				if product.Type == model.MoisturizerProductType {
+//					if product.Ingredients[i].ConcentrationRinseOffMin < c && product.Ingredients[i].ConcentrationRinseOffMax > c {
+//						logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", product.Ingredients[i].Name))
+//					}
+//				} else {
+//					if product.Ingredients[i].ConcentrationLeaveOnMin < c && product.Ingredients[i].ConcentrationLeaveOnMax > c {
+//						logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", product.Ingredients[i].Name))
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+//}
+
+// 1.2(AC)*4.46 * 10^(-3) * W49^(-1.79)
+func calculateConcentrationsBogdanFormula(p model.Product, adjustmentCoefficients float64) map[string]float64 {
+	concentrations := make(map[string]float64)
+	sum := 0.0
+
+	for i, _ := range p.Ingredients {
+		it := float64(i+1) / float64(len(p.Ingredients))
+		concentration := (adjustmentCoefficients * 4.46 * math.Pow(10, -3) * math.Pow(it, -1.79)) * 100
+		concentrations[p.Ingredients[i].Name] = math.Round(concentration*1000) / 1000
+
+		sum = sum + concentration
+	}
+
+	//fmt.Printf("coef: %.2f sum: %.4f \n", adjustmentCoefficients, sum)
+	if sum > 99 { // magic number (precision)
+		logger.New().Info(context.Background(), fmt.Sprintf("product [%s] Sum of concentrations is greater than 99, sum: %f", p.Name, sum))
+		return concentrations
+	}
+	return calculateConcentrationsBogdanFormula(p, adjustmentCoefficients+0.01)
+}
+
 func filterProductsWithIngredients(products []model.Product, ingredients []model.Ingredient) map[string]model.Product {
 	filteredProducts := make(map[string]model.Product)
 
 	for i, product := range products {
-		for _, ingredient := range ingredients {
-			for _, productIngredient := range product.Ingredients {
-				if productIngredient.Name == ingredient.Name || findStringInSlice(productIngredient.Name, ingredient.Synonyms) {
+		for _, productIngredient := range product.Ingredients {
+			for _, ingredient := range ingredients {
+				if ok, hasIngredient := findStringInSlice(ingredient.Synonyms, productIngredient.Name); ok {
+					products[i].ActiveIngredients = append(products[i].ActiveIngredients, hasIngredient)
 					filteredProducts[products[i].Name] = products[i] // can be added multiple times if a few ingredients match but map makes it unique
-					logger.New().Info(context.Background(), fmt.Sprintf("Product [%s] has ingredient [%s]", product.Name, ingredient.Name))
-					// TODO: mark ingredient inside product if exists
+					continue
+					//logger.New().Info(context.Background(), fmt.Sprintf("Product [%s] has ingredient [%s]", product.Name, ingredient.Name))
 				}
 			}
+			products[i].PassiveIngredients = append(products[i].PassiveIngredients, productIngredient.Name)
 		}
 	}
 
 	return filteredProducts
 }
 
-func findStringInSlice(target string, slice []string) bool {
+func findStringInSlice(slice []string, target string) (bool, string) {
 	for _, s := range slice {
 		if s == target {
-			return true
+			return true, target
 		}
 	}
-	return false
+	return false, ""
 }

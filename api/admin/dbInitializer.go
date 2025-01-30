@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"skingenius/admin/image"
 	"skingenius/database"
 	"skingenius/database/model"
 	"skingenius/logger"
@@ -19,89 +18,148 @@ const packageLogPrefix = "admin: "
 func storeProducts(ctx context.Context, dbClient database.Connector, filepath string) {
 	records := readCsvFile(filepath)
 
-	currentProduct := model.Product{
-		Name: " ",
-	}
-	first := true
-
-	var missingImages []string
+	//var logs []string
+	var mp []string
 
 	for i, record := range records {
-		//if record[ProductName] != "Petitgrain Face Moisturizer" {
-		//	continue
-		//}
+		if i == 0 { // skip headers
+			continue
+		}
 
-		if i >= 1 { // skip headers
-			productName := strings.ToLower(record[ProductName])
+		logger.New().Info(context.Background(), packageLogPrefix+fmt.Sprintf("Processing product [%s]", record[ProductName]))
+		currentProduct := model.Product{
+			Name:            strings.ToLower(record[ProductName]),
+			Brand:           record[ProductBrand],
+			Ingredients:     nil,
+			Link:            record[ProductLink],
+			Type:            record[ProductType],
+			FormulationType: record[FormulationType],
+			FormulatedFor:   record[FormulatedFor],
+			Price:           priceToFloat64(strings.ReplaceAll(record[ProductPrice], "$", "")),
+			Image:           "",
+			Description:     record[ProductDescription],
+		}
 
-			// next product from ingredient csv table
-			if currentProduct.Name != productName {
-				fmt.Println(fmt.Sprintf("Creating a new product: %s", productName))
-
-				if productName == "" {
-					continue
-				}
-
-				if !first {
-					time.Sleep(200 * time.Millisecond) // delay before saving next
-
-					if saveErr := dbClient.SaveProduct(ctx, &currentProduct); saveErr != nil {
-						fmt.Println(fmt.Sprintf("failed to save product [%s], error: %v", currentProduct.Name, saveErr))
-						continue
-					}
-					fmt.Println(fmt.Sprintf("product [%s] saved", currentProduct.Name))
-					first = true
-				}
-
-				imgBase64, err := image.ReadImageToBase64V2("admin/resources/product_pictures/" + strings.TrimSpace(productName) + ".jpg")
-				if err != nil {
-					missingImages = append(missingImages, productName)
-				}
-
-				currentProduct = model.Product{
-					Name:  productName,
-					Brand: record[ProductBrand],
-					Link:  record[ProductLink],
-					Image: imgBase64,
-				}
-
-				first = false
-			}
-
-			// continue with same product from table, add ingredient to the product
-			var ingredient *model.Ingredient
-			var err error
-			ingredientNameToFind := strings.ToLower(record[ProductIngredientName])
+		for ingredientIndex, ingredientName := range strings.Split(record[ProductIngredients], ";") {
+			ingredientNameToFind := strings.ToLower(ingredientName)
 			ingredientNameToFind = strings.ReplaceAll(ingredientNameToFind, "*", "")
 			ingredientNameToFind = strings.TrimSpace(ingredientNameToFind)
 
-			ingredient, err = dbClient.FindIngredientByName(ctx, ingredientNameToFind)
-
-			fmt.Println(fmt.Sprintf("Ingredient [%s] found: %v", ingredientNameToFind, ingredient))
-			fmt.Println(fmt.Sprintf("Ingredient [%s] found error: %v", ingredientNameToFind, err))
-
+			ingredient, err := dbClient.FindIngredientByAlias(ctx, ingredientNameToFind)
 			if err != nil {
-				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s], trying to find by alias", ingredientNameToFind))
-				ingredient, err = dbClient.FindIngredientByAlias(ctx, ingredientNameToFind)
-				if err != nil {
-					fmt.Println(fmt.Sprintf("failed to find igredient by alias [%s], error: %v", ingredientNameToFind, err))
-					ingredient, err = dbClient.FindIngredientByINCIName(ctx, ingredientNameToFind)
-					if err != nil {
-						fmt.Println(fmt.Sprintf("failed to find igredient by INCI name [%s], error: %v", ingredientNameToFind, err))
-
-						fmt.Println(fmt.Sprintf("FATAL, no ingredient with name [%s]", ingredientNameToFind))
-						continue
-					}
-				}
+				logger.New().Warn(context.Background(), packageLogPrefix+fmt.Sprintf("FATAL, no ingredient with name [%s]", ingredientNameToFind))
+				mp = append(mp, ingredientNameToFind)
+				continue
 			}
 
+			//ingredient.IndexNumber = uint(ingredientIndex)
+
+			ctx = context.WithValue(ctx, model.IngredientIndexCtxKey(ingredient.ID), ingredientIndex)
 			currentProduct.Ingredients = append(currentProduct.Ingredients, *ingredient)
-			fmt.Println(fmt.Sprintf("%d - product %s : added ingredient %s", i, currentProduct.Name, ingredient.Name))
 		}
+
+		//imgBase64, err := image.ReadImageToBase64V2("admin/resources/product_pictures/" + strings.TrimSpace(currentProduct.Name) + ".jpg")
+
+		//logs = append(logs, fmt.Sprintf("Product: [%s] Missing products: %#v ", currentProduct.Name, missingProducts))
+
+		if saveErr := dbClient.SaveProduct(ctx, &currentProduct); saveErr != nil {
+			logger.New().Fatal(context.Background(), packageLogPrefix+fmt.Sprintf("failed to save product [%s], error: %v", currentProduct.Name, saveErr))
+			continue
+		}
+
+		logger.New().Info(context.Background(), packageLogPrefix+fmt.Sprintf("Stored a new product #%d : %s", i, currentProduct.Name))
 	}
 
-	fmt.Println(fmt.Sprintf("Missing images: %#v ", missingImages))
+	//fmt.Println(len(logs))
+	fmt.Println(fmt.Sprintf("%#v", mp))
 }
+
+//func storeProducts(ctx context.Context, dbClient database.Connector, filepath string) {
+//	records := readCsvFile(filepath)
+//
+//	currentProduct := model.Product{
+//		Name: " ",
+//	}
+//	first := true
+//
+//	var missingImages []string
+//
+//	for i, record := range records {
+//		//if record[ProductName] != "Petitgrain Face Moisturizer" {
+//		//	continue
+//		//}
+//
+//		if i >= 1 { // skip headers
+//			productName := strings.ToLower(record[ProductName])
+//
+//			// next product from ingredient csv table
+//			if currentProduct.Name != productName {
+//				fmt.Println(fmt.Sprintf("Creating a new product: %s", productName))
+//
+//				if productName == "" {
+//					continue
+//				}
+//
+//				if !first {
+//					time.Sleep(200 * time.Millisecond) // delay before saving next
+//
+//					if saveErr := dbClient.SaveProduct(ctx, &currentProduct); saveErr != nil {
+//						fmt.Println(fmt.Sprintf("failed to save product [%s], error: %v", currentProduct.Name, saveErr))
+//						continue
+//					}
+//					fmt.Println(fmt.Sprintf("product [%s] saved", currentProduct.Name))
+//					first = true
+//				}
+//
+//				imgBase64, err := image.ReadImageToBase64V2("admin/resources/product_pictures/" + strings.TrimSpace(productName) + ".jpg")
+//				if err != nil {
+//					missingImages = append(missingImages, productName)
+//				}
+//
+//				currentProduct = model.Product{
+//					Name:  productName,
+//					Brand: record[ProductBrand],
+//					Link:  record[ProductLink],
+//					Image: imgBase64,
+//				}
+//
+//				first = false
+//			}
+//
+//			// continue with same product from table, add ingredient to the product
+//			var ingredient *model.Ingredient
+//			var err error
+//			ingredientNameToFind := strings.ToLower(record[ProductIngredientName])
+//			ingredientNameToFind = strings.ReplaceAll(ingredientNameToFind, "*", "")
+//			ingredientNameToFind = strings.TrimSpace(ingredientNameToFind)
+//
+//			ingredient, err = dbClient.FindIngredientByName(ctx, ingredientNameToFind)
+//
+//			fmt.Println(fmt.Sprintf("Ingredient [%s] found: %v", ingredientNameToFind, ingredient))
+//			fmt.Println(fmt.Sprintf("Ingredient [%s] found error: %v", ingredientNameToFind, err))
+//
+//			if err != nil {
+//				fmt.Println(fmt.Sprintf("failed to find igredient by name [%s], trying to find by alias", ingredientNameToFind))
+//				ingredient, err = dbClient.FindIngredientByAlias(ctx, ingredientNameToFind)
+//				if err != nil {
+//					fmt.Println(fmt.Sprintf("failed to find igredient by alias [%s], error: %v", ingredientNameToFind, err))
+//					ingredient, err = dbClient.FindIngredientByINCIName(ctx, ingredientNameToFind)
+//					if err != nil {
+//						fmt.Println(fmt.Sprintf("failed to find igredient by INCI name [%s], error: %v", ingredientNameToFind, err))
+//
+//						fmt.Println(fmt.Sprintf("FATAL, no ingredient with name [%s]", ingredientNameToFind))
+//						continue
+//					}
+//				}
+//			}
+//
+//			currentProduct.Ingredients = append(currentProduct.Ingredients, *ingredient)
+//			fmt.Println(fmt.Sprintf("%d - product %s : added ingredient %s", i, currentProduct.Name, ingredient.Name))
+//		}
+//	}
+//
+//	fmt.Println(fmt.Sprintf("Missing images: %#v ", missingImages))
+//}
 
 func storeIngredients(ctx context.Context, dbClient database.Connector, filepath string, updateExisting bool) {
 	var err error
@@ -129,6 +187,10 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 
 			name := strings.ReplaceAll(strings.TrimSpace(strings.ToLower(record[IngredientName])), "*", "")
 			logger.New().Info(context.Background(), packageLogPrefix+fmt.Sprintf("Processing ingredient [%s]", name))
+
+			//if name != "bentonite" {
+			//	continue
+			//}
 
 			dbIngredient, findErr := dbClient.FindIngredientByName(context.Background(), name)
 			fmt.Println(fmt.Sprintf("Ingredient [%s] found: %v", name, dbIngredient))
@@ -181,7 +243,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 
 			dbClient.SaveIngredient(ctx, dbIngredient)
 			fmt.Println(fmt.Sprintf("Ingredient [%s] saved or updated", dbIngredient.Name))
-			time.Sleep(200 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 }

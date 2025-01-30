@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"skingenius/database/model"
+	"skingenius/logger"
 	"strconv"
 	"strings"
 )
@@ -19,6 +20,12 @@ func yesNoTo01(val string) int {
 }
 
 func formatBool(val string) bool {
+	val = strings.TrimSpace(val)
+
+	if val == "" {
+		return false
+	}
+
 	val = strings.ToLower(val)
 	if val == "yes" {
 		return true
@@ -41,6 +48,14 @@ func assignPreferencesScore(ctx context.Context, record []string, allPreferences
 			score = formatBool(record[Vegan])
 		case model.GlutenFree:
 			score = formatBool(record[GlutenFree])
+		case model.ParabenFree:
+			score = formatBool(record[ParabenFree])
+		case model.SulphateFree:
+			score = formatBool(record[SulphateFree])
+		case model.SiliconFree:
+			score = formatBool(record[SiliconFree])
+		case model.Unscented:
+			score = formatBool(record[Unscented])
 		}
 
 		ctx = context.WithValue(ctx, model.PreferencesCtxKey(ipreference.ID), score)
@@ -59,25 +74,25 @@ func assignSkintypeScore(ctx context.Context, record []string, allskintypes []mo
 		switch iSkintype.Type {
 		case model.Dry:
 			//score, err = strconv.Atoi(record[Dry])
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dry]), 32)
+			score, err = parseScore(record[Dry])
 			if err != nil {
 				fmt.Println(fmt.Sprintf("failed to cast skintype score: [%s] for skintype Dry", record[Dry]))
 			}
 		case model.Normal:
 			//score, err = strconv.Atoi(record[Normal])
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Normal]), 32)
+			score, err = parseScore(record[Normal])
 			if err != nil {
 				fmt.Println(fmt.Sprintf("failed to cast skintype score: [%s] for skintype Normal", record[Normal]))
 			}
 		case model.Combination:
 			//score, err = strconv.Atoi(record[Combination])
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Combination]), 32)
+			score, err = parseScore(record[Combination])
 			if err != nil {
 				fmt.Println(fmt.Sprintf("failed to cast skintype score: [%s] for skintype Combination", record[Combination]))
 			}
 		case model.Oily:
 			//score, err = strconv.Atoi(record[Oily])
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Oily]), 32)
+			score, err = parseScore(record[Oily])
 			if err != nil {
 				fmt.Println(fmt.Sprintf("failed to cast skintype score: [%s] for skintype Oily", record[Oily]))
 			}
@@ -202,6 +217,10 @@ func assignAllergyScore(ctx context.Context, record []string, allAllergy []model
 			score = formatBool(record[FragranceFree])
 		case model.AllergyScent:
 			score = formatBool(record[ScentFree])
+		case model.AllergySeafood:
+			score = formatBool(record[SeafoodFree])
+		case model.AllergyDiary:
+			score = formatBool(record[DiaryFree])
 		}
 
 		ctx = context.WithValue(ctx, model.AllergiesCtxKey(iallergy.ID), score)
@@ -219,59 +238,57 @@ func assignSkinConcernScore(ctx context.Context, record []string, allSkinconcern
 
 		switch concern.Name {
 		case model.ConcernAcne:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Acne]), 32)
+			score, err = parseScore(record[Acne])
 			description = strings.TrimSpace(record[Acne_Description])
 
 		case model.ConcernRosacea:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Rosacea]), 32)
+			score, err = parseScore(record[Rosacea])
 			description = strings.TrimSpace(record[RosaceaDescription])
 
 		case model.ConcernHyperpigmentation_UnevenSkinTone:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Hyperpigmentation_UnevenSkin_tone]), 32)
+			score, err = parseScore(record[Hyperpigmentation_UnevenSkin_tone])
 			description = strings.TrimSpace(record[Hyperpigmentation_UnevenSkin_tone_Description])
 
 		case model.ConcernDryness_Dehydration:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dryness_Dehydration]), 32)
+			score, err = parseScore(record[Dryness_Dehydration])
 			description = strings.TrimSpace(record[Dryness_Dehydration_Description])
 
 		case model.ConcernOiliness_Shine:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Oiliness_Shine]), 32)
+			score, err = parseScore(record[Oiliness_Shine])
 			description = strings.TrimSpace(record[Oiliness_Shine_Description])
 
 		case model.ConcernFine_lines_Wrinkles:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Fine_lines_Wrinkles]), 32)
+			score, err = parseScore(record[Fine_lines_Wrinkles])
 			description = strings.TrimSpace(record[Fine_lines_Wrinkles_Description])
 
 		case model.ConcernLoss_of_Elasticity_firmness:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Loss_of_Elasticity_firmness]), 32)
+			score, err = parseScore(record[Loss_of_Elasticity_firmness])
 			description = strings.TrimSpace(record[Loss_of_Elasticity_firmness_Description])
 
 		case model.ConcernVisible_pores_Uneven_texture:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Visible_pores_Uneven_texture]), 32)
+			score, err = parseScore(record[Visible_pores_Uneven_texture])
 			description = strings.TrimSpace(record[Visible_pores_Uneven_texture_Description])
 
 		case model.ConcernClogged_pores_blackheads:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Clogged_pores_blackheads]), 32)
+			score, err = parseScore(record[Clogged_pores_blackheads])
 			description = strings.TrimSpace(record[Clogged_pores_blackheads_Description])
 
 		case model.ConcernDullness:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dullness]), 32)
+			score, err = parseScore(record[Dullness])
 			description = strings.TrimSpace(record[Dullness_Description])
 
 		case model.ConcernDark_circles:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Dark_circles]), 32)
+			score, err = parseScore(record[Dark_circles])
 			description = strings.TrimSpace(record[Dark_circles_Description])
 
 		case model.ConcernBlemishes:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Blemishes]), 32)
+			score, err = parseScore(record[Blemishes])
 			description = strings.TrimSpace(record[Blemishes_Description])
 		}
 
 		if err != nil {
 			fmt.Println(fmt.Sprintf("failed to cast skinConcern score, err: %v", err))
 		}
-
-		//Conce	rnNone                             SkinconcernValue = "no_concern"
 
 		ctx = context.WithValue(ctx, model.SkinconcernCtxKey(concern.ID), score)
 		ctx = context.WithValue(ctx, model.SkinconcernDescCtxKey(concern.ID), description)
@@ -315,23 +332,23 @@ func assignBenefitsScore(ctx context.Context, record []string, allBenefits []mod
 
 		switch benefit.Name {
 		case model.BenefitMoisturizing:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Moisturizing]), 32)
+			score, err = parseScore(record[Moisturizing])
 		case model.BenefitNourishing:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Nourishing]), 32)
+			score, err = parseScore(record[Nourishing])
 		//case model.BenefitHydrating:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Hydrating]), 32)
 		case model.BenefitExfoliating:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Exfoliating]), 32)
+			score, err = parseScore(record[Exfoliating])
 		//case model.BenefitCalming:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Calming]), 32)
 		case model.BenefitSoothing:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Soothing]), 32)
+			score, err = parseScore(record[Soothing])
 		case model.BenefitUVBarrier:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[UVBarrier]), 32)
+			score, err = parseScore(record[UVBarrier])
 		case model.BenefitHealing:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Healing]), 32)
+			score, err = parseScore(record[Healing])
 		case model.BenefitSmoothing:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Smoothing]), 32)
+			score, err = parseScore(record[Smoothing])
 		//case model.BenefitReducesAcne:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesAcne]), 32)
 		//case model.BenefitReducesBlemishes:
@@ -345,17 +362,17 @@ func assignBenefitsScore(ctx context.Context, record []string, allBenefits []mod
 		//case model.BenefitImprovesSymptomsOfDermatitis:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSymptomsOfDermatitis]), 32)
 		case model.BenefitBrightening:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Brightening]), 32)
+			score, err = parseScore(record[Brightening])
 		//case model.BenefitImprovesSkinTone:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ImprovesSkinTone]), 32)
 		//case model.BenefitReducesInflammation:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[ReducesInflammation]), 32)
 		case model.BenefitMinimizesPores:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[MinimizesPores]), 32)
+			score, err = parseScore(record[MinimizesPores])
 		//case model.BenefitAntiAging:
 		//	score, err = strconv.ParseFloat(strings.TrimSpace(record[AntiAging]), 32)
 		case model.BenefitFirming:
-			score, err = strconv.ParseFloat(strings.TrimSpace(record[Firming]), 32)
+			score, err = parseScore(record[Firming])
 			//case model.BenefitDetoxifying:
 			//	score, err = strconv.ParseFloat(strings.TrimSpace(record[Detoxifying]), 32)
 			//case model.BenefitBalancing:
@@ -503,4 +520,23 @@ func parseConcentration(c string) (float64, float64) {
 	}
 
 	return minС, maxС
+}
+
+func parseScore(score string) (float64, error) {
+	score = strings.TrimSpace(score)
+
+	if score == "" {
+		return 0, nil
+	}
+
+	return strconv.ParseFloat(score, 32)
+}
+
+func priceToFloat64(price string) float64 {
+	floatPrice, err := strconv.ParseFloat(price, 64)
+	if err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("failed to cast price [%s] to float64, err: %v", price, err))
+		return float64(0)
+	}
+	return floatPrice
 }

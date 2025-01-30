@@ -59,14 +59,22 @@ type Product struct {
 	ID              uint `gorm:"primaryKey;autoIncrement"`
 	Name            string
 	Brand           string
+	Ingredients     []Ingredient `gorm:"many2many:product_ingredients;"`
 	Link            string
 	Type            string
 	FormulationType string
-	Image           string
+	FormulatedFor   string
 	Price           float64
-	Score           float64        `sql:"-"`
-	Ingredients     []Ingredient   `gorm:"many2many:product_ingredient;"`
-	Deleted         gorm.DeletedAt // db.Unscoped().Where("age = 20").Find(&users)
+	Image           string
+	Description     string
+
+	Jsoningredients    string             `gorm:"type:jsonb"`
+	Deleted            gorm.DeletedAt     // db.Unscoped().Where("age = 20").Find(&users)
+	Score              float64            `sql:"-" gorm:"-"`
+	Concentrations     map[string]float64 `sql:"-" gorm:"-"`
+	ActiveIngredients  []string           `sql:"-" gorm:"-"` // ingredients in product which is same as concern ingredients
+	PassiveIngredients []string           `sql:"-" gorm:"-"` // ingredients not accounted for in concern or benefit
+	WASTotal           float64            `sql:"-" gorm:"-"` //  Sum up weighted average scores of ingredients for each benefit or concern
 }
 
 type Ingredient struct {
@@ -75,7 +83,7 @@ type Ingredient struct {
 	PubchemId string
 	CasNumber string
 	ECNumber  string
-	INCIName  string
+	INCIName  string `json:"inci_name"`
 	//Type               string              // Active, Inactive
 	Roleinformulations []Roleinformulation `gorm:"many2many:ingredient_roleinformulations;"`
 	Synonyms           pq.StringArray      `gorm:"type:text[]"`
@@ -88,15 +96,17 @@ type Ingredient struct {
 	Ages               []Age               `gorm:"many2many:ingredient_ages;"`
 	Benefits           []Benefit           `gorm:"many2many:ingredient_benefits;"`
 
-	ConcentrationRinseOffMin float64
-	ConcentrationRinseOffMax float64
+	ConcentrationRinseOffMin float64 `json:"concentration_rinse_off_min"`
+	ConcentrationRinseOffMax float64 `json:"concentration_rinse_off_max"`
 
-	ConcentrationLeaveOnMin float64
-	ConcentrationLeaveOnMax float64
+	ConcentrationLeaveOnMin float64 `json:"concentration_leave_on_min"`
+	ConcentrationLeaveOnMax float64 `json:"concentration_leave_on_max"`
 
 	EffectiveAtLowConcentration ConcentrationEffectiveness
 
-	Score              float64
+	Score float64 `json:"score"`
+	Index int     `json:"index"`
+
 	ConcernDescription string `gorm:"-"`
 }
 
@@ -144,6 +154,7 @@ const (
 	AllergyArtificialFragrance AllergyValue = "artificial_fragrance"
 	AllergyScent               AllergyValue = "scent"
 	AllergySeafood             AllergyValue = "seafood"
+	AllergyDiary               AllergyValue = "diary"
 	AllergyNone                AllergyValue = "no_allergy"
 )
 
@@ -565,4 +576,19 @@ func (ip *IngredientBenefit) BeforeCreate(db *gorm.DB) error {
 type IngredientRoleinformulation struct {
 	IngredientID        uint `gorm:"primaryKey"`
 	RoleinformulationID uint `gorm:"primaryKey"`
+}
+
+type ProductIngredients struct {
+	IngredientID uint `gorm:"primaryKey"`
+	ProductID    uint `gorm:"primaryKey"`
+	Index        int
+}
+
+func (pi *ProductIngredients) BeforeCreate(db *gorm.DB) error {
+	logger.New().Debug(context.Background(), "Before create ProductIngredient")
+
+	if indexVal, ok := db.Statement.Context.Value(IngredientIndexCtxKey(pi.IngredientID)).(int); ok {
+		pi.Index = indexVal
+	}
+	return nil
 }

@@ -10,6 +10,7 @@ import (
 )
 
 const packageLogPrefix = "genius_controller : "
+const adjustmentCoefficients = 0.1
 
 type GeniusController struct {
 	geniusData database.Connector
@@ -53,24 +54,52 @@ func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.D
 	uniqueIng, uniqNames := uniqueIngredientsNamesMap(allergensIng, preferencesIng, skinSensitivityIng) // skinConcernIng
 	logger.New().Info(context.Background(), fmt.Sprintf("unique ingredients len: %v", len(uniqueIng)))
 
-	fmt.Println(fmt.Sprintf("unique ingredients: %v", uniqueIng))
-	allProducts, err := gc.geniusData.FindAllProductsHavingIngredients(ctx, uniqNames)
-	fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
-
 	for _, concern := range quizAnswers.Concerns {
-		// 4.
-		skinConcernIng, err := gc.geniusData.GetIngredientsBySkinconcerns(ctx, []string{concern})
-		if err != nil {
-			logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [skinConcern] [%s], error: %v", concern, err))
+
+		allProducts, allPErr := gc.geniusData.FindAllProductsHavingIngredients(ctx, uniqNames)
+		if allPErr != nil {
+			logger.New().Warn(context.Background(), fmt.Sprintf("failed to get all products having ingredients, error: %v", allPErr))
+			// todo return?
+		}
+		fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
+
+		// 5. Find ingredients that address skin concern
+		skinConcernIng, ibscErr := gc.geniusData.GetIngredientsBySkinconcerns(ctx, []string{concern})
+		if ibscErr != nil {
+			logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [skinConcern] [%s], error: %v", concern, ibscErr))
+			// todo return?
+		}
+		logger.New().Warn(context.Background(), fmt.Sprintf("skin concern [%s] ingredients: %v", concern, len(skinConcernIng)))
+
+		// 6. Find products with ingredients that address skin concern
+		concernProducts := filterProductsWithIngredients(allProducts, skinConcernIng)
+		fmt.Println(fmt.Sprintf("products with concern [%s]: %v", concern, len(concernProducts)))
+
+		var activeProducts []dbmodel.Product
+		for i, product := range concernProducts {
+			p := concernProducts[i]
+
+			// 7. Calculate concentrations
+			p.Concentrations = calculateConcentrationsBogdanFormula(product, adjustmentCoefficients)
+			concernProducts[i] = p
+
+			// 8. Look at concentration based on product category and check if calculated concentration within the range in DB + adjust score
+			adjustedScoreProduct := validateConcentrations(p)
+			activeProducts = append(activeProducts, adjustedScoreProduct)
+
 		}
 
-		fmt.Println(fmt.Sprintf("skin concern ingredients: %v", len(skinConcernIng)))
+		// 9. Calculate weighted average score
+		for i, product := range activeProducts {
+			was := calculateWeightedAverageScore(product)
+			activeProducts[i].WASTotal = was
+		}
 
-		concernProducts := filterProductsWithIngredients(allProducts, skinConcernIng)
+		for _, product := range activeProducts {
+			fmt.Println(fmt.Sprintf("Product: %s, Score: %f", product.Name, product.WASTotal))
+		}
 
-		fmt.Println(fmt.Sprintf("products with concern [%s]: %v", concern, len(concernProducts)))
-		fmt.Println(fmt.Sprintf("products with concern [%s]: %v", concern, len(concernProducts)))
-
+		fmt.Printf("-----------------------\n\n\n")
 	}
 
 }

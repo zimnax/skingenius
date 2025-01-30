@@ -1,112 +1,18 @@
 package main
 
-//const (
-//	IngredientName = iota
-//	PubChemCID
-//	INCIName
-//	INCINumber
-//	CASNumber
-//	Vegetarian
-//	Vegan
-//	GlutenFree
-//	Paleo
-//	NutFree
-//	SoyFree
-//	LatexFree
-//	SesameFree
-//	CitrusFree
-//	DyeFree
-//	FragranceFree
-//	ScentFree
-//	Normal
-//	Dry
-//	Oily
-//	Combination
-//	NotSensitive
-//	ALittleSensitive
-//	ModeratelySensitive
-//	Sensitive
-//	VerySensitive
-//	ExtremelySensitive
-//	NotAcneProne
-//	ALittleAcneProne
-//	ModeratelyAcneProne
-//	AcneProne
-//	VeryAcneProne
-//	ExtremelyAcneProne
-//	SuitableForMatureSkin
-//	Acne
-//	Rosacea
-//	CysticAcne
-//	Hyperpigmentation
-//	Melasma
-//	Xerosis
-//	Dryness
-//	Redness
-//	Oiliness
-//	SignsOfAging
-//	DarkSpots
-//	SensitiveSkin
-//	Dullness
-//	UnevenSkinTone
-//	Wrinkles
-//	FineLines
-//	LossOfElasticityFirmness
-//	DamagedSkin
-//	VisiblePores
-//	CloggedPoresBlackheads
-//	UnevenTexture
-//	Eczema
-//	Psoriasis
-//	Dermatitis
-//	SunburnedSkin
-//	DarkCircles
-//	Blemishes
-//	Moisturizing
-//	Nourishing
-//	Hydrating
-//	Exfoliating
-//	Calming
-//	Soothing
-//	UVBarrier
-//	Healing
-//	Smoothing
-//	ReducesAcne
-//	ReducesBlemishes
-//	ReducesWrinkles
-//	ImprovesSymptomsOfEczema
-//	ImprovesSymptomsOfPsoriasis
-//	ImprovesSymptomsOfDermatitis
-//	Brightening
-//	ImprovesSkinTone
-//	ReducesInflammation
-//	MinimizesPores
-//	AntiAging
-//	Firming
-//	Detoxifying
-//	Balancing
-//	ReducesRedness
-//	Clarifying
-//	AntiBacterial
-//	StimulatesCollagenProduction
-//	ReducesFineLines
-//	AntioxidantProtection
-//	SkinBarrierProtection
-//	Teen
-//	Twenties
-//	Thirties
-//	Forties
-//	Fifties
-//	SixtiesPlus
-//)
-
 const (
 	IngredientName = iota
 	INCIName
+	Duplicates
 	Aliases
+	Active_inactive
 	Allergen_Potential
+	Single_compound
+	Components
 	Risk_of_irritation
 	Role_in_formulation
+	Type
+	Subtype
 	Note
 	Source
 	Comedogenic_Rating
@@ -116,6 +22,7 @@ const (
 	Concentration_sensitive
 
 	SideEffects
+	IncompatibleWith
 	WorksWellWith
 
 	Normal
@@ -201,35 +108,35 @@ const (
 	Blemishes_Description
 
 	Moisturizing
+	Hydrating
 	Nourishing
-	//Hydrating
 	Exfoliating
 	Soothing
-	//Calming
+	Calming
 	UVBarrier
 	Healing
 	Smoothing
-	//ReducesAcne
-	//ReducesBlemishes
-	//ReducesWrinkles
-	//ImprovesSymptomsOfEczema
-	//ImprovesSymptomsOfPsoriasis
-	//ImprovesSymptomsOfDermatitis
+	ReducesAcne
+	ReducesBlemishes
+	ReduceFineLines
+	ReducesWrinkles
+	ImprovesSymptomsOfEczema
+	ImprovesSymptomsOfPsoriasis
+	ImprovesSymptomsOfDermatitis
 	Brightening
-	//ImprovesSkinTone
-	//ReducesInflammation
+	ImprovesSkinTone
+	ReducesInflammation
 	MinimizesPores
-	//AntiAging
+	AntiAging
 	Firming
-	//Detoxifying
-	//Balancing
-	//ReducesRedness
-	//Clarifying
-	//AntiBacterial
-	//StimulatesCollagenProduction
-	//ReducesFineLines
-	//AntioxidantProtection
-	//SkinBarrierProtection
+	Detoxifying
+	Balancing
+	ReducesRedness
+	Clarifying
+	AntiBacterial
+	StimulatesCollagenProduction
+	AntioxidantProtection
+	SkinBarrierProtection
 
 	Concentrations
 	Effective_at_low_concentrations
@@ -237,11 +144,14 @@ const (
 )
 
 const (
-	ProductIngredientName = iota
+	ProductName = iota
 	ProductBrand
-	ProductName
+	ProductIngredients
 	ProductLink
 	ProductType
 	FormulationType
-	Price
+	FormulatedFor
+	ProductPrice
+	Image
+	ProductDescription
 )

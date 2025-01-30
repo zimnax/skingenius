@@ -124,3 +124,70 @@ func Test_filterProductsWithIngredients(t *testing.T) {
 
 	fmt.Println("actual len", len(actual))
 }
+
+/*
+Water
+Caprylic Capric Triglyceride
+Cetearyl Glucoside, Glyceryl Stearate, Coffee Arabica Seed Oil (CreamMaker® Green Coffee)
+Persea Gratissima (Avocado) Oil, Glycine Soja (Soybean) Lipids, Beeswax (Avocado Butter)
+Glycerin
+Coffea Arabica (Coffee) Seed Extract
+Musa Sapientum (Banana) Leaf/Trunk Extract (AntiMicro Banana)
+Hydroxypropyl Guar
+Caprylyl Glycol, Ethylhexylglycerin
+Papaya Banana Fragrance
+*/
+func Test_CalculateConcentrations(t *testing.T) {
+	p1 := model.Product{
+		Name: "product1",
+		Ingredients: []model.Ingredient{
+			{Name: "Water"},
+			{Name: "Caprylic Capric Triglyceride"},
+			{Name: "Cetearyl Glucoside, Glyceryl Stearate, Coffee Arabica Seed Oil (CreamMaker® Green Coffee)"},
+			{Name: "Persea Gratissima (Avocado) Oil, Glycine Soja (Soybean) Lipids, Beeswax (Avocado Butter)"},
+			{Name: "Glycerin"},
+			{Name: "Coffea Arabica (Coffee) Seed Extract"},
+			{Name: "Musa Sapientum (Banana) Leaf/Trunk Extract (AntiMicro Banana)"},
+			{Name: "Hydroxypropyl Guar"},
+			{Name: "Caprylyl Glycol, Ethylhexylglycerin"},
+			{Name: "Papaya Banana Fragrance"},
+		},
+	}
+
+	p2 := model.Product{
+		Name: "product1",
+		Ingredients: []model.Ingredient{
+			{Name: "Water"},
+			{Name: "Coco - caprylate/caprate"},
+			{Name: "CreamMaker® Stearate"},
+			{Name: "Glycerin"},
+			{Name: "Meadowfoam Seed Oil"},
+			{Name: "PolyGel Emollient"},
+			{Name: "Sheabutter Glycerides"},
+			{Name: "Raspberry Seed Oil"},
+			{Name: "Ceramide Complex"},
+			{Name: "72h Moisture"},
+			{Name: "Capryly Glycol EHG"},
+			{Name: "Phenoxyethanol"},
+			{Name: "GelMaker® Hydro"},
+		},
+	}
+
+	tt := []struct {
+		products []model.Product
+	}{
+		{
+			products: []model.Product{p1, p2},
+		},
+	}
+
+	for _, tst := range tt {
+		for _, product := range tst.products {
+			fmt.Println("product ->>> ", product.Name)
+			actual := calculateConcentrationsBogdanFormula(product, 0.1)
+			for s, s2 := range actual {
+				fmt.Println(s, s2)
+			}
+		}
+	}
+}

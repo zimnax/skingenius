@@ -50,14 +50,19 @@ func automigrate(db *gorm.DB) error {
 		return err
 	}
 
+	if err = db.SetupJoinTable(&model.Product{}, "Ingredients", &model.ProductIngredients{}); err != nil {
+		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [ProductIngredients], error: %v", err))
+		return fmt.Errorf(fmt.Sprintf("SetupJoinTable failed for table [ProductIngredients], error: %v", err))
+	}
+
+	//if err = db.AutoMigrate(&model.Product{}); err != nil {
+	//	logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
+	//	return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
+	//}
+
 	if err = db.AutoMigrate(&model.Ingredient{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Ingredient], error: %v", err))
-	}
-
-	if err = db.AutoMigrate(&model.Product{}); err != nil {
-		logger.New().Error(context.Background(), fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
-		return fmt.Errorf(fmt.Sprintf("Automigration failed for table [Product], error: %v", err))
 	}
 
 	if err = db.AutoMigrate(&model.UserRecommendations{}); err != nil {
@@ -444,7 +449,7 @@ func migrateSkinType(db *gorm.DB) error {
 
 func migrateRoleInFormulation(db *gorm.DB) error {
 	var err error
-	
+
 	if err = db.SetupJoinTable(&model.Ingredient{}, "Roleinformulations", &model.IngredientRoleinformulation{}); err != nil {
 		logger.New().Error(context.Background(), fmt.Sprintf("SetupJoinTable failed for table [IngredientRoleinformulation], error: %v", err))
 		return fmt.Errorf(fmt.Sprintf("SetupJoinTable failed for table [IngredientRoleinformulation], error: %v", err))
