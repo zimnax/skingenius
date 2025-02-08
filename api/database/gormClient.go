@@ -92,7 +92,7 @@ func (g GormConnector) DeleteUserRoutine(ctx context.Context, userId string, pro
 	//		return err
 	//	}
 	//
-	//	if err := tx.Where("user_id = ?", userId).Delete(&model.UserRoutine{}).Error; err != nil {
+	//	if err := tx.Where("user_id = ?", userId).Delete(&frontModel.UserRoutine{}).Error; err != nil {
 	//		return err
 	//	}
 	//	// return nil will commit the whole transaction
@@ -105,7 +105,7 @@ func (g GormConnector) DeleteUserRoutine(ctx context.Context, userId string, pro
 	//return g.db.Select("user_routines.id").
 	//	Joins("INNER JOIN user_routine_products ON user_routines.id = user_routine_products.user_routine_id").
 	//	Joins("INNER JOIN products ON user_routine_products.product_id = products.id").
-	//	Where("products.id = ? AND user_id = ?", productId, userId).Delete(&model.UserRoutine{}).Error
+	//	Where("products.id = ? AND user_id = ?", productId, userId).Delete(&frontModel.UserRoutine{}).Error
 
 	return g.db.WithContext(ctx).Where("user_id = ? AND product_id = ?", userId, productId).Delete(&model.UserRoutine{}).Error
 }
@@ -675,7 +675,7 @@ func (g GormConnector) SetupJoinTables() error {
 	return err
 }
 
-//func (g GormConnector) SavePreference(ctx context.Context, preference *model.Preference) error {
+//func (g GormConnector) SavePreference(ctx context.Context, preference *frontModel.Preference) error {
 //
 //	//g.db.WithContext(ctx).Model(&user).Association("Roles").Append(&role)
 //

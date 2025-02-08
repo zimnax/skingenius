@@ -38,14 +38,14 @@ func main() {
 	//
 	//answers := xlsx.ReadAnswers("admin/input.xlsx")
 	//
-	//a1SkinType := model.SkinTypeMapping[answers[0]]
-	//a2SkinSensitivity := model.SensitivityMapping[answers[1]]
-	//a3Acne := model.AcneProneMapping[answers[2]]
-	//a4Age := model.AgeMapping[answers[3]]
-	//a5Preference := string(model.PreferenceMapping[answers[4]])
-	//a6Allergy := string(model.AllergiesMapping[answers[5]])
-	//a7Concerns := string(model.SkinConcernsMapping[answers[6]])
-	//a8Benefits := string(model.BenefitsMapping[answers[7]])
+	//a1SkinType := frontModel.SkinTypeMapping[answers[0]]
+	//a2SkinSensitivity := frontModel.SensitivityMapping[answers[1]]
+	//a3Acne := frontModel.AcneProneMapping[answers[2]]
+	//a4Age := frontModel.AgeMapping[answers[3]]
+	//a5Preference := string(frontModel.PreferenceMapping[answers[4]])
+	//a6Allergy := string(frontModel.AllergiesMapping[answers[5]])
+	//a7Concerns := string(frontModel.SkinConcernsMapping[answers[6]])
+	//a8Benefits := string(frontModel.BenefitsMapping[answers[7]])
 	//
 	//fmt.Println("\n\n ********************  Answers  ********************")
 	//fmt.Println("Skin type: ", a1SkinType)
@@ -70,18 +70,18 @@ func main() {
 
 	// ---------------  Inventory page
 
-	//ingredient := model.Ingredient{
+	//ingredient := frontModel.Ingredient{
 	//	Name: "Testname",
 	//}
 	//
 	//
-	//ctx = context.WithValue(ctx, model.SkintypeCtxKey, 13)
-	//ctx = context.WithValue(ctx, model.SkinsensetivityCtxKey, 14)
-	//ctx = context.WithValue(ctx, model.AcnebreakoutsCtxKey, 15)
-	//ctx = context.WithValue(ctx, model.AllergiesCtxKey, 22)
-	//ctx = context.WithValue(ctx, model.SkinconcernCtxKey, 22)
-	//ctx = context.WithValue(ctx, model.AgeCtxKey, 28)
-	//ctx = context.WithValue(ctx, model.BenefitsCtxKey, 29)
+	//ctx = context.WithValue(ctx, frontModel.SkintypeCtxKey, 13)
+	//ctx = context.WithValue(ctx, frontModel.SkinsensetivityCtxKey, 14)
+	//ctx = context.WithValue(ctx, frontModel.AcnebreakoutsCtxKey, 15)
+	//ctx = context.WithValue(ctx, frontModel.AllergiesCtxKey, 22)
+	//ctx = context.WithValue(ctx, frontModel.SkinconcernCtxKey, 22)
+	//ctx = context.WithValue(ctx, frontModel.AgeCtxKey, 28)
+	//ctx = context.WithValue(ctx, frontModel.BenefitsCtxKey, 29)
 	//
 	//ingredient.Preferences = allPreferences
 	//ingredient.Skintypes = allskintypes
@@ -92,7 +92,7 @@ func main() {
 	//ingredient.Ages = allAges
 	//ingredient.Benefits = allBenefits
 
-	//var pref []model.Preference
+	//var pref []frontModel.Preference
 	//var ctx context.Context
 	//for _, preference := range allPreferences {
 	//	ctx = context.WithValue(context.Background(), preference.Name, 2)

@@ -1,4 +1,4 @@
-package model
+package frontModel
 
 const ScalingRepresentation = 97
 

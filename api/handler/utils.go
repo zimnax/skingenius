@@ -2,35 +2,34 @@ package handler
 
 import (
 	"fmt"
-	dbmodel "skingenius/database/model"
-	"skingenius/model"
+	"skingenius/frontModel"
 )
 
-func quizAnswersToDbModel(quizAnswers model.QuizAnswers) model.DBAnswerModel {
-	a1SkinType := dbmodel.SkinTypeMapping[quizAnswers.SkinType]
-	a2SkinSensitivity := dbmodel.SensitivityMapping[quizAnswers.SkinSensitivity]
-	a3Acne := dbmodel.AcneProneMapping[quizAnswers.AcneBreakouts]
-	a4Age := dbmodel.AgeMapping[quizAnswers.Age]
+func quizAnswersToDbModel(quizAnswers frontModel.QuizAnswers) frontModel.DBAnswerModel {
+	a1SkinType := frontModel.SkinTypeMapping[quizAnswers.SkinType]
+	a2SkinSensitivity := frontModel.SensitivityMapping[quizAnswers.SkinSensitivity]
+	a3Acne := frontModel.AcneProneMapping[quizAnswers.AcneBreakouts]
+	a4Age := frontModel.AgeMapping[quizAnswers.Age]
 
 	var a5Preference []string
 	for _, preference := range quizAnswers.ProductPreferences {
-		a5Preference = append(a5Preference, string(dbmodel.PreferenceMapping[preference]))
+		a5Preference = append(a5Preference, string(frontModel.PreferenceMapping[preference]))
 	}
 
 	var a6Allergy []string
 
 	for _, allergen := range quizAnswers.FreeFromAllergens {
-		a6Allergy = append(a6Allergy, string(dbmodel.AllergiesMapping[allergen]))
+		a6Allergy = append(a6Allergy, string(frontModel.AllergiesMapping[allergen]))
 	}
 
 	var a7Concerns []string
 	for _, concern := range quizAnswers.SkinConcern {
-		a7Concerns = append(a7Concerns, string(dbmodel.SkinConcernsMapping[concern]))
+		a7Concerns = append(a7Concerns, string(frontModel.SkinConcernsMapping[concern]))
 	}
 
 	var a8Benefits []string
 	for _, benefit := range quizAnswers.ProductBenefit {
-		a8Benefits = append(a8Benefits, string(dbmodel.BenefitsMapping[benefit]))
+		a8Benefits = append(a8Benefits, string(frontModel.BenefitsMapping[benefit]))
 	}
 
 	fmt.Println("\n\n ********************  Answers  ********************")
@@ -44,7 +43,7 @@ func quizAnswersToDbModel(quizAnswers model.QuizAnswers) model.DBAnswerModel {
 	fmt.Println("Benefits: ", a8Benefits)
 	fmt.Println("********************  Answers  ******************** \n\n ")
 
-	return model.DBAnswerModel{
+	return frontModel.DBAnswerModel{
 		SkinType:        a1SkinType,
 		SkinSensitivity: a2SkinSensitivity,
 		AcneProne:       a3Acne,

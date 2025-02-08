@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 	"skingenius/database/model"
+	globalModel "skingenius/frontModel"
 	"skingenius/logger"
-	globalModel "skingenius/model"
 	"sort"
 )
 
@@ -65,7 +65,7 @@ func FindTop3Products(products map[string]int) []string {
 }
 
 // 1. Merge scores of same ingredients if occurs in multiple answers
-// 2. Find ingredients what are common in all answers. If answer array is empty(no matching ingredients by answer), ignoring it in merging
+// 2. Find ingredients what are common in all answers. If answer array is empty(no matching ingredients by answer), ignoring it in merging - should NOT happen :)
 func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) (map[string]float64, []string) {
 	countMap := make(map[string]int)
 	scoreMap := make(map[string]float64)
@@ -75,7 +75,6 @@ func uniqueIngredientsNamesMap(ingredients ...[]model.Ingredient) (map[string]fl
 	var ingredientArrays int
 
 	for _, answerIngredients := range ingredients {
-
 		if len(answerIngredients) > 0 { // skip empty arrays if no Allergies, no Concerns, no Benefits etc...
 			ingredientArrays++
 		}
@@ -269,17 +268,18 @@ func calculateConcentrations(p model.Product) map[string]string {
 	return concentrations
 }
 
+// Checking the effective concentration of the active ingredients in the product, and if its below the minimum, adjust the score (set ot to 0.2)
 func validateConcentrations(product model.Product) model.Product {
 	count := 0 // number of active ingredients from 1 product with concentrations in the range
 
 	for _, activeName := range product.ActiveIngredients {
 		c := product.Concentrations[activeName]
-		fmt.Println(fmt.Sprintf("product [%s] active ingredient [%s] concentration: %v", product.Name, activeName, c))
+		//fmt.Println(fmt.Sprintf("product [%s] active ingredient [%s] concentration: %v", product.Name, activeName, c))
 
 		for j, productIngredient := range product.Ingredients {
 			if productIngredient.Name == activeName {
 
-				margin := 0.12
+				margin := 0.12 // default margin for ingredients with index > 21 //todo: improve in future
 				if productIngredient.Index < len(marginErrors)-1 {
 					margin = marginErrors[productIngredient.Index]
 				}
@@ -310,6 +310,8 @@ func validateConcentrations(product model.Product) model.Product {
 	}
 
 	logger.New().Info(context.Background(), fmt.Sprintf("Product [%s] has %d/%d effective concentrations  in the range", product.Name, count, len(product.ActiveIngredients)))
+
+	fmt.Println(fmt.Sprintf("%#v", product))
 	return product
 }
 
@@ -347,29 +349,6 @@ func calculateWeightedAverageScoreActive(p model.Product) float64 {
 	}
 	return sum
 }
-
-//func validateConcentrations(concernProducts []model.Product) {
-//for i, product := range concernProducts {
-//	for _, ingredient := range product.ActiveIngredients {
-//		c := concernProducts[i].Concentrations[ingredient]
-//		fmt.Println(fmt.Sprintf("product [%s] ingredient [%s] concentration: %v", product.Name, ingredient, c))
-//		for _, productIngredient := range product.Ingredients {
-//			if productIngredient.Name == ingredient {
-//
-//				if product.Type == model.MoisturizerProductType {
-//					if product.Ingredients[i].ConcentrationRinseOffMin < c && product.Ingredients[i].ConcentrationRinseOffMax > c {
-//						logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", product.Ingredients[i].Name))
-//					}
-//				} else {
-//					if product.Ingredients[i].ConcentrationLeaveOnMin < c && product.Ingredients[i].ConcentrationLeaveOnMax > c {
-//						logger.New().Info(context.Background(), fmt.Sprintf("Ingredient %s has effective concentration in range", product.Ingredients[i].Name))
-//					}
-//				}
-//			}
-//		}
-//	}
-//}
-//}
 
 // 1.2(AC)*4.46 * 10^(-3) * W49^(-1.79)
 func calculateConcentrationsBogdanFormula(p model.Product, adjustmentCoefficients float64) map[string]float64 {
@@ -417,29 +396,25 @@ func calculateConcentrationsBogdanFormula(p model.Product, adjustmentCoefficient
 	return calculateConcentrationsBogdanFormula(p, adjustmentCoefficients+0.01)
 }
 
-func filterProductsWithIngredients(products []model.Product, ingredients []model.Ingredient) map[string]model.Product {
+func findProductsWithActiveIngredients(products []model.Product, ingredients []model.Ingredient) map[string]model.Product {
 	filteredProducts := make(map[string]model.Product)
 
 	productHasActiveIngredients := false
 	for i, product := range products {
 
-		//if product.Name == "carbon star" {
-		//	fmt.Println("carbon star")
-		//}
-
 		for _, productIngredient := range product.Ingredients {
-			productIngredientIsFoundInConcern := false
+			isIngredientActive := false
 			for _, ingredient := range ingredients {
 				if ok, _ := findStringInSlice(productIngredient.Synonyms, ingredient.Name); ok {
-
 					products[i].ActiveIngredients = append(products[i].ActiveIngredients, productIngredient.Name)
-					logger.New().Info(context.Background(), fmt.Sprintf("Product [%s] has active ingredient [%s]", product.Name, ingredient.Name))
+					logger.New().Debug(context.Background(), fmt.Sprintf("Product [%s] has active ingredient [%s]", product.Name, ingredient.Name))
+
 					productHasActiveIngredients = true
-					productIngredientIsFoundInConcern = true
+					isIngredientActive = true
 					continue
 				}
 			}
-			if !productIngredientIsFoundInConcern {
+			if !isIngredientActive {
 				products[i].PassiveIngredients = append(products[i].PassiveIngredients, productIngredient.Name)
 			}
 		}
@@ -447,7 +422,6 @@ func filterProductsWithIngredients(products []model.Product, ingredients []model
 		if productHasActiveIngredients {
 			filteredProducts[products[i].Name] = products[i] // can be added multiple times if a few ingredients match but map makes it unique
 		}
-
 		productHasActiveIngredients = false
 	}
 

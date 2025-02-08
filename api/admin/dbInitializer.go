@@ -77,7 +77,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 //func storeProducts(ctx context.Context, dbClient database.Connector, filepath string) {
 //	records := readCsvFile(filepath)
 //
-//	currentProduct := model.Product{
+//	currentProduct := frontModel.Product{
 //		Name: " ",
 //	}
 //	first := true
@@ -116,7 +116,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 //					missingImages = append(missingImages, productName)
 //				}
 //
-//				currentProduct = model.Product{
+//				currentProduct = frontModel.Product{
 //					Name:  productName,
 //					Brand: record[ProductBrand],
 //					Link:  record[ProductLink],
@@ -127,7 +127,7 @@ func storeProducts(ctx context.Context, dbClient database.Connector, filepath st
 //			}
 //
 //			// continue with same product from table, add ingredient to the product
-//			var ingredient *model.Ingredient
+//			var ingredient *frontModel.Ingredient
 //			var err error
 //			ingredientNameToFind := strings.ToLower(record[ProductIngredientName])
 //			ingredientNameToFind = strings.ReplaceAll(ingredientNameToFind, "*", "")

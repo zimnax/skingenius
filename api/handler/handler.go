@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"skingenius/controller"
+	"skingenius/frontModel"
 	"skingenius/logger"
-	"skingenius/model"
 )
 
 const packageLogPrefix = "genius_handler : "
@@ -21,7 +21,7 @@ func NewGeniusHandler(controller *controller.GeniusController) *GeniusHandler {
 func (gh *GeniusHandler) SubmitQuizV3(ctx *fiber.Ctx) error {
 	logger.New().Info(ctx.Context(), packageLogPrefix+"SubmitQuizV2 route")
 
-	userAnswers := model.QuizAnswers{}
+	userAnswers := frontModel.QuizAnswers{}
 	if err := ctx.BodyParser(&userAnswers); err != nil {
 		logger.New().Error(ctx.Context(), packageLogPrefix+
 			fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", err))
@@ -37,7 +37,7 @@ func (gh *GeniusHandler) SubmitQuizV3(ctx *fiber.Ctx) error {
 //func (gh *GeniusHandler) SubmitQuizV2(ctx *fiber.Ctx) error {
 //	logger.New().Info(ctx.Context(), packageLogPrefix+"SubmitQuizV2 route")
 //
-//	userAnswers := model.QuizAnswers{}
+//	userAnswers := frontModel.QuizAnswers{}
 //	if err := ctx.BodyParser(&userAnswers); err != nil {
 //		logger.New().Error(ctx.Context(), packageLogPrefix+
 //			fmt.Sprintf("failed to unmarshall userAnswers req, err: %+v", err))
@@ -68,7 +68,7 @@ func (gh *GeniusHandler) SubmitQuizV3(ctx *fiber.Ctx) error {
 //	fmt.Println(fmt.Sprintf("userID: %s", userId))
 //	fmt.Println(fmt.Sprintf("req body: %s", string(ctx.Body())))
 //
-//	recommendedProducts := model.SaveRecommendationsReq{}
+//	recommendedProducts := frontModel.SaveRecommendationsReq{}
 //	if err := ctx.BodyParser(&recommendedProducts); err != nil {
 //		logger.New().Error(ctx.Context(), packageLogPrefix+
 //			fmt.Sprintf("failed to unmarshall saveRecommendations req, err: %+v", err))
@@ -188,7 +188,7 @@ func (gh *GeniusHandler) SubmitQuizV3(ctx *fiber.Ctx) error {
 //
 //	var err error
 //
-//	userAnswers := model.QuizAnswers{}
+//	userAnswers := frontModel.QuizAnswers{}
 //	if err = ctx.BodyParser(&userAnswers); err != nil {
 //		logger.New().Error(ctx.Context(), packageLogPrefix+
 //			fmt.Sprintf("failed to unmarshall save quiz req, err: %+v", err))
@@ -300,7 +300,7 @@ func (gh *GeniusHandler) SubmitQuizV3(ctx *fiber.Ctx) error {
 //	logger.New().Info(ctx.Context(), packageLogPrefix+"userID: %s", userId)
 //	logger.New().Info(ctx.Context(), packageLogPrefix+"SaveUserRoutine req body: %s", string(ctx.Body()))
 //
-//	routine := model.UserRoutine{}
+//	routine := frontModel.UserRoutine{}
 //	if err := ctx.BodyParser(&routine); err != nil {
 //		logger.New().Error(ctx.Context(), packageLogPrefix+
 //			fmt.Sprintf("failed to unmarshall save routine req [%s] err: %+v", string(ctx.Body()), err))

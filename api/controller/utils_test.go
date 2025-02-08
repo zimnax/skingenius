@@ -117,7 +117,7 @@ func Test_filterProductsWithIngredients(t *testing.T) {
 		{Name: "ingredient2"},
 	}
 
-	actual := filterProductsWithIngredients(products, ingredients)
+	actual := findProductsWithActiveIngredients(products, ingredients)
 	//if len(actual) != 0 {
 	//	t.Fatalf("expected 0, actual %d", len(actual))
 	//}
@@ -140,7 +140,7 @@ Papaya Banana Fragrance
 func Test_CalculateConcentrations(t *testing.T) {
 	p1 := model.Product{
 		Name: "product1",
-		//Ingredients: []model.Ingredient{
+		//Ingredients: []frontModel.Ingredient{
 		//	{Name: "Water", Index: 0},
 		//	{Name: "Caprylic Capric Triglyceride", Index: 1},
 		//	{Name: "Cetearyl Glucoside, Glyceryl Stearate, Coffee Arabica Seed Oil (CreamMaker® Green Coffee)", Index: 2},
@@ -166,9 +166,9 @@ func Test_CalculateConcentrations(t *testing.T) {
 		},
 	}
 
-	//p2 := model.Product{
+	//p2 := frontModel.Product{
 	//	Name: "product1",
-	//	Ingredients: []model.Ingredient{
+	//	Ingredients: []frontModel.Ingredient{
 	//		{Name: "Water"},
 	//		{Name: "Coco - caprylate/caprate"},
 	//		{Name: "CreamMaker® Stearate"},
@@ -246,5 +246,43 @@ func Test_findProductIntersection(t *testing.T) {
 	fmt.Println("Common Products:")
 	for _, product := range commonProducts {
 		fmt.Printf("ID: %d, Name: %s\n", product.ID, product.Name)
+	}
+}
+
+func Test_ValidateConcentrations(t *testing.T) {
+	p := model.Product{
+		Type: model.MoisturizerProductType,
+		Ingredients: []model.Ingredient{
+			{Name: "name1", ConcentrationRinseOffMin: 62, Score: 1, Index: 0},   // margin 17.03
+			{Name: "name2", ConcentrationRinseOffMin: 32, Score: 1, Index: 1},   // margin  7.13
+			{Name: "name3", ConcentrationRinseOffMin: 22, Score: 1, Index: 2},   // margin  3.86
+			{Name: "name4", ConcentrationRinseOffMin: 12, Score: 0.6, Index: 3}, // margin  2.92
+		},
+		Concentrations: map[string]float64{
+			"name1": 44, // less than min
+			"name2": 24, // less than min
+			"name3": 20, // more than min
+			"name4": 12, // equal to min
+		},
+		ActiveIngredients: []string{"name1", "name2", "name3", "name4"},
+	}
+
+	adjustedScoreProducts := validateConcentrations(p)
+
+	if len(adjustedScoreProducts.Ingredients) != 4 {
+		t.Fatalf("expected 4, actual %d", len(adjustedScoreProducts.Ingredients))
+	}
+
+	for _, ing := range adjustedScoreProducts.Ingredients {
+		if ing.Name == "name1" && ing.Score != 0.2 {
+			t.Fatalf("expected 0.6, actual %f", ing.Score)
+		}
+		if ing.Name == "name2" && ing.Score != 0.2 {
+			t.Fatalf("expected 0.6, actual %f", ing.Score)
+		}
+		if ing.Name == "name3" && ing.Score != 1 {
+			t.Fatalf("expected 1, actual %f", ing.Score)
+		}
+
 	}
 }

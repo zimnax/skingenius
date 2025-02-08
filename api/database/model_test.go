@@ -47,7 +47,7 @@ func Test_FindExistingIngredient(t *testing.T) {
 	}
 	//butter butyrospermum parkii (shea) butter
 
-	//if saveErr := db.SaveIngredient(context.Background(), &model.Ingredient{Name: "testIngredient"}); saveErr != nil {
+	//if saveErr := db.SaveIngredient(context.Background(), &frontModel.Ingredient{Name: "testIngredient"}); saveErr != nil {
 	//	t.Fatalf("failed to save ingredient, error:%v", saveErr)
 	//}
 
@@ -113,7 +113,7 @@ func Test_SaveExistingIngredient(t *testing.T) {
 //		os.Exit(1)
 //	}
 //
-//	i := model.Ingredient{Name: "testIngredient", EffectiveConcentrations: "0.5-10%", EffectiveAtLowConcentration: model.EffectiveYes}
+//	i := frontModel.Ingredient{Name: "testIngredient", EffectiveConcentrations: "0.5-10%", EffectiveAtLowConcentration: frontModel.EffectiveYes}
 //
 //	if saveErr := db.SaveIngredient(context.Background(), &i); saveErr != nil {
 //		t.Fatalf("failed to save ingredient, error:%v", saveErr)
@@ -128,7 +128,7 @@ func Test_SaveExistingIngredient(t *testing.T) {
 //		t.Fatalf("error should be nil")
 //	}
 //
-//	if ing.EffectiveAtLowConcentration != model.EffectiveYes {
+//	if ing.EffectiveAtLowConcentration != frontModel.EffectiveYes {
 //		t.Fatal("EffectiveAtLowConcentration should be Yes")
 //	}
 //
