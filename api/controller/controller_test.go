@@ -22,7 +22,7 @@ func TestGeniusController_AlgorithmV3(t *testing.T) {
 	q3AcneBreakoutsAnswer := "occasionally"
 	q4PreferencesAnswer := []string{"vegetarian", "vegan"}
 	q5AllergiesAnswer := []string{"nuts", "latex"}
-	q6SkinConcernAnswer := []string{"acne"} //"	hyperpigmentation_unevenskintone"
+	q6SkinConcernAnswer := []string{"acne"} //"hyperpigmentation_unevenskintone"
 	q7AgeAnswer := 20
 	q8BenefitsAnswer := []string{"moisturizing", "nourishing"}
 

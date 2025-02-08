@@ -29,37 +29,41 @@ func NewGeniusController(db database.Connector) *GeniusController {
 	4. Find ingredients by SkinConcerns (for each separately)
 */
 
-func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.DBAnswerModel) {
+func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.DBAnswerModel) error {
 	logger.New().Info(context.Background(), packageLogPrefix+"AlgorithmV3")
 
 	// 1.
 	allergensIng, err := gc.geniusData.GetIngredientsByAllergies(ctx, quizAnswers.Allergies)
 	if err != nil {
 		logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [allergies], error: %v", err))
+		return model.ProcessingServerError
 	}
 
 	// 2.
 	preferencesIng, err := gc.geniusData.GetIngredientsByPreferences(ctx, quizAnswers.Preferences)
 	if err != nil {
 		logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [preferences], error: %v", err))
+		return model.ProcessingServerError
 	}
 
 	// 3.
 	skinSensitivityIng, err := gc.geniusData.GetIngredientsBySkinsensitivity(ctx, quizAnswers.SkinSensitivity)
 	if err != nil {
 		logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [skinSensitivity], error: %v", err))
+		return model.ProcessingServerError
 	}
 
 	// 4.
 	uniqueIng, uniqNames := uniqueIngredientsNamesMap(allergensIng, preferencesIng, skinSensitivityIng) // skinConcernIng
 	logger.New().Info(context.Background(), fmt.Sprintf("unique ingredients len: %v", len(uniqueIng)))
 
-	for _, concern := range quizAnswers.Concerns {
+	productsByConcern := make(map[string][]dbmodel.Product)
 
+	for _, concern := range quizAnswers.Concerns {
 		allProducts, allPErr := gc.geniusData.FindAllProductsHavingIngredients(ctx, uniqNames)
 		if allPErr != nil {
 			logger.New().Warn(context.Background(), fmt.Sprintf("failed to get all products having ingredients, error: %v", allPErr))
-			// todo return?
+			return model.ProcessingServerError
 		}
 		fmt.Println(fmt.Sprintf("found %d products from db", len(allProducts)))
 
@@ -67,9 +71,9 @@ func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.D
 		skinConcernIng, ibscErr := gc.geniusData.GetIngredientsBySkinconcerns(ctx, []string{concern})
 		if ibscErr != nil {
 			logger.New().Warn(context.Background(), fmt.Sprintf("failed to get ingredients by [skinConcern] [%s], error: %v", concern, ibscErr))
-			// todo return?
+			return model.ProcessingServerError
 		}
-		logger.New().Warn(context.Background(), fmt.Sprintf("skin concern [%s] ingredients: %v", concern, len(skinConcernIng)))
+		logger.New().Info(context.Background(), fmt.Sprintf("skin concern [%s] ingredients: %v, %v", concern, len(skinConcernIng), skinConcernIng))
 
 		// 6. Find products with ingredients that address skin concern
 		concernProducts := filterProductsWithIngredients(allProducts, skinConcernIng)
@@ -89,19 +93,38 @@ func (gc *GeniusController) AlgorithmV3(ctx context.Context, quizAnswers model.D
 
 		}
 
-		// 9. Calculate weighted average score
+		// 9. Calculate weighted average score passive ingredients
 		for i, product := range activeProducts {
-			was := calculateWeightedAverageScore(product)
-			activeProducts[i].WASTotal = was
+
+			passiveWas := calculateWeightedAverageScorePassive(product)
+			activeWas := calculateWeightedAverageScoreActive(product)
+
+			activeProducts[i].ActiveWASTotal = activeWas
+			activeProducts[i].PassiveWASTotal = passiveWas
 		}
 
-		for _, product := range activeProducts {
-			fmt.Println(fmt.Sprintf("Product: %s, Score: %f", product.Name, product.WASTotal))
+		fmt.Println(fmt.Sprintf("Products with concern [%s], len: %d", concern, len(activeProducts)))
+		for i, product := range activeProducts {
+			fmt.Println(fmt.Sprintf("%d ->>, Product: %s, activeWAS: %f, passiveWAS: %f,  ", i, product.Name, product.ActiveWASTotal, product.PassiveWASTotal))
+
+			//if product.Name == "moonbounce 2% bioretinol irish sea moss plumping moisturizer" {
+			//	for _, ingredient := range product.Ingredients {
+			//		fmt.Println(fmt.Sprintf("ingredient: %s, concentration: %f", ingredient.Name, product.Concentrations[ingredient.Name]))
+			//	}
+			//}
+
 		}
+
+		productsByConcern[concern] = activeProducts
 
 		fmt.Printf("-----------------------\n\n\n")
 	}
 
+	// 10. Find common products between concerns
+	commonProducts := findProductIntersection(productsByConcern)
+	fmt.Println(fmt.Sprintf("common products: %v", len(commonProducts)))
+
+	return nil
 }
 
 /*

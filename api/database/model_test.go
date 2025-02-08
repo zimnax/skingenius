@@ -369,6 +369,22 @@ func Test_FindAllProductsHavingIngredients(t *testing.T) {
 	}
 }
 
+func TestGormConnector_GetIngredientsBySkinconcerns(t *testing.T) {
+	db, err := NewGormClient(config.LocalHost, config.Port, config.User, config.Password, true, "test")
+	if err != nil {
+		fmt.Println(fmt.Sprintf("failed to establish db connection, error: %v", err))
+		os.Exit(1)
+	}
+
+	ings, err := db.GetIngredientsBySkinconcerns(context.Background(), []string{"acne"})
+
+	for _, ing := range ings {
+		fmt.Println(fmt.Sprintf("ingredient:: %#v", ing))
+	}
+	fmt.Println(err)
+
+}
+
 func TestGormConnector_SaveIngredient(t *testing.T) {
 	db, err := NewGormClient(config.LocalHost, config.Port, config.User, config.Password, true, "test")
 	if err != nil {

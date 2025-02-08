@@ -137,10 +137,10 @@ const (
 	StimulatesCollagenProduction
 	AntioxidantProtection
 	SkinBarrierProtection
-
-	Concentrations
+	
 	Effective_at_low_concentrations
-	ScoreCoefficientForConcentration
+	KnownConcentrationRinseOff
+	KnownConcentrationLeaveOn
 )
 
 const (

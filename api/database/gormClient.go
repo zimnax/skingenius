@@ -442,13 +442,38 @@ func (g GormConnector) GetIngredientsBySkinconcerns(ctx context.Context, concern
 
 	//TODO: WARNING:sum(ingredient_skinconcerns.score) as score - return SUM of scores if ingredient occurs multiple times if len(concerns) MORE THEN 1
 	//err := g.db.Select("ingredients.id, ingredients.name, ingredients.synonyms, sum(ingredient_skinconcerns.score) as score").
-	err := g.db.Select("DISTINCT *").
+
+	err := g.db.Select("DISTINCT ingredients.*,  skinconcerns.name AS skinconcern_name").
 		Table("ingredients").
 		Joins("INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id").
 		Joins("INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id").
 		Where("skinconcerns.name IN (?) AND ingredient_skinconcerns.score = 1", concerns).
 		//Group("ingredients.id,ingredient_skinconcerns.score").
 		Find(&ingredients).Error
+
+	//statement := g.db.Raw("" +
+	//	" SELECT p.name AS name, JSON_AGG(JSONB_SET(JSONB_SET(row_to_json(i)::JSONB, '{score}', TO_JSONB(COALESCE(isc.score, 0))),'{index}', TO_JSONB(pi.index))) AS jsoningredients" +
+	//	" FROM Products p " +
+	//	" JOIN product_ingredients pi ON p.id = pi.product_id " +
+	//	" JOIN Ingredients i ON pi.ingredient_id = i.id " +
+	//	" JOIN ingredient_skinconcerns isc ON i.id = isc.ingredient_id" +
+	//	" JOIN skinconcerns sc ON sc.id = isc.skinconcern_id" +
+	//	" WHERE sc.name = 'acne'" +
+	//	" GROUP BY p.id" +
+	//	" HAVING COUNT(DISTINCT CASE WHEN " +
+	//	whenStatement +
+	//	" AND p.deleted IS NULL THEN i.name END) = COUNT(DISTINCT i.name)")
+
+	//statement := g.db.Raw("" +
+	//	" SELECT DISTINCT * FROM public.ingredients " +
+	//	" INNER JOIN ingredient_skinconcerns ON ingredients.id = ingredient_skinconcerns.ingredient_id " +
+	//	" INNER JOIN skinconcerns ON skinconcerns.id = ingredient_skinconcerns.skinconcern_id " +
+	//	" WHERE skinconcerns.name IN ('acne') AND ingredient_skinconcerns.score = 1 " +
+	//	" GROUP BY ingredients.id ")
+	//
+	//fmt.Println(fmt.Sprintf("STAT: %s ", statement.Statement.SQL.String()))
+	//
+	//err := statement.Scan(&ingredients).Error
 
 	return ingredients, err
 

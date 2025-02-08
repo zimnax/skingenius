@@ -140,44 +140,57 @@ Papaya Banana Fragrance
 func Test_CalculateConcentrations(t *testing.T) {
 	p1 := model.Product{
 		Name: "product1",
+		//Ingredients: []model.Ingredient{
+		//	{Name: "Water", Index: 0},
+		//	{Name: "Caprylic Capric Triglyceride", Index: 1},
+		//	{Name: "Cetearyl Glucoside, Glyceryl Stearate, Coffee Arabica Seed Oil (CreamMaker® Green Coffee)", Index: 2},
+		//	{Name: "Persea Gratissima (Avocado) Oil, Glycine Soja (Soybean) Lipids, Beeswax (Avocado Butter)", Index: 3},
+		//	{Name: "Glycerin", Index: 4},
+		//	{Name: "Coffea Arabica (Coffee) Seed Extract", Index: 5},
+		//	{Name: "Musa Sapientum (Banana) Leaf/Trunk Extract (AntiMicro Banana)", Index: 6},
+		//	{Name: "Hydroxypropyl Guar", Index: 7},
+		//	{Name: "Caprylyl Glycol, Ethylhexylglycerin", Index: 8},
+		//	{Name: "Papaya Banana Fragrance", Index: 9},
+		//},
 		Ingredients: []model.Ingredient{
-			{Name: "Water"},
-			{Name: "Caprylic Capric Triglyceride"},
-			{Name: "Cetearyl Glucoside, Glyceryl Stearate, Coffee Arabica Seed Oil (CreamMaker® Green Coffee)"},
-			{Name: "Persea Gratissima (Avocado) Oil, Glycine Soja (Soybean) Lipids, Beeswax (Avocado Butter)"},
-			{Name: "Glycerin"},
-			{Name: "Coffea Arabica (Coffee) Seed Extract"},
-			{Name: "Musa Sapientum (Banana) Leaf/Trunk Extract (AntiMicro Banana)"},
-			{Name: "Hydroxypropyl Guar"},
-			{Name: "Caprylyl Glycol, Ethylhexylglycerin"},
-			{Name: "Papaya Banana Fragrance"},
+			{Name: "Water", Index: 0},
+			{Name: "Caprylic Capric Triglyceride", Index: 1, KnownConcentrationLeaveOnMin: 10, KnownConcentrationLeaveOnMax: 15},
+			{Name: "Cetearyl Glucoside, Glyceryl Stearate, Coffee Arabica Seed Oil (CreamMaker® Green Coffee)", Index: 2},
+			{Name: "Persea Gratissima (Avocado) Oil, Glycine Soja (Soybean) Lipids, Beeswax (Avocado Butter)", Index: 3},
+			{Name: "Glycerin", Index: 4},
+			{Name: "Coffea Arabica (Coffee) Seed Extract", Index: 5, KnownConcentrationLeaveOnMin: 4.5, KnownConcentrationLeaveOnMax: 10.5},
+			{Name: "Musa Sapientum (Banana) Leaf/Trunk Extract (AntiMicro Banana)", Index: 6},
+			{Name: "Hydroxypropyl Guar", Index: 7},
+			{Name: "Caprylyl Glycol, Ethylhexylglycerin", Index: 8},
+			{Name: "Papaya Banana Fragrance", Index: 9},
 		},
 	}
 
-	p2 := model.Product{
-		Name: "product1",
-		Ingredients: []model.Ingredient{
-			{Name: "Water"},
-			{Name: "Coco - caprylate/caprate"},
-			{Name: "CreamMaker® Stearate"},
-			{Name: "Glycerin"},
-			{Name: "Meadowfoam Seed Oil"},
-			{Name: "PolyGel Emollient"},
-			{Name: "Sheabutter Glycerides"},
-			{Name: "Raspberry Seed Oil"},
-			{Name: "Ceramide Complex"},
-			{Name: "72h Moisture"},
-			{Name: "Capryly Glycol EHG"},
-			{Name: "Phenoxyethanol"},
-			{Name: "GelMaker® Hydro"},
-		},
-	}
+	//p2 := model.Product{
+	//	Name: "product1",
+	//	Ingredients: []model.Ingredient{
+	//		{Name: "Water"},
+	//		{Name: "Coco - caprylate/caprate"},
+	//		{Name: "CreamMaker® Stearate"},
+	//		{Name: "Glycerin"},
+	//		{Name: "Meadowfoam Seed Oil"},
+	//		{Name: "PolyGel Emollient"},
+	//		{Name: "Sheabutter Glycerides"},
+	//		{Name: "Raspberry Seed Oil"},
+	//		{Name: "Ceramide Complex"},
+	//		{Name: "72h Moisture"},
+	//		{Name: "Capryly Glycol EHG"},
+	//		{Name: "Phenoxyethanol"},
+	//		{Name: "GelMaker® Hydro"},
+	//	},
+	//}
+	//}
 
 	tt := []struct {
 		products []model.Product
 	}{
 		{
-			products: []model.Product{p1, p2},
+			products: []model.Product{p1},
 		},
 	}
 
@@ -185,9 +198,53 @@ func Test_CalculateConcentrations(t *testing.T) {
 		for _, product := range tst.products {
 			fmt.Println("product ->>> ", product.Name)
 			actual := calculateConcentrationsBogdanFormula(product, 0.1)
-			for s, s2 := range actual {
-				fmt.Println(s, s2)
+
+			if product.Name == "product1" {
+				for iName, cVal := range actual {
+					if iName == "Coffea Arabica (Coffee) Seed Extract" && cVal != 4.5 {
+						t.Fatalf("expected 4.5, actual %f", cVal)
+					}
+					if iName == "Caprylic Capric Triglyceride" && cVal != 15 {
+						t.Fatalf("expected 15, actual %f", cVal)
+					}
+
+					fmt.Println(iName, cVal)
+				}
 			}
+
 		}
+	}
+}
+
+func Test_findProductIntersection(t *testing.T) {
+	productsByConcern := map[string][]model.Product{
+		"acne": {
+			{ID: 1, Name: "Product A"},
+			{ID: 2, Name: "Product B"},
+			{ID: 3, Name: "Product C"},
+		},
+		"wrinkles": {
+			{ID: 2, Name: "Product B"},
+			{ID: 3, Name: "Product C"},
+			{ID: 4, Name: "Product D"},
+		},
+		"dryness": {
+			{ID: 1, Name: "Product A"},
+			{ID: 2, Name: "Product B"},
+			{ID: 3, Name: "Product C"},
+			{ID: 3, Name: "Product D"},
+			{ID: 3, Name: "Product E"},
+		},
+	}
+
+	commonProducts := findProductIntersection(productsByConcern)
+
+	if len(commonProducts) != 2 {
+		t.Fatalf("expected 2, actual %d", len(commonProducts))
+	}
+
+	fmt.Println("Common Products:")
+	for _, product := range commonProducts {
+		fmt.Printf("ID: %d, Name: %s\n", product.ID, product.Name)
 	}
 }

@@ -74,7 +74,8 @@ type Product struct {
 	Concentrations     map[string]float64 `sql:"-" gorm:"-"`
 	ActiveIngredients  []string           `sql:"-" gorm:"-"` // ingredients in product which is same as concern ingredients
 	PassiveIngredients []string           `sql:"-" gorm:"-"` // ingredients not accounted for in concern or benefit
-	WASTotal           float64            `sql:"-" gorm:"-"` //  Sum up weighted average scores of ingredients for each benefit or concern
+	ActiveWASTotal     float64            `sql:"-" gorm:"-"` //  Sum up weighted average scores of ingredients for each benefit or concern
+	PassiveWASTotal    float64            `sql:"-" gorm:"-"` //  Sum up weighted average scores of ingredients for each benefit or concern
 }
 
 type Ingredient struct {
@@ -102,10 +103,17 @@ type Ingredient struct {
 	ConcentrationLeaveOnMin float64 `json:"concentration_leave_on_min"`
 	ConcentrationLeaveOnMax float64 `json:"concentration_leave_on_max"`
 
+	KnownConcentrationRinseOffMin float64 `json:"known_concentration_rinse_off_min"`
+	KnownConcentrationRinseOffMax float64 `json:"known_concentration_rinse_off_max"`
+
+	KnownConcentrationLeaveOnMin float64 `json:"known_concentration_leave_on_min"`
+	KnownConcentrationLeaveOnMax float64 `json:"known_concentration_leave_on_max"`
+
 	EffectiveAtLowConcentration ConcentrationEffectiveness
 
 	Score float64 `json:"score"`
 	Index int     `json:"index"`
+	WAS   float64 `json:"was"`
 
 	ConcernDescription string `gorm:"-"`
 }

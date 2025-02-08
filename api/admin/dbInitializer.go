@@ -215,6 +215,7 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 				aliases[n] = strings.ToLower(strings.TrimSpace(alias))
 			}
 			aliases = append(aliases, name) // Add ingredient name to aliases for search optimization
+			// todo add INCI_NAME
 
 			// in case if  ingredient does not exist, dbClient would return empty object
 			if dbIngredient.Name != "" {
@@ -228,8 +229,12 @@ func storeIngredients(ctx context.Context, dbClient database.Connector, filepath
 			dbIngredient.ECNumber = ""
 			dbIngredient.INCIName = record[INCIName]
 			dbIngredient.Synonyms = aliases
-			dbIngredient.ConcentrationRinseOffMin, dbIngredient.ConcentrationRinseOffMax = parseConcentration(record[Concentrations])
-			dbIngredient.ConcentrationLeaveOnMin, dbIngredient.ConcentrationLeaveOnMax = parseConcentration(record[Concentrations])
+			dbIngredient.ConcentrationRinseOffMin, dbIngredient.ConcentrationRinseOffMax = parseConcentration(record[Concentration_rinse_off])
+			dbIngredient.ConcentrationLeaveOnMin, dbIngredient.ConcentrationLeaveOnMax = parseConcentration(record[Concentration_leave_on])
+
+			dbIngredient.KnownConcentrationRinseOffMin, dbIngredient.KnownConcentrationRinseOffMax = parseConcentration(record[KnownConcentrationRinseOff])
+			dbIngredient.KnownConcentrationLeaveOnMin, dbIngredient.KnownConcentrationLeaveOnMax = parseConcentration(record[KnownConcentrationLeaveOn])
+
 			dbIngredient.EffectiveAtLowConcentration = assignEffectiveness(record[Effective_at_low_concentrations])
 
 			dbIngredient.Preferences = ipref
